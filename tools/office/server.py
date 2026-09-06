@@ -417,14 +417,40 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json({"error": str(exc)}, 500)
 
 
+class OfficeServer(ThreadingHTTPServer):
+    # Windows-ում SO_REUSEADDR-ը թույլ ա տալիս ԵՐԿՈՒ պրոցես նստի նույն
+    # պորտին — երկրորդ double-click-ից ամեն ինչ խառնվում էր։ Անջատում ենք,
+    # որ երկրորդ բացելը ազնիվ սխալ տա, ու մենք բռնենք ներքևում։
+    allow_reuse_address = False
+
+
+def already_running(port):
+    """Արդեն աշխատող օֆի՞ս ա նստած պորտին։"""
+    import urllib.request
+    try:
+        with urllib.request.urlopen("http://127.0.0.1:%d/api/state" % port, timeout=2) as r:
+            return json.loads(r.read().decode("utf-8")).get("studio") == "Escort Gaming"
+    except Exception:
+        return False
+
+
 def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 7777
     if not os.path.isdir(CHAT_DIR):
         print("Chem gtnum office/chat/ — server must run inside the repo.")
         print("Expected root: %s" % ROOT)
         return 1
-    httpd = ThreadingHTTPServer(("127.0.0.1", port), Handler)
     url = "http://127.0.0.1:%d/" % port
+    try:
+        httpd = OfficeServer(("127.0.0.1", port), Handler)
+    except OSError:
+        if already_running(port):
+            print("Office arden ashxatum a -> %s (bacum em brauzery)" % url)
+            webbrowser.open(url)
+            return 0
+        print("Port %d-y zbaghvats a urish tsragrov. Pordzir` py tools/office/server.py %d"
+              % (port, port + 1))
+        return 1
     print("Escort Gaming - Office")
     print("  %s" % url)
     print("  root: %s" % ROOT)
