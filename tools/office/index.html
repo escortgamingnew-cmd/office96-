@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escort Gaming — Office</title>
+<style>
+  :root{
+    --bg:#14121a; --sidebar:#1c1824; --panel:#211d2b; --panel-2:#272232;
+    --line:#332c42; --line-soft:#2b2537;
+    --text:#e8e4f0; --muted:#9a92ad; --faint:#6f6883;
+    --accent:#c8956d; --accent-soft:#3a2c22;
+    --green:#5fbf8f; --blue:#6ea8e8; --red:#e0736b; --yellow:#dfb45a;
+    --radius:8px;
+    --font:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --mono:"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.55;overflow:hidden}
+  button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#3a3348;border-radius:6px;border:2px solid transparent;background-clip:content-box}
+  ::-webkit-scrollbar-thumb:hover{background:#4a4160;background-clip:content-box}
+  ::-webkit-scrollbar-track{background:transparent}
+
+  .app{display:grid;grid-template-columns:250px 1fr;height:100vh}
+
+  /* ---------- sidebar ---------- */
+  .sidebar{background:var(--sidebar);border-right:1px solid var(--line-soft);display:flex;flex-direction:column;min-height:0}
+  .brand{padding:14px 16px 12px;border-bottom:1px solid var(--line-soft)}
+  .brand h1{margin:0;font-size:15px;font-weight:700;letter-spacing:.2px}
+  .brand .sub{color:var(--faint);font-size:11px;margin-top:2px}
+  .nav{flex:1;overflow-y:auto;padding:10px 8px 20px}
+  .sec{color:var(--faint);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;padding:14px 8px 6px}
+  .item{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;padding:5px 8px;border-radius:6px;color:var(--muted);line-height:1.4}
+  .item:hover{background:#262032;color:var(--text)}
+  .item.on{background:var(--accent-soft);color:#fff;font-weight:600}
+  .item .hash{color:var(--faint);font-weight:400}
+  .item.on .hash{color:#e8c4a0}
+  .item .count{margin-left:auto;font-size:11px;color:var(--faint);background:#2e2739;border-radius:9px;padding:0 6px}
+  .who{border-top:1px solid var(--line-soft);padding:10px 12px;background:#191521}
+  .who label{display:block;font-size:11px;color:var(--faint);margin-bottom:5px}
+  .who select{width:100%;background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-family:inherit}
+
+  /* ---------- main ---------- */
+  .main{display:flex;flex-direction:column;min-width:0;min-height:0}
+  .topbar{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--line-soft);background:var(--bg)}
+  .topbar h2{margin:0;font-size:15px;font-weight:700}
+  .topbar .topic{color:var(--faint);font-size:12px;border-left:1px solid var(--line);padding-left:12px}
+  .topbar .spacer{flex:1}
+  .btn{background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:5px 11px;font-size:12px;color:var(--text)}
+  .btn:hover{background:#312a3f;border-color:#443a56}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#1b1119;font-weight:600}
+  .btn.primary:hover{background:#d6a47e}
+  .body{flex:1;overflow-y:auto;min-height:0}
+
+  /* ---------- chat ---------- */
+  .msgs{padding:18px 20px 8px;max-width:900px}
+  .msg{display:flex;gap:11px;padding:9px 0}
+  .msg + .msg{border-top:1px solid #221d2e}
+  .av{width:34px;height:34px;border-radius:7px;flex:0 0 34px;object-fit:cover;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#1b1119}
+  .msg .b{min-width:0;flex:1}
+  .msg .hd{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .msg .nm{font-weight:700}
+  .msg .rl{font-size:10px;color:var(--faint);border:1px solid var(--line);border-radius:4px;padding:0 5px;text-transform:lowercase}
+  .msg .ts{font-size:11px;color:var(--faint)}
+  .msg .tx{margin-top:2px;white-space:pre-wrap;word-wrap:break-word}
+  .msg .tx code{background:#2a2436;padding:1px 5px;border-radius:4px;font-family:var(--mono);font-size:12.5px}
+  .msg .tx strong{color:#fff}
+  .msg .tx a{color:var(--blue)}
+  .msg.bad .tx{color:var(--yellow);font-family:var(--mono);font-size:12px}
+  .mention{background:#3a2c22;color:var(--accent);border-radius:4px;padding:0 3px;font-weight:600}
+  .daysep{display:flex;align-items:center;gap:10px;margin:14px 0 6px;color:var(--faint);font-size:11px}
+  .daysep:before,.daysep:after{content:"";flex:1;height:1px;background:var(--line-soft)}
+  .chanhead{padding:22px 20px 6px;max-width:900px;color:var(--muted);border-bottom:1px solid var(--line-soft);margin-bottom:6px}
+  .chanhead h3{margin:0 0 4px;color:var(--text);font-size:20px}
+
+  .composer{border-top:1px solid var(--line-soft);padding:12px 20px 16px;background:var(--bg)}
+  .cbox{max-width:900px;border:1px solid var(--line);border-radius:9px;background:var(--panel);overflow:hidden}
+  .cbox:focus-within{border-color:#4d4263}
+  .cbox textarea{width:100%;border:0;background:none;color:var(--text);padding:11px 13px;font-family:inherit;font-size:14px;resize:none;outline:none;max-height:220px;line-height:1.55}
+  .cbar{display:flex;align-items:center;gap:10px;padding:6px 10px 8px;border-top:1px solid var(--line-soft)}
+  .cbar .hint{font-size:11px;color:var(--faint)}
+  .cbar .spacer{flex:1}
+  .locked{max-width:900px;color:var(--yellow);font-size:12px;background:#2b2418;border:1px solid #453a22;border-radius:8px;padding:9px 12px}
+
+  /* ---------- board ---------- */
+  .board{display:flex;gap:12px;padding:16px 20px 24px;overflow-x:auto;height:100%;align-items:flex-start}
+  .col{background:var(--panel);border:1px solid var(--line-soft);border-radius:10px;width:270px;flex:0 0 270px;display:flex;flex-direction:column;max-height:100%}
+  .col.over{border-color:var(--accent);background:#262031}
+  .colhd{display:flex;align-items:center;gap:7px;padding:10px 12px;border-bottom:1px solid var(--line-soft);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+  .dot{width:7px;height:7px;border-radius:50%}
+  .colhd .n{margin-left:auto;color:var(--faint);font-weight:600}
+  .cards{padding:9px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
+  .card{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:10px;cursor:grab;text-align:left;width:100%}
+  .card:hover{border-color:#4d4263;background:#2c2639}
+  .card.drag{opacity:.4}
+  .card .cid{font-family:var(--mono);font-size:11px;color:var(--accent)}
+  .card .ct{font-weight:600;margin:3px 0 7px;line-height:1.4}
+  .card .cf{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11px;color:var(--faint)}
+  .pri{border-radius:4px;padding:0 5px;font-weight:700;font-size:10px}
+  .pri.P0{background:#3d211f;color:var(--red)}
+  .pri.P1{background:#3b3320;color:var(--yellow)}
+  .pri.P2{background:#22303b;color:var(--blue)}
+  .asg{background:#2f2a3d;border-radius:4px;padding:0 6px;color:var(--muted)}
+  .asg.none{color:var(--faint);font-style:italic}
+  .empty{color:var(--faint);font-size:12px;text-align:center;padding:14px 6px}
+
+  /* ---------- doc / drawer ---------- */
+  .doc{padding:22px 26px;max-width:820px}
+  .doc h1{font-size:22px;margin:0 0 14px}
+  .doc h2{font-size:15px;margin:20px 0 6px;color:var(--accent)}
+  .doc p{margin:0 0 10px}
+  .doc ul{margin:0 0 10px;padding-left:20px}
+  .doc code{background:#2a2436;padding:1px 5px;border-radius:4px;font-family:var(--mono);font-size:12.5px}
+  .doc strong{color:#fff}
+  .doc img{max-width:220px;border-radius:10px}
+
+  .scrim{position:fixed;inset:0;background:rgba(10,8,14,.6);display:flex;justify-content:flex-end;z-index:50}
+  .drawer{width:min(560px,92vw);background:var(--bg);border-left:1px solid var(--line);height:100%;display:flex;flex-direction:column}
+  .drawer header{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line-soft)}
+  .drawer header h3{margin:0;font-size:15px;flex:1}
+  .drawer .content{flex:1;overflow-y:auto;padding:16px 18px}
+  .drawer footer{border-top:1px solid var(--line-soft);padding:12px 18px;display:flex;flex-direction:column;gap:9px}
+  .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .row label{font-size:11px;color:var(--faint);min-width:64px}
+  input[type=text],select,textarea.f{background:var(--panel-2);border:1px solid var(--line);border-radius:6px;color:var(--text);padding:6px 9px;font-family:inherit;font-size:13px;outline:none}
+  input[type=text]:focus,textarea.f:focus{border-color:#4d4263}
+  .grow{flex:1;min-width:120px}
+  .steps{display:flex;gap:4px;flex-wrap:wrap}
+  .steps .btn{padding:4px 9px;font-size:11px}
+  .steps .btn.cur{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);cursor:default}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:min(520px,94vw);margin:auto;padding:18px;display:flex;flex-direction:column;gap:11px}
+  .modal h3{margin:0;font-size:16px}
+  .scrim.center{justify-content:center;align-items:center}
+  .err{color:var(--red);font-size:12px}
+  .offline{background:#3d211f;color:#ffb9b3;padding:6px 20px;font-size:12px;border-bottom:1px solid #55302c}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <h1>Escort Gaming</h1>
+      <div class="sub">office · <span id="clock">—</span></div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="who">
+      <label>Գրում եմ որպես</label>
+      <select id="me"></select>
+    </div>
+  </aside>
+  <main class="main">
+    <div id="offline" class="offline" hidden>Սերվերի հետ կապ չկա — չի պահվում։ Ստուգի կոնսոլը։</div>
+    <div class="topbar" id="topbar"></div>
+    <div class="body" id="body"></div>
+    <div id="composer"></div>
+  </main>
+</div>
+
+<script>
+'use strict';
+
+var S = null;                  // սերվերի state
+var view = {t:'channel', id:'general'};
+var me = null;                 // slug
+var openTask = null;           // file name
+var showNew = false;
+var lastErr = '';
+
+var COLORS = ['#c8956d','#6ea8e8','#5fbf8f','#dfb45a','#b98ad4','#e0736b','#63bfb4'];
+var DOT = {proposed:'#6f6883', approved:'#6ea8e8', doing:'#dfb45a', review:'#b98ad4', done:'#5fbf8f'};
+var LABEL = {proposed:'Առաջարկված', approved:'Հաստատված', doing:'Ընթացքում', review:'Ստուգման', done:'Ավարտված'};
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+function hue(name){var h=0;for(var i=0;i<name.length;i++)h=(h*31+name.charCodeAt(i))>>>0;
+  return COLORS[h%COLORS.length];}
+
+function citizenByName(name){
+  if(!S) return null;
+  for(var i=0;i<S.citizens.length;i++){
+    var c=S.citizens[i];
+    if(c.name===name || c.slug===name) return c;
+  }
+  return null;
+}
+
+function avatarHtml(name){
+  var c = citizenByName(name);
+  if(c && c.avatar) return '<img class="av" src="'+esc(c.avatar)+'" alt="">';
+  var letter = (name||'?').trim().charAt(0).toUpperCase();
+  return '<div class="av" style="background:'+hue(name||'?')+'">'+esc(letter)+'</div>';
+}
+
+/* Շատ փոքր markdown — bold, code, հղում, @mention։ Ոչ մի գրադարան։ */
+function inline(text){
+  var out = esc(text);
+  out = out.replace(/`([^`]+)`/g,'<code>$1</code>');
+  out = out.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  out = out.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+  out = out.replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g,'$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+  out = out.replace(/@([\wԱ-Ֆա-ֆա-և]+)/g,'<span class="mention">@$1</span>');
+  return out;
+}
+
+function markdown(raw){
+  var html='', list=false, para=[];
+  function flush(){ if(para.length){ html+='<p>'+inline(para.join(' '))+'</p>'; para=[]; } }
+  var lines = String(raw||'').split('\n');
+  for(var i=0;i<lines.length;i++){
+    var l = lines[i];
+    var li = /^\s*[-*]\s+(.*)$/.exec(l);
+    if(li){ flush(); if(!list){html+='<ul>';list=true;} html+='<li>'+inline(li[1])+'</li>'; continue; }
+    if(list){html+='</ul>';list=false;}
+    if(/^#\s+/.test(l)){ flush(); html+='<h1>'+inline(l.replace(/^#\s+/,''))+'</h1>'; }
+    else if(/^##\s+/.test(l)){ flush(); html+='<h2>'+inline(l.replace(/^##\s+/,''))+'</h2>'; }
+    else if(l.trim()===''){ flush(); }
+    else para.push(l.trim());   // md-ի կոշտ տողադարձերը մեկ պարբերություն են
+  }
+  flush();
+  if(list) html+='</ul>';
+  return html;
+}
+
+/* ------------------------------------------------------------ transport */
+
+function get(){
+  return fetch('/api/state',{cache:'no-store'}).then(function(r){return r.json();});
+}
+function post(path,data){
+  return fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(data)}).then(function(r){
+      return r.json().then(function(j){
+        if(!r.ok) throw new Error(j.error||('HTTP '+r.status));
+        return j;
+      });
+    });
+}
+function apply(state){ S=state; document.getElementById('offline').hidden=true; render(); }
+function fail(e){
+  lastErr = e && e.message ? e.message : String(e);
+  document.getElementById('offline').hidden=false;
+  document.getElementById('offline').textContent='Սերվերի հետ խնդիր. '+lastErr;
+}
+
+/* ---------------------------------------------------------------- render */
+
+function meCitizen(){ return citizenByName(me) || (S && S.citizens[0]) || null; }
+
+function render(){
+  if(!S) return;
+  document.getElementById('clock').textContent = S.now;
+  renderWho();
+  renderNav();
+  if(view.t==='board') renderBoard();
+  else if(view.t==='citizen') renderCitizen();
+  else renderChannel();
+  renderOverlays();
+}
+
+function renderWho(){
+  var sel = document.getElementById('me');
+  var want = S.citizens.map(function(c){return c.slug;}).join('|');
+  if(sel.dataset.k !== want){
+    sel.dataset.k = want;
+    sel.innerHTML = S.citizens.map(function(c){
+      return '<option value="'+esc(c.slug)+'">'+esc(c.name)+' ('+esc(c.role.split(',')[0].trim())+')</option>';
+    }).join('');
+  }
+  if(!me || !citizenByName(me)){
+    var saved = localStorage.getItem('office.me');
+    me = (saved && citizenByName(saved)) ? saved : (S.citizens[0] ? S.citizens[0].slug : null);
+  }
+  sel.value = me || '';
+}
+
+function renderNav(){
+  var h = '<div class="sec">Չաթեր</div>';
+  S.channels.forEach(function(c){
+    var on = view.t==='channel' && view.id===c.id;
+    h += '<button class="item'+(on?' on':'')+'" data-go="channel:'+c.id+'">'+
+         '<span class="hash">#</span>'+esc(c.name)+
+         '<span class="count">'+c.messages.length+'</span></button>';
+  });
+  var total = 0, mine = 0;
+  var meName = meCitizen() ? meCitizen().name : '';
+  S.statuses.forEach(function(s){
+    S.board[s].forEach(function(t){
+      if(s!=='done') total++;
+      if(t.assignee && t.assignee===meName) mine++;
+    });
+  });
+  h += '<div class="sec">Բորդ</div>';
+  h += '<button class="item'+(view.t==='board'?' on':'')+'" data-go="board:">'+
+       '<span class="hash">▦</span>Թասկեր<span class="count">'+total+'</span></button>';
+  if(mine) h += '<div class="item" style="cursor:default"><span class="hash">·</span>'+
+                '<span style="font-size:12px">իմ վրա՝ '+mine+'</span></div>';
+  h += '<div class="sec">Քաղաքացիներ</div>';
+  S.citizens.forEach(function(c){
+    var on = view.t==='citizen' && view.id===c.slug;
+    h += '<button class="item'+(on?' on':'')+'" data-go="citizen:'+c.slug+'">'+
+         '<span class="hash">●</span>'+esc(c.name)+
+         '<span class="count">'+esc(c.role.split(',')[0].trim())+'</span></button>';
+  });
+  document.getElementById('nav').innerHTML = h;
+}
+
+function channel(){
+  for(var i=0;i<S.channels.length;i++) if(S.channels[i].id===view.id) return S.channels[i];
+  return S.channels[0];
+}
+
+function renderChannel(){
+  var ch = channel();
+  document.getElementById('topbar').innerHTML =
+    '<h2><span style="color:var(--faint)">#</span> '+esc(ch.name)+'</h2>'+
+    '<div class="topic">'+esc(ch.topic)+'</div><div class="spacer"></div>'+
+    '<span class="hint" style="font-size:11px;color:var(--faint)">office/chat/'+esc(ch.id)+'.md</span>';
+
+  var h = '<div class="chanhead"><h3>#'+esc(ch.name)+'</h3>'+
+          '<div>'+esc(ch.topic)+' · append-only, ամեն գրառումը գնում ա git-ի մեջ։</div></div>';
+  h += '<div class="msgs">';
+  var day = '';
+  ch.messages.forEach(function(m){
+    if(m.date && m.date!==day){ day=m.date; h+='<div class="daysep">'+esc(day)+'</div>'; }
+    h += '<div class="msg'+(m.malformed?' bad':'')+'">'+avatarHtml(m.author)+'<div class="b"><div class="hd">'+
+         (m.tag?'<span class="cid" style="font-family:var(--mono);font-size:11px;color:var(--accent)">'+esc(m.tag)+'</span>':'')+
+         '<span class="nm">'+esc(m.author)+'</span>'+
+         (m.role?'<span class="rl">'+esc(m.role)+'</span>':'')+
+         '<span class="ts">'+esc(m.time||'ձևաչափից դուրս')+'</span></div>'+
+         '<div class="tx">'+inline(m.text)+'</div></div></div>';
+  });
+  if(!ch.messages.length) h += '<div class="empty">Դատարկ ա։</div>';
+  h += '</div>';
+  var body = document.getElementById('body');
+  var stick = body.scrollHeight - body.scrollTop - body.clientHeight < 120;
+  body.innerHTML = h;
+  if(stick) body.scrollTop = body.scrollHeight;
+
+  var c = meCitizen();
+  if(ch.id==='decisions' && (!c || c.role.indexOf('founder')<0 && c.role.indexOf('lead')<0)){
+    document.getElementById('composer').innerHTML =
+      '<div class="composer"><div class="locked">#decisions-ում գրում ա միայն ղեկավարը կամ հիմնադիրը (CLAUDE.md)։ '+
+      'Փոխի «Գրում եմ որպես»-ը, եթե դու ես։</div></div>';
+    return;
+  }
+  var prev = document.getElementById('ta');
+  var draft = prev ? prev.value : (sessionStorage.getItem('draft.'+ch.id)||'');
+  document.getElementById('composer').innerHTML =
+    '<div class="composer"><div class="cbox">'+
+    '<textarea id="ta" rows="2" placeholder="Գրի #'+esc(ch.name)+'-ում… (Enter՝ ուղարկել, Shift+Enter՝ նոր տող)"></textarea>'+
+    '<div class="cbar"><span class="hint">'+esc(c?c.name+' ('+c.role.split(',')[0].trim()+')':'?')+'</span>'+
+    '<div class="spacer"></div><span class="hint" id="cerr"></span>'+
+    '<button class="btn primary" id="send">Ուղարկել</button></div></div></div>';
+  var ta = document.getElementById('ta');
+  ta.value = draft;
+  autosize(ta);
+  if(document.activeElement===document.body) ta.focus();
+}
+
+function autosize(ta){ ta.style.height='auto'; ta.style.height=Math.min(ta.scrollHeight,220)+'px'; }
+
+function send(){
+  var ta = document.getElementById('ta');
+  var c = meCitizen();
+  if(!ta || !c || !ta.value.trim()) return;
+  var text = ta.value;
+  var role = c.role.split(',')[0].trim();
+  ta.value=''; autosize(ta);
+  sessionStorage.removeItem('draft.'+view.id);
+  post('/api/message',{channel:view.id,author:c.name,role:role,text:text})
+    .then(apply)
+    .catch(function(e){
+      ta.value = text;
+      var el=document.getElementById('cerr'); if(el){el.className='err';el.textContent='չուղարկվեց. '+e.message;}
+    });
+}
+
+function renderBoard(){
+  var meName = meCitizen()?meCitizen().name:'';
+  document.getElementById('topbar').innerHTML =
+    '<h2>▦ Բորդ</h2><div class="topic">ստատուսը ֆոլդերն ա · քաշի քարտը սյունակների արանքում</div>'+
+    '<div class="spacer"></div>'+
+    '<button class="btn" id="fmine">'+(view.mine?'✓ ':'')+'Իմ թասկերը</button>'+
+    '<button class="btn primary" id="newtask">+ Նոր թասկ</button>';
+
+  var h = '<div class="board">';
+  S.statuses.forEach(function(s){
+    var list = S.board[s].filter(function(t){ return !view.mine || t.assignee===meName; });
+    h += '<section class="col" data-col="'+s+'"><div class="colhd">'+
+         '<span class="dot" style="background:'+DOT[s]+'"></span>'+esc(LABEL[s])+
+         '<span class="n">'+list.length+'</span></div><div class="cards">';
+    list.forEach(function(t){
+      h += '<div class="card" draggable="true" data-file="'+esc(t.file)+'">'+
+           '<div class="cid">'+esc(t.id||t.file)+'</div>'+
+           '<div class="ct">'+esc(t.title)+'</div><div class="cf">'+
+           (t.priority?'<span class="pri '+esc(t.priority)+'">'+esc(t.priority)+'</span>':'')+
+           '<span class="asg'+(t.assignee?'':' none')+'">'+
+           esc(t.assignee || (t.wanted ? 'ազատ → '+t.wanted : 'ազատ'))+'</span>'+
+           '</div></div>';
+    });
+    if(!list.length) h += '<div class="empty">—</div>';
+    h += '</div></section>';
+  });
+  h += '</div>';
+  document.getElementById('body').innerHTML = h;
+  document.getElementById('composer').innerHTML = '';
+  wireDrag();
+}
+
+function wireDrag(){
+  var dragged = null;
+  Array.prototype.forEach.call(document.querySelectorAll('.card'),function(el){
+    el.addEventListener('dragstart',function(e){
+      dragged = el.dataset.file; el.classList.add('drag');
+      e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',dragged);
+    });
+    el.addEventListener('dragend',function(){ el.classList.remove('drag'); dragged=null; });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.col'),function(col){
+    col.addEventListener('dragover',function(e){ e.preventDefault(); col.classList.add('over'); });
+    col.addEventListener('dragleave',function(){ col.classList.remove('over'); });
+    col.addEventListener('drop',function(e){
+      e.preventDefault(); col.classList.remove('over');
+      var file = e.dataTransfer.getData('text/plain') || dragged;
+      if(!file) return;
+      var c = meCitizen();
+      post('/api/task/move',{file:file,to:col.dataset.col,actor:c?c.name:'?'}).then(apply).catch(fail);
+    });
+  });
+}
+
+function renderCitizen(){
+  var c = citizenByName(view.id);
+  if(!c){ view={t:'channel',id:'general'}; return render(); }
+  document.getElementById('topbar').innerHTML =
+    '<h2>'+esc(c.name)+'</h2><div class="topic">'+esc(c.role)+'</div><div class="spacer"></div>'+
+    '<span style="font-size:11px;color:var(--faint)">office/citizens/'+esc(c.slug)+'.md</span>';
+  document.getElementById('body').innerHTML = '<div class="doc">'+markdown(c.body)+'</div>';
+  document.getElementById('composer').innerHTML = '';
+}
+
+/* -------------------------------------------------------------- overlays */
+
+function renderOverlays(){
+  var old = document.getElementById('overlay');
+  if(old) old.remove();
+  if(openTask) return drawTask();
+  if(showNew) return drawNew();
+}
+
+function findTask(file){
+  for(var i=0;i<S.statuses.length;i++){
+    var list = S.board[S.statuses[i]];
+    for(var j=0;j<list.length;j++) if(list[j].file===file) return list[j];
+  }
+  return null;
+}
+
+function drawTask(){
+  var t = findTask(openTask);
+  if(!t){ openTask=null; return; }
+  var c = meCitizen();
+  var wrap = document.createElement('div');
+  wrap.id='overlay'; wrap.className='scrim';
+  wrap.innerHTML =
+    '<div class="drawer" onclick="event.stopPropagation()">'+
+    '<header><h3>'+esc(t.id||t.file)+'</h3>'+
+    '<span class="pri '+esc(t.priority)+'">'+esc(t.priority)+'</span>'+
+    '<button class="btn" data-x="1">Փակել</button></header>'+
+    '<div class="content">'+markdown(t.body)+'</div>'+
+    '<footer>'+
+    '<div class="row"><label>Assignee</label>'+
+    '<input type="text" class="grow" id="asg" value="'+esc(t.assignee)+'" placeholder="ազատ ա">'+
+    '<button class="btn" id="asgme">Ես եմ վերցնում</button>'+
+    '<button class="btn primary" id="asgsave">Պահել</button></div>'+
+    '<div class="row"><label>Ստատուս</label><div class="steps">'+
+    S.statuses.map(function(s){
+      return '<button class="btn'+(s===t.status?' cur':'')+'" data-mv="'+s+'">'+esc(LABEL[s])+'</button>';
+    }).join('')+'</div></div>'+
+    '<div class="row"><span style="font-size:11px;color:var(--faint)">office/board/tasks/'+
+    esc(t.status)+'/'+esc(t.file)+'</span><span class="err" id="terr"></span></div>'+
+    '</footer></div>';
+  wrap.addEventListener('click',function(e){ if(e.target===wrap){openTask=null;render();} });
+  document.body.appendChild(wrap);
+
+  function terr(e){ var el=document.getElementById('terr'); if(el) el.textContent=e.message; }
+  wrap.querySelector('[data-x]').onclick = function(){ openTask=null; render(); };
+  document.getElementById('asgme').onclick = function(){
+    document.getElementById('asg').value = c?c.name:''; };
+  document.getElementById('asgsave').onclick = function(){
+    post('/api/task/assign',{file:t.file,assignee:document.getElementById('asg').value,
+      actor:c?c.name:'?'}).then(apply).catch(terr); };
+  Array.prototype.forEach.call(wrap.querySelectorAll('[data-mv]'),function(b){
+    if(b.dataset.mv===t.status) return;
+    b.onclick = function(){
+      post('/api/task/move',{file:t.file,to:b.dataset.mv,actor:c?c.name:'?'})
+        .then(apply).catch(terr); };
+  });
+}
+
+function drawNew(){
+  var c = meCitizen();
+  var wrap = document.createElement('div');
+  wrap.id='overlay'; wrap.className='scrim center';
+  wrap.innerHTML =
+    '<div class="modal" onclick="event.stopPropagation()">'+
+    '<h3>Նոր թասկ → proposed/</h3>'+
+    '<input type="text" id="nt" placeholder="Վերնագիր (կարճ)">'+
+    '<div class="row"><label>Priority</label>'+
+    '<select id="np"><option>P0</option><option>P1</option><option selected>P2</option></select>'+
+    '<span style="font-size:11px;color:var(--faint)">Author՝ '+esc(c?c.name:'?')+'</span></div>'+
+    '<textarea class="f" id="nn" rows="4" placeholder="Ինչ ա պետք — հստակ, ստուգելի արդյունք։ Ինչ ա «արված» նշանակում։"></textarea>'+
+    '<textarea class="f" id="nc" rows="2" placeholder="Կոնտեքստ — հղումներ, կախվածություններ (կարաս դատարկ թողնես)"></textarea>'+
+    '<div class="row"><span class="err" id="nerr"></span><div class="spacer" style="flex:1"></div>'+
+    '<button class="btn" data-x="1">Չեղարկել</button>'+
+    '<button class="btn primary" id="ncreate">Բացել թասկը</button></div></div>';
+  wrap.addEventListener('click',function(e){ if(e.target===wrap){showNew=false;render();} });
+  document.body.appendChild(wrap);
+  document.getElementById('nt').focus();
+  wrap.querySelector('[data-x]').onclick = function(){ showNew=false; render(); };
+  document.getElementById('ncreate').onclick = function(){
+    post('/api/task/create',{
+      title:document.getElementById('nt').value,
+      need:document.getElementById('nn').value,
+      context:document.getElementById('nc').value,
+      priority:document.getElementById('np').value,
+      author:c?c.name:'?'
+    }).then(function(s){ showNew=false; apply(s); })
+      .catch(function(e){ document.getElementById('nerr').textContent=e.message; });
+  };
+}
+
+/* ---------------------------------------------------------------- events */
+
+document.addEventListener('click',function(e){
+  var go = e.target.closest ? e.target.closest('[data-go]') : null;
+  if(go){
+    var p = go.dataset.go.split(':');
+    view = p[0]==='board' ? {t:'board',mine:false} : {t:p[0],id:p[1]};
+    openTask=null; render(); return;
+  }
+  if(e.target.closest('#send')) return send();
+  if(e.target.closest('#newtask')){ showNew=true; render(); return; }
+  if(e.target.closest('#fmine')){ view.mine=!view.mine; render(); return; }
+  var card = e.target.closest ? e.target.closest('.card') : null;
+  if(card){ openTask = card.dataset.file; render(); }
+});
+
+document.addEventListener('input',function(e){
+  if(e.target.id==='ta'){ autosize(e.target); sessionStorage.setItem('draft.'+view.id,e.target.value); }
+});
+
+document.addEventListener('keydown',function(e){
+  if(e.target.id==='ta' && e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); }
+  if(e.key==='Escape'){ if(openTask||showNew){ openTask=null; showNew=false; render(); } }
+});
+
+document.getElementById('me').addEventListener('change',function(e){
+  me = e.target.value; localStorage.setItem('office.me',me); render();
+});
+
+get().then(apply).catch(fail);
+setInterval(function(){
+  if(document.hidden) return;
+  get().then(function(s){
+    // Չխանգարենք գրածին. միայն սերվերի կողմի փոփոխությունն ենք վերցնում։
+    S=s; document.getElementById('offline').hidden=true;
+    if(!openTask && !showNew) render(); else { renderNav(); }
+  }).catch(fail);
+}, 2500);
+</script>
+</body>
+</html>
