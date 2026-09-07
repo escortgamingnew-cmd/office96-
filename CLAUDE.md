@@ -2,7 +2,7 @@
 
 Սա **Escort Gaming** ստուդիայի օֆիսն ա՝ Արամի ֆիրման, որը խաղեր ա սարքում
 Stake Engine-ի համար։ Առաջին պրոդուկտը՝ **Run Dady** crash խաղը՝ single-player
-instant runner խաղ [Stake Engine](https://engine.stake.com)-ի համար։
+instant runner խաղ [Stake Engine](https://stake-engine.com)-ի համար։
 Look & feel ռեֆերենսը՝ `docs/reference/` (Three.js պրոտոտիպ, v16_14)։
 Պրոդուկտը գրվում ա 0-ից՝ Stake Engine-ի Math SDK (Python) + Web SDK կանոններով։
 
@@ -72,7 +72,8 @@ proposed → approved → doing → review → done
   թասկերը հաստատված են by default, բայց ղեկավարը կարդում ա ու կարող ա
   հարց բարձրացնել։
 - Վերցնում ես թասկ → տեղափոխի `doing/`, անունդ գրի `assignee`-ում
-- Ավարտեցիր → `review/`։ Review-ն անում ա QA-ն կամ ղեկավարը → `done/`
+- Ավարտեցիր → `review/`։ **`review → done` դարպասը միայն QA-ինն ա** —
+  ոչ ոք իր գործը ինքը done չի տանում, ներառյալ ղեկավարը։
 - Ձևաչափը՝ `office/board/README.md`
 
 ## Չաթերը
@@ -97,7 +98,10 @@ proposed → approved → doing → review → done
 
 ## Տեխնիկական հիմքեր
 
-- Ուսումնասիրությունները՝ `docs/stake-engine/` (PM-ի պատասխանատվությունն ա)
+- Ուսումնասիրությունները՝ `docs/stake-engine/` — research-ի միակ
+  պատասխանատուն ղեկավարն ա (Սևակ)։ Արտաքին research-ը (ChatGPT, Grok)
+  գնում ա `docs/research-raw/`՝ որպես ՉՍՏՈՒԳՎԱԾ հետք. կանոնները՝
+  `docs/research-raw/README.md`
 - Որոշված ա. **Pixi.js 2.5D** ռենդեր (3D պրոտոն մոբայլում տաքացնում էր),
   մաթը՝ Stake Math SDK, Python
 - Մաթ մոդելի թիրախները (RTP, max win, continue մեխանիկա) դեռ որոշված ՉԵՆ —

@@ -1,7 +1,7 @@
 # T-0003 — Պրոյեկտի սկելետ (Pixi.js + SDK-ներ)
 
 - **Author.** Aram (founder)
-- **Assignee.** — (developer)
+- **Assignee.** Տիգրան (developer)
 - **Opened.** 2026-09-07
 - **Priority.** P1
 
@@ -16,3 +16,4 @@ Python պրոյեկտի կմախք, build/run README-ով։ Դեռ խաղայի�
 
 ## Log
 - [2026-09-07] Aram. բացվեց, հաստատված ա հիմնադրի կողմից։
+- [2026-09-07] Տիգրան. վերցրի (approved → doing)։ Բովանդակային աշխատանքը բլոկված ա T-0001-ի web-sdk մասով (docs/stake-engine/-ը դեռ դատարկ ա) — SDK-ի կառուցվածք չեմ հորինելու, սպասում եմ PM-ի web-sdk.md-ին։

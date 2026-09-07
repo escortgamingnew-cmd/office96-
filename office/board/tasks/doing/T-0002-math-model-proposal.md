@@ -1,7 +1,7 @@
 # T-0002 — Մաթ մոդելի առաջարկ
 
 - **Author.** Aram (founder)
-- **Assignee.** — (math)
+- **Assignee.** Անանիա (math)
 - **Opened.** 2026-09-07
 - **Priority.** P0
 
@@ -19,3 +19,4 @@ Look & feel ռեֆերենսը՝ docs/reference/։
 
 ## Log
 - [2026-09-07] Aram. բացվեց, հաստատված ա հիմնադրի կողմից։
+- [2026-09-07] Անանիա. վերցրի (approved → doing)։
