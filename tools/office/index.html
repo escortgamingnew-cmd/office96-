@@ -72,6 +72,19 @@
   .msg .tx a{color:var(--blue)}
   .msg.bad .tx{color:var(--yellow);font-family:var(--mono);font-size:12px}
   .mention{background:#3a2c22;color:var(--accent);border-radius:4px;padding:0 3px;font-weight:600}
+  .rrow{display:flex;align-items:center;gap:4px;margin-top:5px;flex-wrap:wrap}
+  .rpill{display:inline-flex;align-items:center;gap:4px;background:#2a2436;border:1px solid var(--line);
+         border-radius:11px;padding:1px 8px;font-size:12px;cursor:pointer;line-height:1.5}
+  .rpill:hover{border-color:#4d4263}
+  .rpill.mine{background:var(--accent-soft);border-color:var(--accent)}
+  .rpill .n{font-size:11px;color:var(--muted)}
+  .raddbtn{opacity:0;border:1px solid var(--line);background:#241f30;border-radius:11px;
+           padding:1px 7px;font-size:12px;color:var(--faint);cursor:pointer;transition:opacity .12s}
+  .msg:hover .raddbtn{opacity:1}
+  .rpal{position:absolute;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+        padding:6px 8px;display:flex;gap:4px;z-index:40;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+  .rpal button{background:none;border:0;font-size:18px;padding:3px 5px;border-radius:6px;cursor:pointer}
+  .rpal button:hover{background:#312a3f}
   .daysep{display:flex;align-items:center;gap:10px;margin:14px 0 6px;color:var(--faint);font-size:11px}
   .daysep:before,.daysep:after{content:"";flex:1;height:1px;background:var(--line-soft)}
   .chanhead{padding:22px 20px 6px;max-width:900px;color:var(--muted);border-bottom:1px solid var(--line-soft);margin-bottom:6px}
@@ -325,14 +338,27 @@ function renderChannel(){
           '<div>'+esc(ch.topic)+' · append-only, ամեն գրառումը գնում ա git-ի մեջ։</div></div>';
   h += '<div class="msgs">';
   var day = '';
-  ch.messages.forEach(function(m){
+  var chReacts = (S.reactions||{})[ch.id]||{};
+  var myName = meCitizen()?meCitizen().name:'';
+  ch.messages.forEach(function(m, mi){
     if(m.date && m.date!==day){ day=m.date; h+='<div class="daysep">'+esc(day)+'</div>'; }
+    var pills = '';
+    var rx = chReacts[String(mi)]||{};
+    Object.keys(rx).forEach(function(em){
+      var who = rx[em];
+      pills += '<span class="rpill'+(who.indexOf(myName)>=0?' mine':'')+'" data-react="'+esc(em)+
+               '" data-msg="'+mi+'" title="'+esc(who.join(', '))+'">'+em+
+               '<span class="n">'+who.length+'</span></span>';
+    });
     h += '<div class="msg'+(m.malformed?' bad':'')+'">'+avatarHtml(m.author)+'<div class="b"><div class="hd">'+
          (m.tag?'<span class="cid" style="font-family:var(--mono);font-size:11px;color:var(--accent)">'+esc(m.tag)+'</span>':'')+
          '<span class="nm">'+esc(m.author)+'</span>'+
          (m.role?'<span class="rl">'+esc(m.role)+'</span>':'')+
          '<span class="ts">'+esc(m.time||'ձևաչափից դուրս')+'</span></div>'+
-         '<div class="tx">'+inline(m.text)+'</div></div></div>';
+         '<div class="tx">'+inline(m.text)+'</div>'+
+         '<div class="rrow">'+pills+
+         '<button class="raddbtn" data-radd="'+mi+'" title="Ռեակցիա">☺+</button>'+
+         '</div></div></div>';
   });
   if(!ch.messages.length) h += '<div class="empty">Դատարկ ա։</div>';
   h += '</div>';
@@ -537,7 +563,32 @@ function drawNew(){
 
 /* ---------------------------------------------------------------- events */
 
+function react(mi, emoji){
+  var c = meCitizen();
+  if(!c) return;
+  post('/api/react',{channel:view.id,msg:mi,emoji:emoji,name:c.name}).then(apply).catch(fail);
+}
+function showPalette(btn, mi){
+  var old=document.getElementById('rpal'); if(old) old.remove();
+  var pal=document.createElement('div');
+  pal.id='rpal'; pal.className='rpal';
+  (S.emoji||['❤️','😂','👍']).forEach(function(em){
+    var b=document.createElement('button'); b.textContent=em;
+    b.onclick=function(ev){ ev.stopPropagation(); pal.remove(); react(mi, em); };
+    pal.appendChild(b);
+  });
+  document.body.appendChild(pal);
+  var r=btn.getBoundingClientRect();
+  pal.style.left=Math.min(r.left, innerWidth-pal.offsetWidth-10)+'px';
+  pal.style.top=(r.top-pal.offsetHeight-6 > 0 ? r.top-pal.offsetHeight-6 : r.bottom+6)+'px';
+}
 document.addEventListener('click',function(e){
+  var pal=document.getElementById('rpal');
+  if(pal && !e.target.closest('#rpal') && !e.target.closest('[data-radd]')) pal.remove();
+  var rp = e.target.closest ? e.target.closest('[data-react]') : null;
+  if(rp){ react(+rp.dataset.msg, rp.dataset.react); return; }
+  var ra = e.target.closest ? e.target.closest('[data-radd]') : null;
+  if(ra){ showPalette(ra, +ra.dataset.radd); return; }
   var go = e.target.closest ? e.target.closest('[data-go]') : null;
   if(go){
     var p = go.dataset.go.split(':');

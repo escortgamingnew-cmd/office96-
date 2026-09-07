@@ -46,7 +46,7 @@ def main():
 
     code, state = call("/api/state")
     check("GET /api/state", code == 200)
-    check("4 channels", len(state["channels"]) == 4)
+    check("5 channels", len(state["channels"]) == 5)
     check("3 approved tasks", len(state["board"]["approved"]) == 3)
     check("citizens found", len(state["citizens"]) >= 2)
     dec = [c for c in state["channels"] if c["id"] == "decisions"][0]
@@ -67,6 +67,15 @@ def main():
         raw = fh.read()
     check("file is real UTF-8 on disk", "Ինքնաստուգում" in raw)
     check("no CRLF introduced", "\r\n" not in raw)
+
+    # -- reactions
+    code, state = call("/api/react", {"channel": "general", "msg": 0, "emoji": "👍", "name": "Թեստ"})
+    check("react toggle on", code == 200 and
+          state["reactions"].get("general", {}).get("0", {}).get("👍") == ["Թեստ"])
+    code, state = call("/api/react", {"channel": "general", "msg": 0, "emoji": "👍", "name": "Թեստ"})
+    check("react toggle off", code == 200 and not state["reactions"].get("general"))
+    code, _ = call("/api/react", {"channel": "general", "msg": 0, "emoji": "💣", "name": "X"})
+    check("bad emoji rejected", code == 400)
 
     # -- empty message rejected
     code, _ = call("/api/message", {"channel": "general", "author": "Ս", "role": "lead", "text": "  "})

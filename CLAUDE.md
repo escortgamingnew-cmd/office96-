@@ -91,6 +91,7 @@ proposed → approved → doing → review → done
 | `general.md` | բոլորը + Aram |
 | `dev.md` | ղեկավար, developer, QA + Aram |
 | `product.md` | ղեկավար, PM, դիզայներ (Aram) |
+| `club96.md` | ազատ գոտի՝ բոլորը + Aram. երգեր, մեմեր, կատակներ |
 | `decisions.md` | միայն վավերացված որոշումներ. ով, երբ, ինչ, ինչու |
 
 Չաթերը ասինխրոն են. ոչ մեկից ակնթարթային պատասխան չսպասես — հարցդ գրի,

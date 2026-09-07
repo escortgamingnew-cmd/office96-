@@ -36,8 +36,12 @@ CHANNELS = [
     {"id": "general",   "name": "general",   "topic": "բոլորը + Aram"},
     {"id": "dev",       "name": "dev",       "topic": "ղեկավար, developer, QA + Aram"},
     {"id": "product",   "name": "product",   "topic": "ղեկավար, PM, դիզայներ"},
+    {"id": "club96",    "name": "club96",    "topic": "ազատ գոտի — երգեր, կատակներ, գաղափարներ"},
     {"id": "decisions", "name": "decisions", "topic": "միայն վավերացված որոշումներ"},
 ]
+
+REACTIONS_PATH = os.path.join(CHAT_DIR, "reactions.json")
+ALLOWED_EMOJI = ["❤️", "😂", "👍", "🔥", "👏", "😮", "🎉", "💪"]
 
 # [2026-09-07 15:30] Անուն (դեր)   ու decisions.md-ի տարբերակը՝ առանց ժամի,
 # պիտակով. [2026-09-07] D-001 — Aram (founder)
@@ -285,6 +289,43 @@ def create_task(title, author, priority, need, context):
         return name
 
 
+# -------------------------------------------------------------- reactions
+
+def load_reactions():
+    if not os.path.exists(REACTIONS_PATH):
+        return {}
+    try:
+        return json.loads(read(REACTIONS_PATH))
+    except Exception:
+        return {}
+
+
+def toggle_reaction(channel_id, msg_index, emoji, name):
+    """Ռեակցիա դնել/հանել. պահվում ա reactions.json-ում՝ չաթի md-ները
+    append-only թողնելով։ Բանալին գրառման ինդեքսն ա (append-only ⇒ կայուն)։"""
+    channel_id = safe_name(channel_id)
+    if emoji not in ALLOWED_EMOJI:
+        raise ValueError("emoji not allowed")
+    name = (name or "").strip()
+    if not name:
+        raise ValueError("name required")
+    msg_index = int(msg_index)
+    with _write_lock:
+        data = load_reactions()
+        ch = data.setdefault(channel_id, {})
+        msg = ch.setdefault(str(msg_index), {})
+        who = msg.setdefault(emoji, [])
+        if name in who:
+            who.remove(name)
+            if not who:
+                del msg[emoji]
+            if not msg:
+                del ch[str(msg_index)]
+        else:
+            who.append(name)
+        write(REACTIONS_PATH, json.dumps(data, ensure_ascii=False, indent=1))
+
+
 # --------------------------------------------------------------- citizens
 
 def load_citizens():
@@ -334,6 +375,8 @@ def load_state():
         "board": load_board(),
         "statuses": STATUSES,
         "citizens": load_citizens(),
+        "reactions": load_reactions(),
+        "emoji": ALLOWED_EMOJI,
     }
 
 
@@ -404,6 +447,9 @@ class Handler(BaseHTTPRequestHandler):
             elif path == "/api/task/assign":
                 set_assignee(data.get("file"), (data.get("assignee") or "").strip(),
                              data.get("actor") or "?")
+            elif path == "/api/react":
+                toggle_reaction(data.get("channel"), data.get("msg"),
+                                data.get("emoji"), data.get("name"))
             elif path == "/api/task/create":
                 create_task(data.get("title"), data.get("author") or "?",
                             data.get("priority"), data.get("need"), data.get("context"))
