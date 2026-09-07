@@ -69,3 +69,20 @@ penalty schedule) — ամբողջ աղյուսակները էջում են։
 UX. auto-load → Play կոճակ → ամբողջ անիմացիան → Play Again; betting
 UI-ն ամբողջությամբ անջատած, session call-եր չկան։ Review-ում պահանջում
 են event ID-ներ՝ normal win / big win / max win / loss / bonus։
+
+## Quality Rankings — ստուգված [/game-quality-rankings, 2026-09-07]
+
+- 0–3 ★, որոշում ա տեսանելիությունը. ★★★՝ featured/Burst/Exclusives
+  առաջնահերթություն; ★★՝ New Releases + Burst/Exclusives ըստ պահանջարկի;
+  **★ = ՉԻ հրապարակվում**, ուղարկում են բարելավման։
+  (Ուշադրություն. submission-checklist-ը ասում ա «միջին ≥1 → approved».
+  երկու էջի տեքստերը իրար չեն բռնում — մեր թիրախը ≥2★ ա, հակասությունը՝ Q-005։)
+- 1★-ի տիպիկ պատճառները. **shallow gameplay** (1-2 bet-ից ձանձրույթ),
+  **generic AI ասեթներ** (ստանդարտ ֆոնտեր, գրադիենտներ, emoji),
+  անհամաձայն art, engaging feature-ների պակաս (bonus mode-եր սպասվում են)։
+- 3★-ի չափանիշները. սարքերի վրա թեստ, օպտիմալ bundle (արագ load),
+  մաքուր art/անիմացիա, ու **Burst խաղի համար՝ ԽՈՐՈՒԹՅՈՒՆ**. «simple
+  Burst concepts do not perform well… players seeking more want depth
+  (e.g. Cut n Crash, Angry Balls, Drop the Boss are good benchmarks)»։
+- **Burst Games-ը պաշտոնական կատեգորիա ա** — Run Dady-ի թիրախային տունը։
+- Review-ի առաջնահերթությունը կախված ա ընթացիկ star rating-ից։
