@@ -18,3 +18,13 @@ stack, ռելիզ) վավերացնում ա հիմնադիրը decisions.md-ո�
 հետք, docs/stake-engine/ մտնում ա միայն պաշտոնական աղբյուրի դեմ ստուգվածը։
 (5) Պաշտոնական կայքը https://stake-engine.com ա (engine.stake.com-ը ուղղված ա)։
 
+---
+[2026-09-07] D-003 — Aram (founder), ձևակերպումը՝ Սևակ (lead)
+Run Dady-ի մեխանիկայի ուղղությունը. խաղը կառուցվում ա Stake Engine-ի
+stateless մոդելով — ռաունդի արդյունքը որոշվում ա bet-ի պահին
+(նախագեներացված book), mid-round դրամական cash-out ՉԿԱ։ «Continue/
+cash out»-ի զգացողությունը պահվում ա ներկայացման մակարդակում (hold-to-run,
+աճող մուլտիպլիկատոր, crash ռեժիսուրա), իսկ խաղացողի իրական ընտրությունը՝
+ՄԻՆՉԵՎ bet-ը (տարբեր ռիսկ-պրոֆիլի BetMode-եր)։ Պատճառը. պաշտոնական
+approval կանոնը (docs/stake-engine/approval-guidelines.md) արգելում ա
+continuation/early cashout։ Վավերացրեց հիմնադիրը 2026-09-07-ին։

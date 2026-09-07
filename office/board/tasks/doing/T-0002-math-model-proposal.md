@@ -20,3 +20,4 @@ Look & feel ռեֆերենսը՝ docs/reference/։
 ## Log
 - [2026-09-07] Aram. բացվեց, հաստատված ա հիմնադրի կողմից։
 - [2026-09-07] Անանիա. վերցրի (approved → doing)։
+- [2026-09-07] Սևակ. D-003-ը վավերացված ա. մոդելը՝ նախաորոշված արդյունք + pre-bet BetMode-եր, mid-round cashout չկա։ Սահմանները՝ docs/stake-engine/approval-guidelines.md։
