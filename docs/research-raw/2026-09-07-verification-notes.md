@@ -42,3 +42,20 @@ Raw ֆայլերը. `2026-09-07-chatgpt-deep-research-stake-engine.pdf` ու
 - ChatGPT PDF. «RTP band-ը public docs-ում չկա (GAP)» — ՀԵՐՔՎԱԾ 2026-09-07.
   math-verification էջը հստակ 90.0–96.70% ա տալիս + ամբողջ critical/non-critical
   թեստերի աղյուսակներ։ (Հնարավոր ա էջը թարմացվել ա PDF-ից հետո։)
+
+## Լրացում (նույն օրը, երեկոյան) — stateful հարցի խորացում
+
+Հիմնադիրը հիշեցրեց, որ պլատֆորմում mines/crash խաղեր կան։ Ստուգեցի.
+- web-sdk README (ուղիղ). stateful/stateless տարանջատումը ԿԱ, Mines
+  օրինակով — բայց լինքը stake.com/casino/games/mines ա, այսինքն Stake-ի
+  ՍԵՓԱԿԱՆ Originals խաղը, ոչ երրորդ կողմի։
+- ts-client API surface (ուղիղ). Authenticate/Play/EndRound/Event —
+  cashout/step/action մեթոդ ՉԿԱ։
+- Անկախ 2026 աղբյուր (roshtein.com-ի Stake Engine հոդված). երրորդ կողմի
+  խաղերը stateless են, early cashout՝ արգելված — համընկնում ա պաշտոնական
+  approval էջի հետ։
+- Community (արդեն ֆայլում). live «mines» կլոնները արդյունքը նախ որոշում
+  են, նոր վանդակներն են նկարում — precomputed book, ոչ իրական stateful։
+Եզրակացություն. հակասությունը ԻՐԱԿԱՆ ա որպես ճարտարապետություն vs
+քաղաքականություն. Stake-ի ինֆրան stateful կարա, երրորդ կողմի հրապարակման
+ուղին այսօր՝ ոչ։ Որոշիչ ստուգումը՝ Q-007 (գրավոր հարց Engine-ին)։
