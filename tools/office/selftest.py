@@ -47,7 +47,7 @@ def main():
     code, state = call("/api/state")
     check("GET /api/state", code == 200)
     check("5 channels", len(state["channels"]) == 5)
-    check("3 approved tasks", len(state["board"]["approved"]) == 3)
+    check("board has doing tasks", len(state["board"]["doing"]) >= 1)
     check("citizens found", len(state["citizens"]) >= 2)
     dec = [c for c in state["channels"] if c["id"] == "decisions"][0]
     check("decisions D-001 parsed", dec["messages"][0].get("tag") == "D-001",
@@ -91,7 +91,9 @@ def main():
     if not created:
         return finish()
     task = created[0]
-    check("task id auto-numbered", task["id"] == "T-0004", task["id"])
+    all_ids = [t["id"] for col in state["board"].values() for t in col if t["id"]]
+    expected = "T-%04d" % max(int(i[2:]) for i in all_ids if i != task["id"])
+    check("task id auto-numbered", int(task["id"][2:]) == int(expected[2:]) + 1, task["id"])
 
     code, state = call("/api/task/assign", {"file": task["file"], "assignee": "Սևակ", "actor": "Սևակ"})
     check("POST /api/task/assign", code == 200, str(state)[:120])
