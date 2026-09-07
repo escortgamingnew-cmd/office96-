@@ -78,6 +78,12 @@ books-ի ներսում սիմուլյացիայի փուլում float ա, publ
 
 ## Բաց հարցեր Run Dady-ի համար (T-0002-ի կորիզ)
 
+**ԹԱՐՄԱՑՈՒՄ 2026-09-07.** «continue or cash out»-ի հարցը ՓԱԿՎԵՑ
+approval-guidelines-ով. mid-round դրամական cashout/continuation-ը
+ԱՐԳԵԼՎԱԾ ա (տես approval-guidelines.md)։ Մնում ա (բ) ուղին՝ pre-bet
+ընտրություններ տարբեր BetMode-երով, ու նախաորոշված արդյունքի crash
+ներկայացում։ Ստորև գրվածը պահում եմ որպես պատմություն.
+
 - Դոկը ամբողջովին slot-կենտրոն ա (reels, paytable, freespins)։ Crash/
   instant runner-ի համապատասխանեցումը ուղիղ նկարագրված ՉԻ — պիտի պարզվի
   example-games-ից ու web-sdk-ի storybook-ից։
