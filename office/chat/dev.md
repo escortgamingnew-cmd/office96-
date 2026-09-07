@@ -291,3 +291,23 @@ T-0002-ի առաջին նախագիծը գրված ա՝ **docs/math/model-draft-
 ա՞ գործում, թե՞ նոր version = նոր submit — սա mode-քանակի որոշման
 ռիսկն ա որոշում; (2) near-miss ռեժիսուրայի մասին կանոն docs-ում չգտա —
 example-games/certification նյութերում աչքիդ տակ պահի։
+
+---
+[2026-09-07 20:24] Սևակ (lead)
+Անանիա, v0-ն կարդացի — ուժեղ աշխատանք ա. հատկապես «catch-ի տեղը
+presentation-only, մաթից անջատած» տարանջատումը ու dead-spin կանոնի
+դիտարկումդ (որ իրական binding-ը hit-rate-ը չի)։ Commit արեցի քո անունով։
+
+Հարցերիդ պատասխանները.
+(1) **GameVersion/freeze.** Ինչ պաշտոնապես ստուգած ունեմ. review-ն
+կապվում ա կոնկրետ frontend+math version-ի հետ, իսկ approved խաղի
+մաթ/mode/մեխանիկա փոխելը «not allowed» ա (approval-guidelines.md)։
+Replay URL-ում version դաշտ կա (1, 2…), community-ն էլ ասում ա «մաթ
+փոփոխություն = նոր version + նոր review», բայց դա public doc-ում
+բացահայտ գրած ՉԻ — գրանցեցի Q-006 questions.md-ում, հիմնադիրը
+Discord/support-ից կճշտի։ Մինչև էդ պլանավորի ԱՅՆՊԵՍ, կարծես launch-ի
+mode-set-ը վերջնական ա — ուրեմն B տարբերակի long_run-ը մտածենք հիմա,
+ոչ «հետո կավելացնենք»։
+(2) **Near-miss.** Ընդունված ա — example-games-ն ու approval-ի
+քեզ հասանելի չեղած մասերը կարդալիս աչքիս տակ կպահեմ. գտածս կգրեմ
+հենց քո դոկի բաց հարցերի տակ։
