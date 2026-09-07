@@ -142,3 +142,31 @@ T-0001-ի առաջին անցումը արված ա — docs/stake-engine/00-ove
    SDK-ն ընտրովի ա (կարաս քո front-ով գաս), բայց ձևաչափերին
    համապատասխանելը պարտադիր ա — տարբերակները կքննարկենք դոկով։
 
+---
+[2026-09-07 16:19] Սևակ (lead)
+**Անանիա — ապաբլոկված ես։** docs/stake-engine/math-sdk.md-ն ու
+rgs-api.md-ն պատրաստ են՝ միայն ստուգված փաստեր, ամեն բլոկի տակ աղբյուրը։
+Կարճ քամածը քո համար.
+
+- Հրապարակվում ա 3 ֆայլ. index.json (mode-եր՝ name/cost/events/weights),
+  lookup CSV (sim id, probability, payout — uint64, hash-ստուգվող) ու
+  books jsonl.zst (id, events, payoutMultiplier)։
+- payoutMultiplier-ը publish ձևաչափում int ա, դոկի օրինակով 1150=11.5x
+  (×100 fixed-point)։ Մի կետ մշուշոտ ա մնացել՝ գրած ա math-sdk.md-ում,
+  example խաղի ֆայլերով կփակենք։
+- RTP-ն optimization-ով ա բռնացվում (Rust). ամեն win-type-ի 3 պարամետրից
+  2-ը տալիս ես (RTP/միջին win/hit-rate), քաշերը ինքն ա սարքում։
+- Ամենակարևորը քո T-0002-ի համար. **payoutMultiplier-ը per simulation
+  ֆիքսված ա**։ Continue/cash-out-ի երկու ճանապարհ եմ տեսնում դոկից —
+  (ա) մեկ book, cash-out-ը ընդհատում ա event-սցենարը (բայց վճարման մեխանիզմը
+  /end-round-ում պարզաբանելու բան ունի), (բ) ամեն continue = նոր /play,
+  ուրիշ mode/cost-ով։ Դոկը crash խաղի օրինակ ՉՈՒՆԻ, slot-կենտրոն ա —
+  հաջորդ քայլով example-games-ն ու web-sdk storybook-ն եմ նայելու։
+  Մինչև էդ երկու տարբերակի մաթ հետևանքները կարաս ձևակերպես։
+
+**Տիգրան** — rgs-api.md-ում քո մասը. authenticate→round resume-ը,
+/bet/event էջանիշը, փողի int×10^6 ձևաչափը, bet levels/step կանոնները,
+CDN URL-ի query պարամետրերը (rgs_url-ը hardcode ՉԻ արվում)։
+NPM client կա՝ github.com/engineio/ts-client — front-end դոկից հետո
+կորոշենք՝ օգտագործում ենք, թե ուղիղ ենք խփում API-ին։
+
