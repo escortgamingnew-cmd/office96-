@@ -70,7 +70,7 @@ books-ի ներսում սիմուլյացիայի փուլում float ա, publ
 [/docs/math/optimization-algorithm]
 
 - Rust binary (cargo build --release)։ Լookup-ի քաշերն ա փոխում (սկզբում
-  բոլորは 1), որ mode-ը հասնի թիրախ RTP-ին։
+  բոլորը 1), որ mode-ը հասնի թիրախ RTP-ին։
 - Conditions-ում ամեն win-type-ի համար 3 փոփոխականից (RTP, միջին win,
   hit-rate) 2-ը պիտի տրվի; hit-rate-երի գումարը = 1, մեկը կարա x (ազատ)
   մնա։ Կարգը կարևոր ա. wincap-ը առաջինը (exclusive ID pools)։

@@ -187,3 +187,29 @@ D-001-ի «Pixi 2.5D» զգացողությունը դրա մեջ սարքելո
 քո կարծիքը՝ apps/price sample-ը նայելուց հետո (անունից ոչ-ռելսային ա
 երևում, ստուգելու ա repo-ում)։ Գրի կարծիքդ էստեղ, D-003 կսարքենք։
 
+---
+[2026-09-07 19:52] Սևակ (lead)
+Հիմնադրի երկու research PDF-ները մշակված են (research-raw/), ստուգման
+նոթերս՝ կողքը, docs/stake-engine-ում ավելացավ approval-guidelines.md։
+Գլխավորը թիմի համար.
+
+**Անանիա** — T-0002-ի շրջանակը կտրուկ պարզեցավ, պաշտոնական թվերով.
+- mid-round cashout ՉԿԱ (stateless կանոն) → մոդելը նախաորոշված արդյունքով
+  ա. «continue»-ի զգացողությունը ներկայացման խնդիր ա, ոչ մաթի
+- RTP 90.0–96.7, mode spread ≤0.5, max win ≤500,000x, cost multiplier
+  ≤2,000x, base std dev ≥0.6, hit ≥1/50
+- pre-bet ռիսկ-ընտրությունը legal ա (տարբեր BetMode-եր՝ տարբեր
+  կոր/վոլատիլություն) — «short run / long run» գաղափարը էստեղով ա
+- 100k–1M sim/mode, dead spin-երը չգերակշռեն, win-սանդղակը՝ առանց
+  դատարկ գոտիների; ETL/CVaR շեմերը՝ approval-guidelines.md-ում
+
+**Տիգրան** — Bet Replay-ը ՊԱՐՏԱԴԻՐ ա, առանց դրա խաղ չեն հաստատում.
+replay=true param, GET /bet/replay/... առանց session-ի, betting UI
+անջատած։ T-0003-ի սկելետի մեջ դիր օր 1-ից։ Community-ից զգուշացումներ
+(դեռ չստուգած, բայց մի քանի անկախ աղբյուր). sample-ների per-spin state
+reset-ին մի վստահի, SVG filter-ները մոբայլում frame rate են սպանում,
+պորտալի iframe-ը viewport-ից 16px փոքր ա եղել — պահի որպես ստուգելիք։
+
+**Լուսինե** — review-ի փաստերը. 3 անկախ reviewer, 0–3 աստղ, միջին ≥1՝
+անցնում ա։ Մերժման տիպիկ թեմաները (IP/կլոն, dead spins, replay չկա,
+non-stateless մեխանիկա) արժի քո checklist-ը մտնեն։
