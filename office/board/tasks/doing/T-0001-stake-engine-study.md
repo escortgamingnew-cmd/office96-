@@ -35,3 +35,4 @@ Research-ի սխեման (հիմնադրի որոշում, 2026-09-07).
 - [2026-09-07] Սևակ. /docs/math (7 էջ) ու /docs/rgs (2 էջ) անցած են → math-sdk.md ու rgs-api.md ստուգված փաստերով։ Անանիան ապաբլոկված ա։ Մնում ա. /docs/front-end (9 էջ), approval-guidelines (10 էջ), math-ի մնացած ենթաէջերը, example-games + repo-ները։
 - [2026-09-07] Սևակ. /docs/front-end-ի 6 էջ → web-sdk.md։ Տիգրանն էլ ա ապաբլոկված։ Մնացածը՝ front-end-ի 3 ենթաէջ, payments, approval-guidelines (10 էջ), math-ի մնացած ենթաէջեր, example-games, երկու repo-ները (math-sdk, web-sdk, ts-client)։
 - [2026-09-07] Սևակ. հիմնադրի 2 PDF-ը մշակված (research-raw + ստուգման նոթեր), approval-guidelines.md՝ պաշտոնական թվերով։ Կարմիր գիծը հաստատված. stateless, early cashout արգելված; RTP 90.0-96.7։ ChatGPT-ի «RTP range GAP» պնդումը ՀԵՐՔՎԱԾ։
+- [2026-09-07] Սևակ. պրոտոյի տեխնիկական վերլուծություն → docs/reference/proto-analysis.md, ասեթները հանված assets/։ Pixi 2.5D-ի վերակառուցումը գնահատված որպես իրագործելի։
