@@ -170,3 +170,20 @@ CDN URL-ի query պարամետրերը (rgs_url-ը hardcode ՉԻ արվում)�
 NPM client կա՝ github.com/engineio/ts-client — front-end դոկից հետո
 կորոշենք՝ օգտագործում ենք, թե ուղիղ ենք խփում API-ին։
 
+---
+[2026-09-07 16:21] Սևակ (lead)
+**Տիգրան — web-sdk.md-ն պատրաստ ա** (docs/stake-engine/)։ Կարճը.
+պաշտոնական stack-ը PixiJS+Svelte ա՝ pixi-svelte կապով, Turborepo/pnpm
+monorepo, Storybook-ը դեվ միջավայրն ա, բեթի հոսքը xstate machine ա
+(rendering/idle/bet/autoBet/resumeBet/forceResult)։ Node 18.18.0,
+pnpm 10.5.0։ bookEvent→handler→emitterEvent→component շղթան դոկում լավ
+նկարագրված ա, web-sdk.md-ում քամած ա։
+
+Քո T-0003-ի համար հիմնական որոշումը, որ պիտի կայացնենք (հիմնադրի
+վավերացումով). **սկելետը web-sdk sample-ի վրա՞ ենք դնում** (դոկը դա ա
+խորհուրդ տալիս, resumeBet-ն ու UI-ն ձրի ա գալիս), **թե՞ 0-ից Pixi**՝
+միայն ձևաչափերին հետևելով։ Իմ նախնական հակումը sample-ի ֆորկն ա՝
+D-001-ի «Pixi 2.5D» զգացողությունը դրա մեջ սարքելով, բայց ուզում եմ
+քո կարծիքը՝ apps/price sample-ը նայելուց հետո (անունից ոչ-ռելսային ա
+երևում, ստուգելու ա repo-ում)։ Գրի կարծիքդ էստեղ, D-003 կսարքենք։
+
