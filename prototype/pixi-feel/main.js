@@ -15,11 +15,30 @@
   };
   const Z_NEAR = 1, Z_FAR = 64;        // վիրտուալ խորության միջակայք
   const SEG_LEN = 2;                    // ճամփի գծանշման սեգմենտի երկարությունը z-ում
-  const HORIZON = 0.40;                 // հորիզոնի y-ը՝ էկրանի մասնաբաժնով
-  const MULT_RATE = 0.05;               // 1 + dist * rate (պրոտոյի բանաձևը)
-  const ACCEL = 1.6, DECEL = 2.2;       // speed 0..1
   const N_SIDE = 30;                    // կողքի օբյեկտների pool
   const HERO_FRAMES = 20, HERO_COLS = 4, HERO_FW = 500, HERO_FH = 500;
+
+  // Feel-պարամետրեր — DEV պանելով լարվող (⚙/T)։ Խաղի build-ում պանելը հանվում
+  // ա, թվերը ֆիքսվում են feel spec-ից։ Ռեֆերենսը՝ docs/reference/proto-params.md
+  const P = {
+    horizon:  0.40,   // հորիզոնի y (էկրանի մասնաբաժին)
+    multRate: 0.05,   // 1 + dist × rate (պրոտո՝ 0.05)
+    accel:    1.6,    // speed 0..1 արագացում
+    decel:    2.2,    // դանդաղում
+    zSpeed:   26,     // հոսքի արագություն z/վրկ speed=1-ում
+    distRate: 8,      // «մետր»/վրկ speed=1-ում (մուլտի համար)
+    fovK:     0.16,   // FOV-ի իլյուզիայի ուժգնությունը
+    roadBase: 0.30,   // ճամփի կիսալայնությունը W-ի մասով speed=0
+    roadWiden:0.07,   // լայնացումը speed=1-ում
+    heroH:    0.30,   // հերոսի բարձրությունը H-ի մասով
+    animBase: 0.10,   // անիմացիայի արագ. speed=0-ի մոտ
+    animK:    0.42,   // + speed×k
+    rhythmB:  6,      // վազքի ֆազայի բազա
+    rhythmK:  14,     // + speed×k (bob/sway տեմպ)
+    shakeOn:  0.72,   // ցնցումը սկսվում ա էս speed-ից
+    shakeAmp: 10,     // ցնցման ամպլիտուդ px
+  };
+  const P_DEF = { ...P };
 
   // ---------- App ----------
   const app = new PIXI.Application();
@@ -34,8 +53,8 @@
 
   const W = () => app.screen.width;
   const H = () => app.screen.height;
-  const horizonY = () => H() * HORIZON;
-  const roadHalf = (speed) => W() * (0.30 + 0.07 * speed); // FOV-ի իլյուզիա. արագանալիս ճամփան «լայնանում» ա
+  const horizonY = () => H() * P.horizon;
+  const roadHalf = (speed) => W() * (P.roadBase + P.roadWiden * speed); // FOV-ի իլյուզիա
 
   // ---------- Canvas texture-ներ (baked, ոչ մի filter runtime-ում) ----------
   function cv(w, h) {
@@ -347,11 +366,72 @@
     glow.width = W() * 0.75; glow.height = H() * 0.16;
     haze.width = W(); haze.height = H() * 0.16;
     haze.y = horizonY() - haze.height * 0.45;
-    const hs = (H() * 0.30) / HERO_FH; // հերոսը ~30% էկրանի բարձրության
+    const hs = (H() * P.heroH) / HERO_FH; // հերոսի բարձրությունը
     hero.scale.set(hs);
   }
   layout();
   window.addEventListener("resize", () => setTimeout(layout, 50));
+
+  // ---------- DEV feel-պանել (խաղի մաս ՉԻ — կոնստրուկտորի սաղմը) ----------
+  const TUNE_DEFS = [
+    ["multRate", "Մուլտի տեմպ", 0.01, 0.2, 0.005],
+    ["accel",    "Արագացում", 0.4, 5, 0.1],
+    ["decel",    "Դանդաղում", 0.4, 6, 0.1],
+    ["zSpeed",   "Հոսքի արագ.", 8, 60, 1],
+    ["distRate", "Մետր/վրկ", 2, 22, 0.5],
+    ["fovK",     "FOV իլյուզիա", 0, 0.4, 0.01],
+    ["roadBase", "Ճամփի լայն.", 0.18, 0.45, 0.01],
+    ["roadWiden","Ճամփի բացում", 0, 0.2, 0.01],
+    ["horizon",  "Հորիզոն", 0.25, 0.55, 0.01],
+    ["heroH",    "Հերոսի չափ", 0.18, 0.45, 0.01],
+    ["animBase", "Անիմ բազա", 0.02, 0.3, 0.01],
+    ["animK",    "Անիմ ×speed", 0.1, 0.9, 0.02],
+    ["rhythmB",  "Ռիթմ բազա", 2, 12, 0.5],
+    ["rhythmK",  "Ռիթմ ×speed", 4, 28, 0.5],
+    ["shakeOn",  "Ցնցում սկիզբ", 0.3, 1, 0.02],
+    ["shakeAmp", "Ցնցում ուժ", 0, 30, 1],
+  ];
+  const tuneEl = document.getElementById("tune");
+  const tuneRows = document.getElementById("tuneRows");
+  const tuneVals = {};
+  for (const [key, label, min, max, step] of TUNE_DEFS) {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `<label>${label} <b data-v="${key}">${P[key]}</b></label>` +
+      `<input type="range" min="${min}" max="${max}" step="${step}" value="${P[key]}" data-k="${key}">`;
+    tuneRows.appendChild(row);
+    tuneVals[key] = row.querySelector("b");
+    const inp = row.querySelector("input");
+    inp.addEventListener("input", () => {
+      P[key] = parseFloat(inp.value);
+      tuneVals[key].textContent = P[key];
+      if (key === "heroH" || key === "horizon") layout();
+    });
+    inp.addEventListener("pointerdown", (e) => e.stopPropagation());
+    inp.addEventListener("pointerup", (e) => e.stopPropagation());
+  }
+  function refreshTune() {
+    for (const [key] of TUNE_DEFS) {
+      tuneRows.querySelector(`input[data-k="${key}"]`).value = P[key];
+      tuneVals[key].textContent = P[key];
+    }
+  }
+  const toggleTune = () => tuneEl.classList.toggle("open");
+  const tuneBtn = document.getElementById("tuneBtn");
+  tuneBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleTune(); });
+  tuneBtn.addEventListener("pointerdown", (e) => e.stopPropagation());
+  tuneEl.addEventListener("pointerdown", (e) => e.stopPropagation());
+  tuneEl.addEventListener("pointerup", (e) => e.stopPropagation());
+  window.addEventListener("keydown", (e) => { if (e.key === "t" || e.key === "T") toggleTune(); });
+  document.getElementById("tuneCopy").addEventListener("click", () => {
+    const json = JSON.stringify(P, null, 2);
+    console.log("feel params:", json);
+    if (navigator.clipboard) navigator.clipboard.writeText(json).catch(() => {});
+  });
+  document.getElementById("tuneReset").addEventListener("click", () => {
+    Object.assign(P, P_DEF);
+    refreshTune(); layout();
+  });
 
   // ---------- Debug hook (միայն փորձարկման համար) ----------
   window.__feel = {
@@ -365,16 +445,16 @@
     const dt = Math.min(tk.deltaMS / 1000, 0.05);
 
     // արագություն
-    if (holding) speed = Math.min(1, speed + ACCEL * dt);
-    else speed = Math.max(0, speed - DECEL * dt);
-    const fovExp = 1 - 0.16 * speed; // FOV-ի իլյուզիա
+    if (holding) speed = Math.min(1, speed + P.accel * dt);
+    else speed = Math.max(0, speed - P.decel * dt);
+    const fovExp = 1 - P.fovK * speed; // FOV-ի իլյուզիա
 
     // հոսք
-    const zSpeed = speed * 26;      // z-միավոր/վրկ
+    const zSpeed = speed * P.zSpeed; // z-միավոր/վրկ
     zOff += zSpeed * dt;
     if (speed > 0.02) {
-      dist += speed * 8 * dt;
-      runPhase += dt * (6 + 14 * speed);
+      dist += speed * P.distRate * dt;
+      runPhase += dt * (P.rhythmB + P.rhythmK * speed);
     }
     idleT += dt;
 
@@ -422,24 +502,24 @@
 
     if (speed > 0.05) {
       if (!hero.playing) hero.play();
-      hero.animationSpeed = 0.10 + 0.42 * speed;
+      hero.animationSpeed = P.animBase + P.animK * speed;
     } else {
       // idle. կանգնած՝ շատ դանդաղ «շնչող» ցիկլ առաջին կադրերի վրա
       if (hero.playing) { hero.gotoAndStop(0); }
-      hero.scale.y = ((H() * 0.30) / HERO_FH) * (1 + Math.sin(idleT * 2.2) * 0.006);
+      hero.scale.y = ((H() * P.heroH) / HERO_FH) * (1 + Math.sin(idleT * 2.2) * 0.006);
       hero.rotation *= 0.9;
     }
-    if (speed > 0.05) hero.scale.y = (H() * 0.30) / HERO_FH;
+    if (speed > 0.05) hero.scale.y = (H() * P.heroH) / HERO_FH;
 
     // camera shake բարձր արագության վրա (root-ի offset, ոչ մի filter)
-    const shake = Math.max(0, speed - 0.72) * 10;
+    const shake = Math.max(0, speed - P.shakeOn) * P.shakeAmp;
     root.x = (Math.random() - 0.5) * shake;
     root.y = (Math.random() - 0.5) * shake * 0.6;
 
     if (speed > 0.3) hintEl.classList.add("hidden");
 
     // մուլտիպլիկատոր
-    const mult = 1 + dist * MULT_RATE;
+    const mult = 1 + dist * P.multRate;
     multEl.textContent = "×" + mult.toFixed(2);
     multEl.classList.toggle("hot", speed > 0.85);
     multEl.style.transform = speed > 0.85 ? `scale(${1 + Math.sin(runPhase * 3) * 0.02})` : "";

@@ -30,6 +30,28 @@
   #fpsBtn{position:fixed;top:max(10px,env(safe-area-inset-top));left:10px;width:26px;height:26px;
     border-radius:6px;border:1px solid var(--line);background:rgba(33,29,43,.55);
     color:var(--muted);font-size:10px;font-family:inherit;cursor:pointer;padding:0;z-index:5}
+  #tuneBtn{position:fixed;top:max(10px,env(safe-area-inset-top));left:42px;width:26px;height:26px;
+    border-radius:6px;border:1px solid var(--line);background:rgba(33,29,43,.55);
+    color:var(--muted);font-size:12px;font-family:inherit;cursor:pointer;padding:0;z-index:5}
+  /* DEV tuning panel — խաղի մաս ՉԻ. Stake build-ում սա հանվում ա */
+  #tune{position:fixed;top:44px;left:10px;bottom:14px;width:250px;overflow-y:auto;
+    background:rgba(26,22,34,.94);border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;z-index:6;display:none;color:var(--text);font-size:11px}
+  #tune.open{display:block}
+  #tune h4{margin:2px 0 8px;font-size:11px;color:var(--accent);letter-spacing:.1em;
+    text-transform:uppercase}
+  #tune .devtag{float:right;color:#e0736b;font-size:9px;border:1px solid #55302c;
+    border-radius:4px;padding:0 4px}
+  #tune .row{margin:7px 0}
+  #tune label{display:flex;justify-content:space-between;color:var(--muted);
+    margin-bottom:2px}
+  #tune label b{color:var(--text);font-weight:400}
+  #tune input[type=range]{width:100%;accent-color:var(--accent);height:18px;margin:0}
+  #tune .btns{display:flex;gap:6px;margin-top:10px}
+  #tune button{flex:1;border:1px solid var(--line);background:rgba(58,44,34,.5);
+    color:var(--text);border-radius:6px;padding:5px 0;font-family:inherit;font-size:11px;
+    cursor:pointer}
+  #tune .note{color:var(--muted);margin-top:8px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -38,6 +60,12 @@
 <div class="ui" id="hint">Պահի՝ վազելու համար</div>
 <div class="ui" id="fps">— fps</div>
 <button id="fpsBtn" title="FPS counter (F)">ƒ</button>
+<button id="tuneBtn" title="Feel tuning panel (T)">⚙</button>
+<div id="tune"><h4>Feel lab <span class="devtag">DEV</span></h4><div id="tuneRows"></div>
+  <div class="btns"><button id="tuneCopy">Copy JSON</button><button id="tuneReset">Reset</button></div>
+  <div class="note">Խաղի մաս չի — զգացողությունը լարելու գործիք ա։ Copy JSON-ը
+  արժեքները քլիփբորդ ա տալիս (feel spec-ի համար)։ Հեռանկարում՝ կոնստրուկտորի սաղմը։</div>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/8.16.0/pixi.min.js"></script>
 <script src="main.js"></script>
 </body>
