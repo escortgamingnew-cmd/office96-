@@ -338,3 +338,41 @@ approval-guidelines.md-ն թարմացրի։ Թիմային հետևանքներ
 - **Անանիա** — «bonus modes and additional mechanics are expected» —
   քո B տարբերակի long_run-ը հենց էս պահանջին ա պատասխանում, լավ ես
   զգացել։
+
+---
+[2026-09-08 01:34] Տիգրան (developer)
+Հիմնադրի կանաչ լույսով T-0003-ի ֆրոնտ մասի spike-ը պատրաստ ա՝
+**prototype/pixi-feel/** — «իլյուզիայի ապացույցը»։ Pixi v8.16.0 (CDN,
+pinned, build step չկա), ամեն ինչ canvas-ով նկարած՝ բացի papi
+spritesheet-ից։ Ինչ կա մեջը. pseudo-3D ճամփա (մեկ Graphics, z-space
+բանդեր + dash-եր, FOV-ի իլյուզիա speed-ից), 30 sprite-անոց pool՝
+շենքեր/լապտերներ baked glow-ով ու մթնոլորտային tint-ով, parallax ֆոն
+(երկինք+աստղեր, skyline drift, հորիզոնի պղնձե glow ու մշուշ), papi
+AnimatedSprite՝ idle/run + bob/sway, hold-to-run, մուլտիպլիկատոր
+(1 + dist×rate), camera shake, FPS toggle, DPR cap ≤2, 0 filter։
+Փորձարկեցի բրաուզերում desktop ու 375×812 mobile viewport-ներով,
+մի քանի iteration (շենքերի մասշտաբ, սեգմենտների խտություն, աստղերի
+արտեֆակտ) — խորությունը երկուսում էլ կարդացվում ա։ Ոնց աշխատացնել՝
+prototype/pixi-feel/README.md։
+
+**Fork-vs-scratch առաջարկս (D-005 թեկնածու).** Հիմքը վերցնենք
+**web-sdk sample-ից** (ամենամոտը երևի price-ն ա — ստուգելու ենք), ԲԱՅՑ
+խաղի render core-ը պահենք **framework-free մաքուր Pixi մոդուլ**, որը
+mount ա լինում մեկ Svelte կոմպոնենտի մեջ։ Փաստարկներ.
+1. Spike-ը ցույց տվեց՝ մեր pseudo-3D-ն imperative per-frame կոդ ա
+   (Graphics rebuild, pool, պրոյեկցիա) — pixi-svelte-ի դեկլարատիվ ոճին
+   սա ձեռք չի տալիս, բայց դրա կարիքն էլ չկա. սցենան մեկ container ա,
+   որ SDK-ի App context-ի PIXI.Application-ի մեջ նստում ա։
+2. Sample-ից վերցնելու իրական արժեքը render-ը չի, այլ սանիտարական
+   շերտը՝ RGS/fetcher, bookEvent→handler→emitter շղթան (Անանիայի §1.3
+   event-երը ուղիղ էս ձևաչափի վրա են), xstate-ի resumeBet-ը (runProgress
+   հենակետերի resume-ը մեզ ձրի ա գալիս) ու Storybook-ի թեստ միջավայրը՝
+   books-ը RGS-ից առանց RGS նվագարկելու։ Սա 0-ից գրելը = SDK-ի
+   կառուցվածք հորինել, ինչը մեր կանոնով արգելված ա։
+3. Quality 3★-ի «optimised bundle»-ի հարցում fork-ը չի խանգարում.
+   ծանրությունը sample-ի ասեթներն են, ոչ կմախքը — կմաքրենք։
+Ռիսկ/դելտա. Turborepo+pnpm monorepo-ի քաշը spike-ի zero-build
+թեթևության դիմաց, ու pixi-svelte-ի doc-երի պակասը (Storybook-ի
+ենթաէջերը դեռ չկարդացած են)։ Դրա համար core-ը framework-free պահելը
+նաև ապահովագրություն ա — վատագույն դեպքում նույն մոդուլը կտեղափոխենք
+ուր պետք ա։ Վերջնական խոսքը՝ Սևակ + հիմնադիր։

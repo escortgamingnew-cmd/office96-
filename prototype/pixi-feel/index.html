@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>pixi-feel — Run Dady pseudo-3D փորձանմուշ</title>
+<style>
+  :root{
+    --bg:#14121a; --panel:#211d2b; --text:#e8e4f0; --muted:#9a92ad;
+    --accent:#c8956d; --accent-soft:#3a2c22; --line:#332c42;
+  }
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);overflow:hidden;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    -webkit-user-select:none;user-select:none;touch-action:none}
+  #stage{position:fixed;inset:0}
+  #stage canvas{display:block}
+  .ui{position:fixed;pointer-events:none;color:var(--text)}
+  #mult{top:max(14px,env(safe-area-inset-top));left:0;right:0;text-align:center;
+    font-size:clamp(28px,6vw,44px);font-weight:700;letter-spacing:.04em;
+    color:var(--accent);text-shadow:0 0 18px rgba(200,149,109,.45), 0 2px 6px rgba(0,0,0,.6);
+    transition:transform .08s}
+  #mult.hot{color:#e8b98a}
+  #hint{bottom:max(18px,env(safe-area-inset-bottom));left:0;right:0;text-align:center;
+    font-size:13px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;
+    transition:opacity .4s}
+  #hint.hidden{opacity:0}
+  #fps{top:max(10px,env(safe-area-inset-top));right:10px;font-size:12px;color:var(--muted);
+    background:rgba(33,29,43,.7);border:1px solid var(--line);border-radius:6px;
+    padding:3px 8px;display:none}
+  #fpsBtn{position:fixed;top:max(10px,env(safe-area-inset-top));left:10px;width:26px;height:26px;
+    border-radius:6px;border:1px solid var(--line);background:rgba(33,29,43,.55);
+    color:var(--muted);font-size:10px;font-family:inherit;cursor:pointer;padding:0;z-index:5}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div class="ui" id="mult">×1.00</div>
+<div class="ui" id="hint">Պահի՝ վազելու համար</div>
+<div class="ui" id="fps">— fps</div>
+<button id="fpsBtn" title="FPS counter (F)">ƒ</button>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/8.16.0/pixi.min.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
