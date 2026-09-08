@@ -68,7 +68,7 @@ export function facadeCanvas(wM, hM, wall, winPct, opts = {}) {
   // պատուհաններ
   const floorH = 2.6, rows = Math.max(1, Math.floor((hM - 1.2) / floorH)), rowStep = (hM - 1.0) / rows;
   const cols = Math.max(1, Math.floor(wM / 2.2)), step = wM / cols;
-  const ww = step * .55, wh = rowStep * .6;
+  const ww = step * .42, wh = rowStep * .5;
   for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) {
     const cx = step * (q + .5), cy = hM - (1.0 + rowStep * (r + .5) + 0.3); // y-ը ներքևից (հիմքը 0.3 բարձր)
     const lit = rnd() < winPct;
@@ -76,7 +76,7 @@ export function facadeCanvas(wM, hM, wall, winPct, opts = {}) {
     x.fillStyle = "rgba(70,62,96,.35)"; x.fillRect(X - 3, Y - 3, WW + 6, WH + 6); // շրջանակ
     if (lit) {
       const col = pick(COL.winLit);
-      x.shadowColor = col; x.shadowBlur = 8; x.fillStyle = col; x.fillRect(X, Y, WW, WH); x.shadowBlur = 0;
+      x.shadowColor = col; x.shadowBlur = 5; x.fillStyle = col; x.fillRect(X, Y, WW, WH); x.shadowBlur = 0;
     } else { x.fillStyle = COL.winDark; x.fillRect(X, Y, WW, WH); }
     x.fillStyle = "rgba(0,0,0,.12)"; x.fillRect(X, Y, WW, WH * .12); // sill ստվեր
   }
@@ -101,15 +101,25 @@ export function facadeCanvas(wM, hM, wall, winPct, opts = {}) {
 
 /* Շենքի արխետիպ (պրոտո SHAPES. tower/block), երկու երես. front (կամեռային, w×h) + side (ճամփային, d×h) */
 export function makeBuildingVariant() {
+  // պրոտոյի ռենդերում շենքերը GLB-ից ֆիքս ~12մ բարձրության էին (cloneSlot(sl, 12)), լայնությունը՝ տարբեր.
+  // tower/block արխետիպները պահված են, բարձրության ցրվածքը՝ նեղացրած էդ տեսքին
   const tower = rnd() < .5;
-  const h = tower ? rnd(14, 20) : rnd(6, 9);
+  const h = tower ? rnd(10.5, 13) : rnd(8, 10.5);
   const d = tower ? rnd(5, 7) : rnd(8, 12);
-  const w = h * .5 * (tower ? rnd(.8, 1.0) : rnd(1.6, 2.2));
+  const w = tower ? rnd(5, 8) : rnd(9, 14);
   const wall = pick(COL.walls);
   const winPct = 0.6;
   const front = tex(facadeCanvas(w, h, wall, winPct, {}));
   const side = tex(facadeCanvas(d, h, wall, winPct, { door: true, awning: rnd() < .4 ? pick(COL.awnings) : null }));
   return { w, h, d, front, side, antenna: h > 12 };
+}
+
+export function makeRoofTex() {
+  const [c, x] = cv(64, 64);
+  x.fillStyle = COL.roofCap; x.fillRect(0, 0, 64, 64);
+  x.strokeStyle = "rgba(60,50,90,.18)"; x.lineWidth = 4; x.strokeRect(2, 2, 60, 60);
+  x.fillStyle = "rgba(255,255,255,.12)"; x.fillRect(14, 14, 36, 36);
+  return tex(c);
 }
 
 export function makeAntennaTex() {
@@ -161,20 +171,31 @@ export function makeBushTex() {
 /* Մեքենա — placeholder՝ հետևից/դիմացից տեսք (ուղիղ ռակուրս), 1.8×1.6մ front, 4.2մ երկար։
  * Իրական render-ը car-default.glb-ից Blender-ով ա գալու (ռակուրսների strip)։ Tint-ով գունավորվում ա։ */
 export function makeCarTex(rear) {
-  const S = 40, W = 2.0 * S, H = 1.7 * S;
+  const S = 48, W = 2.0 * S, H = 1.6 * S;
   const [c, x] = cv(W, H);
-  // թափք (սպիտակ՝ tint-ի համար), խցիկ մուգ, անիվներ
-  x.fillStyle = "#1a1a24"; x.fillRect(.1 * S, H - .45 * S, .4 * S, .45 * S); x.fillRect(W - .5 * S, H - .45 * S, .4 * S, .45 * S);
-  x.fillStyle = "#ffffff"; x.beginPath(); x.roundRect(.1 * S, H - 1.0 * S, 1.8 * S, .7 * S, 4); x.fill();
-  x.fillStyle = "#e8e8f0"; x.beginPath(); x.roundRect(.25 * S, H - 1.55 * S, 1.5 * S, .6 * S, 5); x.fill();
-  x.fillStyle = "#26304a"; x.beginPath(); x.roundRect(.35 * S, H - 1.5 * S, 1.3 * S, .42 * S, 4); x.fill(); // ապակի
-  x.fillStyle = "rgba(0,0,0,.18)"; x.fillRect(.1 * S, H - .55 * S, 1.8 * S, .1 * S);
-  // լույսեր. հետևից կարմիր, դիմացից սպիտակ (baked glow)
-  const lc = rear ? "#ff3040" : "#fff6d8";
-  x.shadowColor = lc; x.shadowBlur = 10; x.fillStyle = lc;
-  x.fillRect(.2 * S, H - .95 * S, .45 * S, .16 * S); x.fillRect(W - .65 * S, H - .95 * S, .45 * S, .16 * S);
+  const cxp = W / 2;
+  // անիվներ (թափքի տակից երևում են)
+  x.fillStyle = "#15151d";
+  x.beginPath(); x.roundRect(.12 * S, H - .5 * S, .42 * S, .5 * S, 3); x.fill();
+  x.beginPath(); x.roundRect(W - .54 * S, H - .5 * S, .42 * S, .5 * S, 3); x.fill();
+  // թափք (սպիտակ՝ tint-ի համար). ներքևի մասը՝ լայն, խցիկը՝ նեղացող trapezoid
+  x.fillStyle = "#ffffff";
+  x.beginPath(); x.roundRect(.1 * S, H - 1.0 * S, 1.8 * S, .78 * S, 6); x.fill();
+  x.beginPath(); x.moveTo(.32 * S, H - .95 * S); x.lineTo(.5 * S, H - 1.5 * S); x.lineTo(W - .5 * S, H - 1.5 * S); x.lineTo(W - .32 * S, H - .95 * S); x.closePath(); x.fill();
+  // ապակի (հետևի/դիմացի), մուգ կապույտ, թեթև արտացոլում
+  x.fillStyle = "#22304d";
+  x.beginPath(); x.moveTo(.45 * S, H - 1.0 * S); x.lineTo(.58 * S, H - 1.42 * S); x.lineTo(W - .58 * S, H - 1.42 * S); x.lineTo(W - .45 * S, H - 1.0 * S); x.closePath(); x.fill();
+  x.fillStyle = "rgba(255,255,255,.18)"; x.fillRect(.62 * S, H - 1.38 * S, .3 * S, .3 * S);
+  // բամպեր + համարանիշ
+  x.fillStyle = "rgba(0,0,0,.22)"; x.fillRect(.1 * S, H - .36 * S, 1.8 * S, .14 * S);
+  x.fillStyle = "#e9e9f0"; x.fillRect(cxp - .22 * S, H - .62 * S, .44 * S, .16 * S);
+  // լույսեր. հետևից կարմիր, դիմացից տաք սպիտակ (baked glow)
+  const lc = rear ? "#ff3040" : "#fff2c8";
+  x.shadowColor = lc; x.shadowBlur = 12; x.fillStyle = lc;
+  x.beginPath(); x.roundRect(.2 * S, H - .9 * S, .42 * S, .18 * S, 3); x.fill();
+  x.beginPath(); x.roundRect(W - .62 * S, H - .9 * S, .42 * S, .18 * S, 3); x.fill();
   x.shadowBlur = 0;
-  return { texture: tex(c), wM: 2.0, hM: 1.7 };
+  return { texture: tex(c), wM: 2.0, hM: 1.6 };
 }
 
 /* Billboard 8×4մ վահանակ 5մ սյուների վրա — placeholder գովազդ (canvas տեքստ) */

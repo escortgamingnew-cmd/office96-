@@ -2,4 +2,4 @@
 rem Run Dady pixi-feel prototype
 cd /d "%~dp0"
 start http://127.0.0.1:7788/
-py -m http.server 7788
+py serve.py 7788

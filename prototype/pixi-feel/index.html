@@ -3,70 +3,167 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>pixi-feel — Run Dady pseudo-3D փորձանմուշ</title>
+<title>pixi-feel — Run Dady (Pixi.js 2.5D, v16_14 պարիտետ)</title>
 <style>
-  :root{
-    --bg:#14121a; --panel:#211d2b; --text:#e8e4f0; --muted:#9a92ad;
-    --accent:#c8956d; --accent-soft:#3a2c22; --line:#332c42;
+  /* ---- UI-ը v16_14 պրոտոյից ա (ms-ref մորֆ). փոփոխական անունները պահված են 1:1 ---- */
+  :root {
+    --ui-spd:1;
+    --ui-betc:#2ec27e; --ui-betc-dn:#24a869; --ui-betc-glow:rgba(46,194,126,.35);
+    --ui-runc:#2ec27e; --ui-runc-dn:#24a869; --ui-runc-glow:rgba(46,194,126,.35);
+    --ui-btnt:#fff;
+    --ui-coc1:#ffc94d; --ui-coc2:#f6a821; --ui-coc-glow:rgba(246,168,33,.45);
+    --ui-rad:12px;
   }
-  html,body{margin:0;padding:0;height:100%;background:var(--bg);overflow:hidden;
-    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-    -webkit-user-select:none;user-select:none;touch-action:none}
-  #stage{position:fixed;inset:0}
-  #stage canvas{display:block}
-  .ui{position:fixed;pointer-events:none;color:var(--text)}
-  #mult{top:max(14px,env(safe-area-inset-top));left:0;right:0;text-align:center;
-    font-size:clamp(28px,6vw,44px);font-weight:700;letter-spacing:.04em;
-    color:var(--accent);text-shadow:0 0 18px rgba(200,149,109,.45), 0 2px 6px rgba(0,0,0,.6);
-    transition:transform .08s}
-  #mult.hot{color:#e8b98a}
-  #hint{bottom:max(18px,env(safe-area-inset-bottom));left:0;right:0;text-align:center;
-    font-size:13px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;
-    transition:opacity .4s}
-  #hint.hidden{opacity:0}
-  #fps{top:max(10px,env(safe-area-inset-top));right:10px;font-size:12px;color:var(--muted);
-    background:rgba(33,29,43,.7);border:1px solid var(--line);border-radius:6px;
-    padding:3px 8px;display:none}
-  #fpsBtn{position:fixed;top:max(10px,env(safe-area-inset-top));left:10px;width:26px;height:26px;
-    border-radius:6px;border:1px solid var(--line);background:rgba(33,29,43,.55);
-    color:var(--muted);font-size:10px;font-family:inherit;cursor:pointer;padding:0;z-index:5}
-  #tuneBtn{position:fixed;top:max(10px,env(safe-area-inset-top));left:42px;width:26px;height:26px;
-    border-radius:6px;border:1px solid var(--line);background:rgba(33,29,43,.55);
-    color:var(--muted);font-size:12px;font-family:inherit;cursor:pointer;padding:0;z-index:5}
-  /* DEV tuning panel — խաղի մաս ՉԻ. Stake build-ում սա հանվում ա */
-  #tune{position:fixed;top:44px;left:10px;bottom:14px;width:250px;overflow-y:auto;
-    background:rgba(26,22,34,.94);border:1px solid var(--line);border-radius:10px;
-    padding:10px 12px;z-index:6;display:none;color:var(--text);font-size:11px}
-  #tune.open{display:block}
-  #tune h4{margin:2px 0 8px;font-size:11px;color:var(--accent);letter-spacing:.1em;
-    text-transform:uppercase}
-  #tune .devtag{float:right;color:#e0736b;font-size:9px;border:1px solid #55302c;
-    border-radius:4px;padding:0 4px}
-  #tune .row{margin:7px 0}
-  #tune label{display:flex;justify-content:space-between;color:var(--muted);
-    margin-bottom:2px}
-  #tune label b{color:var(--text);font-weight:400}
-  #tune input[type=range]{width:100%;accent-color:var(--accent);height:18px;margin:0}
-  #tune .btns{display:flex;gap:6px;margin-top:10px}
-  #tune button{flex:1;border:1px solid var(--line);background:rgba(58,44,34,.5);
-    color:var(--text);border-radius:6px;padding:5px 0;font-family:inherit;font-size:11px;
-    cursor:pointer}
-  #tune .note{color:var(--muted);margin-top:8px;line-height:1.5}
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  button { -webkit-touch-callout:none; border:0; border-radius:12px; padding:14px 22px; font:600 14px ui-monospace, Menlo, monospace; color:#fff; cursor:pointer; letter-spacing:.5px; }
+  button:focus, button:focus-visible { outline:none; }
+  html,body { width:100%; height:100%; background:#b6bfda; overflow:hidden; font-family:ui-monospace, Menlo, monospace;
+              -webkit-user-select:none; user-select:none; touch-action:none; }
+  #stage { position:fixed; inset:0; }
+  #stage canvas { display:block; }
+  #vig { position:fixed; inset:0; pointer-events:none; opacity:0; transition:opacity .3s;
+         background:radial-gradient(ellipse at center, rgba(0,0,0,0) 45%, rgba(0,0,0,.7) 100%); }
+  #hud { position:fixed; inset:0; pointer-events:none; display:flex; flex-direction:column; justify-content:space-between;
+         padding:16px; padding-bottom:max(16px, env(safe-area-inset-bottom)); }
+  /* ---- վերջին արդյունքների շերտ (վերև) + ամբողջ պատմության մոդալ ---- */
+  #histbar { position:fixed; top:10px; left:50%; transform:translateX(-50%); z-index:40; display:flex; gap:6px; align-items:center; pointer-events:auto; }
+  #histpills { display:flex; gap:6px; max-width:calc(100vw - 120px); overflow:hidden; }
+  .hpill { display:inline-flex; align-items:center; justify-content:center; min-width:52px; padding:5px 9px; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:.2px;
+           background:rgba(10,14,20,.55); backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,.08); }
+  .hpill.w { color:#3ddc91; border-color:rgba(46,194,126,.45); }
+  .hpill.l { color:#ff6b6b; border-color:rgba(255,77,77,.4); }
+  #histbar .hpill { animation:hin .35s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes hin { from { opacity:0; transform:translateY(-14px) scale(.7); } to { opacity:1; transform:none; } }
+  #histmore { width:30px; height:26px; border-radius:999px; border:1px solid rgba(255,255,255,.14); padding:0; background:rgba(10,14,20,.55); backdrop-filter:blur(6px); color:#fff; font-size:12px; line-height:1;
+              display:flex; align-items:center; justify-content:center; transition:transform .3s cubic-bezier(.34,1.56,.64,1), background .2s; }
+  #histmore:active { transform:scale(.88); }
+  #histmore.open { transform:rotate(180deg); }
+  #histback { position:fixed; inset:0; background:rgba(5,8,12,.5); opacity:0; pointer-events:none; transition:opacity .3s ease; z-index:41; }
+  #histback.open { opacity:1; pointer-events:auto; }
+  #histmodal { position:fixed; top:0; left:50%; z-index:42; width:min(92vw, 420px); transform:translateX(-50%) translateY(calc(-100% - 20px));
+               transition:transform .45s cubic-bezier(.3,1.25,.35,1); background:rgba(14,19,27,.92); backdrop-filter:blur(14px);
+               border:1px solid rgba(255,255,255,.1); border-top:none; border-radius:0 0 18px 18px; padding:14px 14px 16px; pointer-events:auto; }
+  #histmodal.open { transform:translateX(-50%) translateY(0); }
+  #histmodal .hm-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  #histmodal .hm-top span { font-size:12px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,.55); }
+  #histclose { width:28px; height:28px; border-radius:8px; border:1px solid rgba(255,255,255,.14); background:transparent; color:#fff; font-size:14px; padding:0; }
+  #histgrid { display:flex; flex-wrap:wrap; gap:6px; max-height:46vh; overflow-y:auto; }
+  .hempty { color:rgba(255,255,255,.4); font-size:12px; padding:8px 2px; }
+  /* ---- մուլտի + վիճակ ---- */
+  #mult { color:#fff; font-size:56px; font-weight:700; letter-spacing:-2px; text-align:center; margin-top:8vh; text-shadow:0 4px 24px rgba(0,0,0,.6); transition:color .2s; }
+  #mult.crashed { color:#ff4d4d; }
+  #state { color:rgba(255,255,255,.5); font-size:12px; text-align:center; letter-spacing:2px; text-transform:uppercase; }
+  /* ---- կոճակներ ---- */
+  #controls { display:flex; gap:8px; justify-content:center; pointer-events:auto; position:relative; flex-direction:column; align-items:center; }
+  #cashout { background:linear-gradient(180deg,var(--ui-coc1),var(--ui-coc2)); color:#3a2600; font-size:15px; padding:14px 30px; display:flex; gap:10px; align-items:center; touch-action:none;
+             border-radius:var(--ui-rad); box-shadow:0 6px 22px var(--ui-coc-glow); transform:translateY(46px) scale(.92); opacity:0; pointer-events:none;
+             transition:transform calc(.26s / var(--ui-spd)) cubic-bezier(.22,1.35,.36,1), opacity calc(.18s / var(--ui-spd)), background .2s; }
+  #cashout.show { transform:translateY(0) scale(1); opacity:1; pointer-events:auto; }
+  #cashout.won { background:linear-gradient(180deg,#3ddc91,#22b573); color:#04331d; }
+  #cashout b { font-size:17px; letter-spacing:0; }
+  #cashout:active { transform:translateY(0) scale(.96); }
+  #hold { background:var(--ui-betc); color:var(--ui-btnt); padding:20px 36px; font-size:16px; touch-action:none;
+          position:absolute; bottom:0; left:50%; transform:translateX(-50%); display:grid; place-items:center;
+          border:2px solid transparent; border-radius:var(--ui-rad); box-shadow:0 8px 24px var(--ui-betc-glow); will-change:width,transform;
+          transition:width calc(.45s / var(--ui-spd)) cubic-bezier(.34,1.56,.64,1), background .2s, border-color .2s, color .2s, box-shadow .2s; }
+  /* պարտության վիճակ. նույն կոճակը ghost «Keep Running» ա դառնում */
+  #betmorph.lost #hold { background:rgba(46,194,126,.08); border-color:var(--ui-runc); color:#3ddc91; box-shadow:0 0 0 rgba(0,0,0,0); }
+  #caughtlbl { position:absolute; left:50%; bottom:calc(100% + 12px); transform:translateX(-50%) translateY(8px); width:max-content; color:#ff5d5d;
+               font:700 14px ui-monospace, Menlo, monospace; letter-spacing:2px; text-transform:uppercase; text-shadow:0 2px 12px rgba(0,0,0,.6); opacity:0; pointer-events:none;
+               transition:opacity .35s ease .15s, transform .5s cubic-bezier(.3,1.4,.4,1) .15s; }
+  #betmorph.lost #caughtlbl { opacity:1; transform:translateX(-50%) translateY(0); }
+  #hold.active { background:var(--ui-betc-dn); transform:translateX(-50%) scale(.97); }
+  #betmorph.run #hold { background:var(--ui-runc); box-shadow:0 8px 24px var(--ui-runc-glow); }
+  #betmorph.run #hold.active { background:var(--ui-runc-dn); }
+  /* պիտակների փոխարինում. հեռացողը մեծանալով ա անցնում կամեռայի կողքով (scale 1.4), մտնողը .6-ից ա pop անում մի beat ուշ */
+  .golbl { grid-area:1/1; white-space:nowrap; transition:opacity calc(.25s / var(--ui-spd)) cubic-bezier(.22,.9,.3,1), transform calc(.45s / var(--ui-spd)) cubic-bezier(.34,1.56,.64,1); }
+  .golbl.off { opacity:0; transform:scale(.6); pointer-events:none; transition-delay:0s; }
+  .golbl:not(.off) { transition-delay:calc(.15s / var(--ui-spd)); }
+  #betmorph.run #lbl_bet.off, #betmorph.lost #lbl_bet.off { transform:scale(1.4); }
+  /* bet ↔ run մորֆող կոնտեյներ. կոճակը տեղում ա մնում ներքևում, stake-զոնան վերևից ա փլվում */
+  #betmorph { position:relative; pointer-events:auto; transition:width calc(.45s / var(--ui-spd)) cubic-bezier(.34,1.56,.64,1), height calc(.55s / var(--ui-spd)) cubic-bezier(.22,.9,.3,1); }
+  #betstack { position:absolute; top:0; left:50%; width:max-content; display:flex; flex-direction:column; gap:10px; transform:translateX(-50%); }
+  #betmorph.run #betstack, #betmorph.lost #betstack { pointer-events:none; }
+  #chiprow .chip { transition:transform calc(.5s / var(--ui-spd)) cubic-bezier(.34,1.56,.64,1), opacity calc(.35s / var(--ui-spd)) cubic-bezier(.22,.9,.3,1), background .2s; }
+  #betmorph.run #chiprow .chip, #betmorph.lost #chiprow .chip { opacity:0; transform:translateY(-26px) scale(.7); }
+  #betmorph.run #chiprow .chip:nth-child(2), #betmorph.lost #chiprow .chip:nth-child(2) { transition-delay:calc(35ms / var(--ui-spd)); }
+  #betmorph.run #chiprow .chip:nth-child(3), #betmorph.lost #chiprow .chip:nth-child(3) { transition-delay:calc(70ms / var(--ui-spd)); }
+  #betmorph.run #chiprow .chip:nth-child(4), #betmorph.lost #chiprow .chip:nth-child(4) { transition-delay:calc(105ms / var(--ui-spd)); }
+  #betrow { transition:transform calc(.5s / var(--ui-spd)) cubic-bezier(.22,.9,.3,1), opacity calc(.3s / var(--ui-spd)) cubic-bezier(.22,.9,.3,1); }
+  #betmorph.run #betrow, #betmorph.lost #betrow { opacity:0; transform:translateY(30px) scale(.92); transition-delay:calc(120ms / var(--ui-spd)); }
+  #betrow { display:flex; align-items:center; gap:8px; background:linear-gradient(180deg,#33405e,#242f49); border:1px solid rgba(255,255,255,.12); border-radius:16px; padding:8px; box-shadow:0 10px 28px rgba(0,0,0,.35); }
+  .bstep { width:46px; height:46px; border-radius:12px; background:rgba(255,255,255,.14); font-size:20px; line-height:1; padding:0; }
+  .bstep:active { background:rgba(255,255,255,.26); transform:scale(.94); }
+  #bet_amt { flex:1; min-width:130px; text-align:center; color:#fff; font-size:20px; font-weight:700; letter-spacing:.5px; }
+  #chiprow { display:flex; gap:8px; }
+  .chip { flex:1; background:linear-gradient(180deg,#3c4966,#2c374f); border:1px solid rgba(255,255,255,.1); padding:13px 0; font-size:15px; border-radius:12px; }
+  .chip:active { transform:scale(.94); }
+  /* ---- DEV. FPS + Feel Lab (խաղի մաս չի) ---- */
+  #fps { position:fixed; top:max(10px,env(safe-area-inset-top)); right:10px; font-size:12px; color:#cfd3e6; background:rgba(14,19,27,.7); border:1px solid rgba(255,255,255,.14); border-radius:6px; padding:3px 8px; display:none; z-index:5; }
+  #fpsBtn, #tuneBtn { position:fixed; top:max(10px,env(safe-area-inset-top)); width:26px; height:26px; border-radius:6px; border:1px solid rgba(255,255,255,.18); background:rgba(14,19,27,.55); color:#cfd3e6; font-size:11px; padding:0; z-index:5; }
+  #fpsBtn { left:10px; } #tuneBtn { left:42px; font-size:13px; }
+  #tune { position:fixed; top:44px; left:10px; bottom:14px; width:250px; overflow-y:auto; background:rgba(14,19,27,.94); border:1px solid rgba(255,255,255,.14); border-radius:10px;
+          padding:10px 12px; z-index:6; display:none; color:#e8e4f0; font-size:11px; }
+  #tune.open { display:block; }
+  #tune h4 { margin:2px 0 8px; font-size:11px; color:#ffc94d; letter-spacing:.1em; text-transform:uppercase; }
+  #tune .devtag { float:right; color:#ff6b6b; font-size:9px; border:1px solid #6b3030; border-radius:4px; padding:0 4px; }
+  #tune .row { margin:7px 0; }
+  #tune label { display:flex; justify-content:space-between; color:#9aa0b8; margin-bottom:2px; }
+  #tune label b { color:#e8e4f0; font-weight:400; }
+  #tune input[type=range] { width:100%; accent-color:#ffc94d; height:18px; margin:0; }
+  #tune .btns { display:flex; gap:6px; margin-top:10px; }
+  #tune button { flex:1; border:1px solid rgba(255,255,255,.14); background:rgba(255,201,77,.15); color:#e8e4f0; border-radius:6px; padding:5px 0; font-size:11px; }
+  #tune .note { color:#9aa0b8; margin-top:8px; line-height:1.5; }
 </style>
 </head>
 <body>
 <div id="stage"></div>
-<div class="ui" id="mult">×1.00</div>
-<div class="ui" id="hint">Պահի՝ վազելու համար</div>
-<div class="ui" id="fps">— fps</div>
+<div id="vig"></div>
+<div id="histbar"><div id="histpills"></div><button id="histmore">▾</button></div>
+<div id="histback"></div>
+<div id="histmodal">
+  <div class="hm-top"><span>Վերջին ռաունդներ</span><button id="histclose">✕</button></div>
+  <div id="histgrid"></div>
+</div>
+<div id="hud">
+  <div>
+    <div id="mult">1.00x</div>
+    <div id="state">place your bet</div>
+  </div>
+  <div id="controls">
+    <button id="cashout"><span id="co_label">CASH OUT</span><b id="co_amt">$5.00</b></button>
+    <div id="betmorph">
+      <div id="betstack">
+        <div id="betrow">
+          <button class="bstep" id="bet_minus">−</button>
+          <div id="bet_amt">$5</div>
+          <button class="bstep" id="bet_plus">+</button>
+        </div>
+        <div id="chiprow">
+          <button class="chip" data-bet="5">5</button>
+          <button class="chip" data-bet="10">10</button>
+          <button class="chip" data-bet="20">20</button>
+          <button class="chip" data-bet="50">50</button>
+        </div>
+      </div>
+      <div id="caughtlbl">💔 Daddy Got Caught!</div>
+      <button id="hold">
+        <span class="golbl" id="lbl_bet">Place Bet</span>
+        <span class="golbl off" id="lbl_run">🐰 Run! Daddy</span>
+        <span class="golbl off" id="lbl_lost">↻ Keep Running</span>
+      </button>
+    </div>
+  </div>
+</div>
+<div id="fps">— fps</div>
 <button id="fpsBtn" title="FPS counter (F)">ƒ</button>
-<button id="tuneBtn" title="Feel tuning panel (T)">⚙</button>
+<button id="tuneBtn" title="Feel Lab (T)">⚙</button>
 <div id="tune"><h4>Feel lab <span class="devtag">DEV</span></h4><div id="tuneRows"></div>
   <div class="btns"><button id="tuneCopy">Copy JSON</button><button id="tuneReset">Reset</button></div>
-  <div class="note">Խաղի մաս չի — զգացողությունը լարելու գործիք ա։ Copy JSON-ը
-  արժեքները քլիփբորդ ա տալիս (feel spec-ի համար)։ Հեռանկարում՝ կոնստրուկտորի սաղմը։</div>
+  <div class="note">Խաղի մաս չի — զգացողությունը լարելու գործիք ա։ Թվերը պրոտոյի միավորներով են (մ/վ, °, մ)։
+  Copy JSON-ը արժեքները քլիփբորդ ա տալիս (feel spec-ի համար)։ Հեռանկարում՝ կոնստրուկտորի սաղմը։</div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/8.16.0/pixi.min.js"></script>
-<script src="main.js"></script>
+<script type="module" src="src/main.js"></script>
 </body>
 </html>

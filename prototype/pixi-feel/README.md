@@ -1,62 +1,96 @@
-# pixi-feel — pseudo-3D իլյուզիայի փորձանմուշ
+# pixi-feel — Run Dady-ի խաղային ներկայացումը Pixi.js 2.5D-ով
 
-T-0003-ի «իլյուզիայի ապացույցի» spike. ստուգում ա, որ Three.js պրոտոյի
-(v16_14) 3D զգացողությունը ստացվում ա մաքուր Pixi.js 2.5D-ով [D-001]՝
-առանց մոբայլը տաքացնող bloom/PBR/լույսերի։ Խաղային լոգիկա ու RGS կապ
-ՉԿԱ — սա միայն զգացողության փորձ ա։
+v16_14 Three.js պրոտոյի (`docs/reference/pntiworldproto_16_14.html`) **պարիտետը**
+մաքուր Pixi.js v8 2.5D-ով [D-001]՝ առանց մոբայլը տաքացնող bloom/PBR/լույսերի։
+Ռաունդի հոսքը պրոտոյի ռեժիսուրան ա (hold-to-run, մուլտի, catch, rewind), արդյունքը՝
+**SANDBOX fake-book**-ից՝ bet-ի պահին [D-003]։ RGS/network ԴԵՌ չկա, իրական մաթ ԴԵՌ չկա։
 
 ## Աշխատացնելը
 
-Build step չկա։ Պետք ա միայն static server (ES module/fetch-ի համար՝
-file://-ով չի աշխատի spritesheet-ի պատճառով).
+Build step չկա։ ES module-ներ են → static server ա պետք (file://-ով չի աշխատի).
 
 ```
 cd prototype/pixi-feel
-py -m http.server 7788        # կամ python3 -m http.server 7788
-# բացի http://127.0.0.1:7788
+py serve.py 7788          # կամ play.bat (բացում ա բրաուզերն էլ)
+# բացի http://127.0.0.1:7788/
 ```
 
-Pixi.js v8.16.0-ը քաշվում ա cdnjs-ից (pinned) — ինտերնետ ա պետք առաջին
-բացելուն։
+`serve.py`-ն Python-ի ստանդարտ http.server-ն ա՝ մեկ ուղղումով. Windows-ում
+`py -m http.server`-ը `.js`-ը `text/plain` ա տալիս, ու module script-ը չի բեռնվում։
+Pixi.js v8.16.0-ը քաշվում ա cdnjs-ից (pinned) — ինտերնետ ա պետք առաջին բացելուն։
 
 ## Կառավարում
 
-- **Պահել (մկնիկ/touch/Space)** — արագանում ա, բաց թողնելը՝ դանդաղում
-- **F կամ ƒ կոճակը (վերևի ձախ)** — FPS counter
-- Մուլտիպլիկատորը վերևում՝ `1 + dist × 0.05` (պրոտոյի բանաձևի ոգով)
+- **Place Bet** (−/+ կամ չիպ 5/10/20/50) → կոճակը մորֆվում ա **Run! Daddy**
+- **Պահել** Run! Daddy-ն (մկնիկ/touch/Space/↑) — վազում ա, բաց թողնել՝ կանգնում
+- **CASH OUT** — ընթացիկ մուլտիով win (sandbox semantics), կանաչ pill, rewind
+- Crash-կետին հասնելիս՝ **CAUGHT** (հետապնդողը կտրում ա ճամփան), կարմիր pill,
+  կոճակը ghost **Keep Running** → rewind → նոր ռաունդ
+- Վերևի pills՝ վերջին 6 արդյունքը, ▾ → մոդալ (մինչև 60)
+- **F / ƒ** — FPS, **T / ⚙** — Feel Lab (DEV պանել, խաղի մաս չի)
 
-## Ինչից ա սարքած իլյուզիան
+## Կառուցվածքը (`src/`)
 
-- **Պրոյեկցիա.** `p = (zNear/z)^fovExp`, y = horizon + (bottom−horizon)·p,
-  scale ∝ p։ `fovExp`-ը արագության հետ իջնում ա 1→0.84 — «FOV-ը լայնանում
-  ա» զգացողություն, ճամփի լայնությունն էլ ա speed-ից թեթև աճում։
-- **Ճամփա.** Մեկ Graphics, ամեն կադր. ասֆալտի trapezoid, z-space-ում
-  հոսող բանդեր + կենտրոնի դեղին dash-եր, ուղիղ եզրագծեր ու պղնձե curb։
-- **Կողքի օբյեկտներ.** 30 sprite-անոց pool (շենքեր + լապտերներ), canvas-ով
-  նկարած texture-ներ (baked glow, ոչ մի runtime filter)։ Ծնվում են
-  հորիզոնում, alpha fade-ով ու մթնոլորտային tint-ով (հեռուն մուգ) մոտենում,
-  անցնում կադրից դուրս, վերադառնում pool։
-- **Ֆոն.** Երկնքի գրադիենտ + աստղեր (canvas), հեռու քաղաքի TilingSprite
-  ուրվագիծ՝ դանդաղ դրեյֆով, հորիզոնի պղնձե glow ու մշուշի շերտ (ծնվելը
-  քողարկում ա)։
-- **Հերոս.** `assets/papi-run-20f.webp` spritesheet (4×5, 20 կադր,
-  500×500) → AnimatedSprite։ Idle՝ «շնչող» առաջին կադր, վազք՝ fps-ը
-  speed-ին կապած + bob/sway/rotation, blob ստվեր (canvas)։
-- **Կամերա.** Բարձր արագության թեթև shake՝ root container-ի offset-ով։
+| Ֆայլ | Ինչ ա |
+|---|---|
+| `params.js` | `P` — feel-պարամետրերը պրոտոյի թվերով ու իրական միավորներով (մ/վ, °, մ); Feel Lab-ի սահմանումներ |
+| `cam.js` | Վիրտուալ pinhole կամերա. դիրք (0, 4.5, 14), FOV 55(+14·k), eased lookAt, portraitK, roll |
+| `world.js` | Քաղաքը. շենքեր (front sprite + ճամփի կողմի/տանիքի PerspectiveMesh երեսներ), լապտերներ, մեքենաներ, ծառ/թուփ, billboard, հյուրանոց, աստղեր; ճամփա/մայթ/գետին Graphics; flow/rewind |
+| `tex.js` | Canvas-ով նկարած բոլոր texture-ները (ֆասադ, լապտեր, ծառ, մեքենա, billboard, հետապնդող, ստվեր) |
+| `ui.js` | DOM/CSS UI՝ պրոտոյից պորտ. bet↔run մորֆ, CASH OUT/WON, պատմություն, մուլտի |
+| `sandbox.js` | Fake-book. crash-կետը bet-ի պահին (placeholder distribution, ոչ իրական մաթ) |
+| `feellab.js` | DEV պանել |
+| `main.js` | Ռաունդի հոսքը (պրոտոյի animateBody-ի վերաշարադրանք), կերպարներ, loop |
+
+## Ինչ ա 1:1 պրոտոյից (կոդի ուղիղ ընթերցումով)
+
+- **Աշխարհը մետրերով ա, կամերան (0, 4.5, 14)**, lookAt (0, 2, −30), FOV 55 → 69 արագության հետ
+  (fov-zoom, lag 4), portrait-ում FOV-ը լայնանում ա (portraitK), հերոսը z=2 / −1.2
+- **Ուղղությունը.** Պապին կամեռայի կողմ ա վազում, աշխարհը հեռանում ա մշուշի մեջ (`z -= dz`),
+  օբյեկտները ծնվում են կամեռայի հետևում (SPAWN_Z=40)
+- **Արագություն.** `speed += (TARGET−speed)·min(1, dt·4)`, TARGET=22; կանգ՝ stopDecel 20,
+  պարտություն՝ loseDecel 9; `speed < 0.12·TARGET → 0`
+- **Հոսքը ոտքերից ա.** `dz = dt·animFps·k / 20 × stride` (38 fps, 8.5 մ/ցիկլ) →
+  մաքս ≈ 16.15 մ/վ; մուլտի `1 + dist × 0.05`
+- **Կամերա.** shake 18Hz amp 1 (smoothed random), ռիթմ 0.55 (bob ոտնաձայնի հետ), tilt 0.25,
+  lose pull 2, vignette k·0.9
+- **Հերոս.** hop 0.18·wobble, rotation −0.08·k·wobble, squash/stretch; կադրերը «մեկ կադր/ռենդեր»
+  cadence-ով (ցնցում չկա); կոնտակտային ստվեր
+- **Catch.** հետապնդողը (6.5, 2.5, camZ+5) → (0.9, 2.5, (camZ+charZ)/2−1), ease-out 1.8/վ,
+  «CAUGHT» երբ catchAnim=1 ու speed<0.6; կարմիր մուլտի
+- **Rewind.** դրոն-կամար (y += 9·sin πt), աշխարհը ետ ա հոսում sweepD (cashout՝ վազածի չափ,
+  պարտություն՝ fog+70), հին Պապին/հետապնդողը հոսքով անցնում են կամեռայի տակով, նոր Պապին
+  հյուրանոցի մոտ ա սպասում; կարճ rewind (<14մ)՝ նույն Պապին տեղում
+- **Աշխարհ.** ROAD_W 10, մայթ 3 (±6.5), շենքեր ±(5+3+w/2), SEG 16 × 12, լապտեր քայլ 14 random
+  դասավորությամբ, մեքենաներ կայանած լապտերների արանքում (պրոտո. «ճամփան վազորդինն ա»),
+  billboard ամեն 12 վ, fog 70/210 desktop · 40/120 mobile, աստղեր 400/140, հյուրանոց (−19, 0, −45)
+- **UI.** betmorph ms-ref խորեոգրաֆիա (stagger chips, spring), CASH OUT/WON, pills, մոդալ,
+  տեքստերը նույնը
+
+## Ինչ ա գիտակցաբար տարբեր
+
+- **Motion blur** (frame-accumulation) չկա — fullscreen pass ա, մոբայլի բյուջեից դուրս
+- Լույս/ստվեր/bloom չկա — glow-երը baked են canvas-ում, fog-ը՝ alpha fade + գույնի lerp
+- Շենքերը GLB-ի փոխարեն canvas ֆասադ են (պրոտոյի lowPolyBuilding/addWindows կանոններով.
+  հարկ 2.6մ, սյուն 2.2մ, 60% վառ, pastel), բարձրությունը ~8–13մ (պրոտոյի GLB-ը 12 էր)
+- Մեքենան canvas placeholder ա (հետևից/դիմացից տեսք, tint) — իրական render-ը
+  car-default.glb-ից Blender-ով ա գալու
+- Հետապնդողը պրոտոյի drawEnemy placeholder silhouette-ն ա
 
 ## Մոբայլ բյուջեն
 
-- `devicePixelRatio` cap ≤ 2, antialias off
-- 0 filter, 0 blur — բոլոր glow-երը canvas-ում baked են
-- Մեկ Graphics rebuild/կադր (~30 quad), ~35 sprite, object pooling
-- `dt` clamp 0.05s — background tab-ից արթնանալիս թռիչք չկա
+- DPR cap ≤2 (mobile 1.5), antialias off, ticker maxFPS 30 mobile / 60 desktop
+- 0 filter, 0 blur; ~122 display object (+400/140 աստղ sprite), ~85 տեսանելի
+- Մեկ Graphics rebuild/կադր (գետին+ճամփա, ~120 quad), PerspectiveMesh 4×4 (32 tri) երեսների համար
+- `dt` clamp 0.05 վ
 
-## Debug
+## Debug (`window.__feel`)
 
-`window.__feel` — `state()`, `force(speed, dist?)`, `release()`՝
-կոնսոլից վիճակը ստուգելու/բռնելու համար։
+`state()`, `placeBet(b)`, `hold(on)`, `cashout()`, `restart()`, `setCrash(d)` (sandbox
+crash-կետը ստիպել), `step(dt, n)` (դետերմինիստիկ քայլ՝ rAF-ից անկախ թեստի համար),
+`budget()`, `P`։
 
 ## Ասեթ
 
-`assets/papi-run-20f.webp`-ը կոպի ա `docs/reference/assets/`-ից (մեր
-օրիգինալ ասեթը, պրոտոյից հանած)։ Ուրիշ ոչ մի արտաքին asset չկա։
+`assets/papi-run-20f.webp` — մեր օրիգինալ spritesheet-ը (docs/reference/assets/-ից)։
+Ուրիշ ոչ մի արտաքին asset չկա, ամեն ինչ canvas ա։
