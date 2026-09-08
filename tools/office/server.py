@@ -43,6 +43,19 @@ CHANNELS = [
 REACTIONS_PATH = os.path.join(CHAT_DIR, "reactions.json")
 ALLOWED_EMOJI = ["❤️", "😂", "👍", "🔥", "👏", "😮", "🎉", "💪"]
 
+DM_DIR = os.path.join(CHAT_DIR, "dm")
+UPLOADS_DIR = os.path.join(CHAT_DIR, "uploads")
+IMG_EXT = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
+MAX_UPLOAD = 8 * 1024 * 1024
+
+
+def channel_path(channel_id):
+    """Քանալի ֆայլը. dm-<slug> → chat/dm/<slug>.md, մնացածը՝ chat/<id>.md"""
+    channel_id = safe_name(channel_id)
+    if channel_id.startswith("dm-"):
+        return os.path.join(DM_DIR, channel_id[3:] + ".md")
+    return os.path.join(CHAT_DIR, channel_id + ".md")
+
 # [2026-09-07 15:30] Անուն (դեր)   ու decisions.md-ի տարբերակը՝ առանց ժամի,
 # պիտակով. [2026-09-07] D-001 — Aram (founder)
 MSG_HEAD = re.compile(
@@ -129,9 +142,14 @@ def parse_chat(path):
 
 
 def append_message(channel_id, author, role, text):
-    path = os.path.join(CHAT_DIR, "%s.md" % safe_name(channel_id))
+    path = channel_path(channel_id)
     if not os.path.exists(path):
-        raise ValueError("no such channel")
+        if channel_id.startswith("dm-"):
+            # DM-ը ստեղծվում ա առաջին գրառման հետ
+            os.makedirs(DM_DIR, exist_ok=True)
+            write(path, "# Անձնական — Aram + %s\n" % channel_id[3:])
+        else:
+            raise ValueError("no such channel")
     text = text.replace("\r\n", "\n").strip()
     if not text:
         raise ValueError("empty message")
@@ -140,6 +158,25 @@ def append_message(channel_id, author, role, text):
     with _write_lock:
         body = read(path).replace("\r\n", "\n").rstrip("\n") + "\n"
         write(path, body + entry)
+
+
+def save_upload(name, data_url):
+    """Նկար չաթի uploads/ ֆոլդեր. վերադարձնում ա հարաբերական ուղին։"""
+    import base64 as _b64
+    ext = os.path.splitext(safe_name(name or "img.png"))[1].lower() or ".png"
+    if ext not in IMG_EXT:
+        raise ValueError("only images: " + ", ".join(sorted(IMG_EXT)))
+    m = re.match(r"data:image/[a-z+]+;base64,(.+)$", data_url or "", re.S)
+    if not m:
+        raise ValueError("bad image data")
+    raw = _b64.b64decode(m.group(1))
+    if len(raw) > MAX_UPLOAD:
+        raise ValueError("image too large (max 8MB)")
+    os.makedirs(UPLOADS_DIR, exist_ok=True)
+    fname = datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + os.urandom(3).hex() + ext
+    with open(os.path.join(UPLOADS_DIR, fname), "wb") as fh:
+        fh.write(raw)
+    return "uploads/" + fname
 
 
 # ------------------------------------------------------------------ board
@@ -349,6 +386,8 @@ def load_citizens():
             if m:
                 fields[m.group(1).strip().rstrip(".").lower()] = m.group(2).strip()
         role = fields.get("դեր", "") or fields.get("role", "")
+        if not role:
+            continue  # անձնագիր չի (օր. wake-preferences.md) — «Դեր.» դաշտ չունի
         avatar = None
         for ext in (".png", ".jpg", ".jpeg", ".webp"):
             if os.path.exists(os.path.join(AVATAR_DIR, slug + ext)):
@@ -368,6 +407,15 @@ def load_state():
     for ch in CHANNELS:
         header, messages = parse_chat(os.path.join(CHAT_DIR, ch["id"] + ".md"))
         channels.append(dict(ch, header=header, messages=messages))
+    # Անձնական չաթեր. մեկը ամեն AI քաղաքացու հետ (հիմնադիրը DM-ի կարիք չունի ինքն իր հետ)
+    for cit in load_citizens():
+        if cit["slug"] == "founder":
+            continue
+        cid = "dm-" + cit["slug"]
+        header, messages = parse_chat(channel_path(cid))
+        channels.append({"id": cid, "name": cit["name"], "dm": True,
+                         "topic": "անձնական՝ Aram + " + cit["name"],
+                         "header": header, "messages": messages})
     return {
         "studio": "Escort Gaming",
         "now": now_stamp(),
@@ -430,6 +478,8 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json(load_state())
             elif path.startswith("/avatar/"):
                 self.send_file(os.path.join(AVATAR_DIR, safe_name(path[8:])))
+            elif path.startswith("/uploads/"):
+                self.send_file(os.path.join(UPLOADS_DIR, safe_name(path[9:])))
             else:
                 self.send_json({"error": "not found"}, 404)
         except Exception as exc:
@@ -447,6 +497,12 @@ class Handler(BaseHTTPRequestHandler):
             elif path == "/api/task/assign":
                 set_assignee(data.get("file"), (data.get("assignee") or "").strip(),
                              data.get("actor") or "?")
+            elif path == "/api/upload":
+                rel = save_upload(data.get("name"), data.get("data"))
+                caption = (data.get("caption") or "").strip()
+                text = (caption + "\n" if caption else "") + "![նկար](%s)" % rel
+                append_message(data.get("channel"), data.get("author"),
+                               data.get("role"), text)
             elif path == "/api/react":
                 toggle_reaction(data.get("channel"), data.get("msg"),
                                 data.get("emoji"), data.get("name"))

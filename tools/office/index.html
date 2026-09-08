@@ -150,6 +150,20 @@
   .scrim.center{justify-content:center;align-items:center}
   .err{color:var(--red);font-size:12px}
   .offline{background:#3d211f;color:#ffb9b3;padding:6px 20px;font-size:12px;border-bottom:1px solid #55302c}
+  .who{display:flex;align-items:center;gap:9px}
+  .who .nm{font-weight:600;font-size:13px}
+  .who .rl{color:var(--faint);font-size:11px}
+  .chatimg{max-width:min(340px,80%);max-height:260px;border-radius:10px;border:1px solid var(--line);
+           display:block;margin-top:6px;cursor:zoom-in}
+  .av{cursor:pointer}
+  #lightbox{position:fixed;inset:0;background:rgba(10,8,14,.85);display:flex;flex-direction:column;
+            align-items:center;justify-content:center;z-index:80;cursor:zoom-out;gap:12px;padding:20px}
+  #lightbox img{max-width:92vw;max-height:78vh;border-radius:12px;border:1px solid var(--line);
+                box-shadow:0 20px 80px rgba(0,0,0,.6)}
+  #lightbox .info{color:var(--text);text-align:center;cursor:default}
+  #lightbox .info .n{font-size:18px;font-weight:700}
+  #lightbox .info .r{color:var(--muted);font-size:13px;margin-top:2px}
+  #lightbox .info .btn{margin-top:10px}
 </style>
 </head>
 <body>
@@ -160,10 +174,7 @@
       <div class="sub">office · <span id="clock">—</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
-    <div class="who">
-      <label>Գրում եմ որպես</label>
-      <select id="me"></select>
-    </div>
+    <div class="who" id="who"></div>
   </aside>
   <main class="main">
     <div id="offline" class="offline" hidden>Սերվերի հետ կապ չկա — չի պահվում։ Ստուգի կոնսոլը։</div>
@@ -178,7 +189,8 @@
 
 var S = null;                  // սերվերի state
 var view = {t:'channel', id:'general'};
-var me = null;                 // slug
+// Ինքնությունը ֆիքսված ա. UI-ից գրում ա միայն հիմնադիրը՝ իր անունով։
+// Քաղաքացիները գրում են ԻՐԵՆՑ session-ներից — ուրիշի անունով գրել չկա (D-006)։
 var openTask = null;           // file name
 var showNew = false;
 var lastErr = '';
@@ -214,6 +226,8 @@ function inline(text){
   var out = esc(text);
   out = out.replace(/`([^`]+)`/g,'<code>$1</code>');
   out = out.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  out = out.replace(/!\[([^\]]*)\]\((uploads\/[\w.\-]+)\)/g,
+    '<img class="chatimg" src="/$2" alt="$1" loading="lazy">');
   out = out.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
   out = out.replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g,'$1<a href="$2" target="_blank" rel="noopener">$2</a>');
   out = out.replace(/@([\wԱ-Ֆա-ֆա-և]+)/g,'<span class="mention">@$1</span>');
@@ -262,7 +276,9 @@ function fail(e){
 
 /* ---------------------------------------------------------------- render */
 
-function meCitizen(){ return citizenByName(me) || (S && S.citizens[0]) || null; }
+function meCitizen(){
+  return citizenByName('Aram') || {name:'Aram', role:'founder', slug:'founder', avatar:null};
+}
 
 function render(){
   if(!S) return;
@@ -276,28 +292,29 @@ function render(){
 }
 
 function renderWho(){
-  var sel = document.getElementById('me');
-  var want = S.citizens.map(function(c){return c.slug;}).join('|');
-  if(sel.dataset.k !== want){
-    sel.dataset.k = want;
-    sel.innerHTML = S.citizens.map(function(c){
-      return '<option value="'+esc(c.slug)+'">'+esc(c.name)+' ('+esc(c.role.split(',')[0].trim())+')</option>';
-    }).join('');
-  }
-  if(!me || !citizenByName(me)){
-    var saved = localStorage.getItem('office.me');
-    me = (saved && citizenByName(saved)) ? saved : (S.citizens[0] ? S.citizens[0].slug : null);
-  }
-  sel.value = me || '';
+  var c = meCitizen();
+  document.getElementById('who').innerHTML =
+    avatarHtml(c.name)+'<div><div class="nm">'+esc(c.name)+'</div>'+
+    '<div class="rl">'+esc(c.role)+'</div></div>';
 }
 
 function renderNav(){
   var h = '<div class="sec">Չաթեր</div>';
   S.channels.forEach(function(c){
+    if(c.dm) return;
     var on = view.t==='channel' && view.id===c.id;
     h += '<button class="item'+(on?' on':'')+'" data-go="channel:'+c.id+'">'+
          '<span class="hash">#</span>'+esc(c.name)+
          '<span class="count">'+c.messages.length+'</span></button>';
+  });
+  h += '<div class="sec">Անձնական</div>';
+  S.channels.forEach(function(c){
+    if(!c.dm) return;
+    var on = view.t==='channel' && view.id===c.id;
+    h += '<button class="item'+(on?' on':'')+'" data-go="channel:'+c.id+'">'+
+         '<span class="hash">@</span>'+esc(c.name)+
+         (c.messages.length?'<span class="count">'+c.messages.length+'</span>':'')+
+         '</button>';
   });
   var total = 0, mine = 0;
   var meName = meCitizen() ? meCitizen().name : '';
@@ -329,13 +346,17 @@ function channel(){
 
 function renderChannel(){
   var ch = channel();
+  var chFile = ch.dm ? 'office/chat/dm/'+ch.id.slice(3)+'.md' : 'office/chat/'+ch.id+'.md';
+  var mark = ch.dm ? '@' : '#';
   document.getElementById('topbar').innerHTML =
-    '<h2><span style="color:var(--faint)">#</span> '+esc(ch.name)+'</h2>'+
+    '<h2><span style="color:var(--faint)">'+mark+'</span> '+esc(ch.name)+'</h2>'+
     '<div class="topic">'+esc(ch.topic)+'</div><div class="spacer"></div>'+
-    '<span class="hint" style="font-size:11px;color:var(--faint)">office/chat/'+esc(ch.id)+'.md</span>';
+    '<span class="hint" style="font-size:11px;color:var(--faint)">'+chFile+'</span>';
 
-  var h = '<div class="chanhead"><h3>#'+esc(ch.name)+'</h3>'+
-          '<div>'+esc(ch.topic)+' · append-only, ամեն գրառումը գնում ա git-ի մեջ։</div></div>';
+  var h = '<div class="chanhead"><h3>'+mark+esc(ch.name)+'</h3>'+
+          '<div>'+esc(ch.topic)+' · append-only, ամեն գրառումը գնում ա git-ի մեջ։'+
+          (ch.dm?' Գրածդ հասնում ա Սևակին, ինքը '+esc(ch.name)+'-ին ա արթնացնում — պատասխանը էստեղ կգա։':'')+
+          '</div></div>';
   h += '<div class="msgs">';
   var day = '';
   var chReacts = (S.reactions||{})[ch.id]||{};
@@ -368,18 +389,14 @@ function renderChannel(){
   if(stick) body.scrollTop = body.scrollHeight;
 
   var c = meCitizen();
-  if(ch.id==='decisions' && (!c || c.role.indexOf('founder')<0 && c.role.indexOf('lead')<0)){
-    document.getElementById('composer').innerHTML =
-      '<div class="composer"><div class="locked">#decisions-ում գրում ա միայն ղեկավարը կամ հիմնադիրը (CLAUDE.md)։ '+
-      'Փոխի «Գրում եմ որպես»-ը, եթե դու ես։</div></div>';
-    return;
-  }
   var prev = document.getElementById('ta');
   var draft = prev ? prev.value : (sessionStorage.getItem('draft.'+ch.id)||'');
   document.getElementById('composer').innerHTML =
     '<div class="composer"><div class="cbox">'+
-    '<textarea id="ta" rows="2" placeholder="Գրի #'+esc(ch.name)+'-ում… (Enter՝ ուղարկել, Shift+Enter՝ նոր տող)"></textarea>'+
-    '<div class="cbar"><span class="hint">'+esc(c?c.name+' ('+c.role.split(',')[0].trim()+')':'?')+'</span>'+
+    '<textarea id="ta" rows="2" placeholder="Գրի '+mark+esc(ch.name)+'-ում… (Enter՝ ուղարկել, Shift+Enter՝ նոր տող, նկար՝ 📎 կամ paste)"></textarea>'+
+    '<div class="cbar"><span class="hint">'+esc(c.name+' ('+c.role.split(',')[0].trim()+')')+'</span>'+
+    '<button class="btn" id="attach" title="Նկար կցել">📎</button>'+
+    '<input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>'+
     '<div class="spacer"></div><span class="hint" id="cerr"></span>'+
     '<button class="btn primary" id="send">Ուղարկել</button></div></div></div>';
   var ta = document.getElementById('ta');
@@ -583,6 +600,27 @@ function showPalette(btn, mi){
   pal.style.top=(r.top-pal.offsetHeight-6 > 0 ? r.top-pal.offsetHeight-6 : r.bottom+6)+'px';
 }
 document.addEventListener('click',function(e){
+  if(e.target.closest('#attach')){ var f=document.getElementById('file'); if(f) f.click(); return; }
+  if(e.target.classList && e.target.classList.contains('chatimg')){
+    showLightbox('<img src="'+esc(e.target.getAttribute('src'))+'" alt="">');
+    return;
+  }
+  var avEl = e.target.closest ? e.target.closest('.av') : null;
+  if(avEl && !e.target.closest('#lightbox')){
+    var msgEl = avEl.closest('.msg');
+    var nm = msgEl ? (msgEl.querySelector('.nm')||{}).textContent : null;
+    var cit = nm ? citizenByName(nm) : null;
+    if(cit){
+      showLightbox(
+        (cit.avatar?'<img src="'+esc(cit.avatar)+'" alt="">':'')+
+        '<div class="info"><div class="n">'+esc(cit.name)+'</div>'+
+        '<div class="r">'+esc(cit.role)+(cit.since?' · քաղաքացի '+esc(cit.since)+'-ից':'')+'</div>'+
+        '<button class="btn" data-passport="'+esc(cit.slug)+'">Անձնագիրը</button></div>');
+      return;
+    }
+  }
+  var pp = e.target.closest ? e.target.closest('[data-passport]') : null;
+  if(pp){ closeLightbox(); view={t:'citizen', id:pp.dataset.passport}; render(); return; }
   var pal=document.getElementById('rpal');
   if(pal && !e.target.closest('#rpal') && !e.target.closest('[data-radd]')) pal.remove();
   var rp = e.target.closest ? e.target.closest('[data-react]') : null;
@@ -608,12 +646,65 @@ document.addEventListener('input',function(e){
 
 document.addEventListener('keydown',function(e){
   if(e.target.id==='ta' && e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); }
-  if(e.key==='Escape'){ if(openTask||showNew){ openTask=null; showNew=false; render(); } }
+  if(e.key==='Escape'){
+    if(document.getElementById('lightbox')){ closeLightbox(); return; }
+    if(openTask||showNew){ openTask=null; showNew=false; render(); }
+  }
 });
 
-document.getElementById('me').addEventListener('change',function(e){
-  me = e.target.value; localStorage.setItem('office.me',me); render();
+/* ------------------------------------------------------- նկար + lightbox */
+
+function uploadImage(file){
+  var ta = document.getElementById('ta');
+  var c = meCitizen();
+  if(!file || !c) return;
+  if(file.size > 8*1024*1024){
+    var el=document.getElementById('cerr');
+    if(el){el.className='err';el.textContent='նկարը մեծ ա (մաքս 8MB)';}
+    return;
+  }
+  var rd = new FileReader();
+  rd.onload = function(){
+    var caption = ta ? ta.value.trim() : '';
+    post('/api/upload',{channel:view.id, author:c.name,
+      role:c.role.split(',')[0].trim(), name:file.name||'img.png',
+      data:rd.result, caption:caption})
+      .then(function(s){ if(ta){ta.value=''; autosize(ta);} sessionStorage.removeItem('draft.'+view.id); apply(s); })
+      .catch(function(e){
+        var el=document.getElementById('cerr');
+        if(el){el.className='err';el.textContent='չվերբեռնվեց. '+e.message;}
+      });
+  };
+  rd.readAsDataURL(file);
+}
+
+document.addEventListener('change',function(e){
+  if(e.target.id==='file' && e.target.files && e.target.files[0]){
+    uploadImage(e.target.files[0]);
+    e.target.value='';
+  }
 });
+document.addEventListener('paste',function(e){
+  if(view.t!=='channel' || !e.clipboardData) return;
+  for(var i=0;i<e.clipboardData.items.length;i++){
+    var it = e.clipboardData.items[i];
+    if(it.kind==='file' && it.type.indexOf('image/')===0){
+      e.preventDefault();
+      uploadImage(it.getAsFile());
+      return;
+    }
+  }
+});
+
+function showLightbox(html){
+  closeLightbox();
+  var lb = document.createElement('div');
+  lb.id='lightbox';
+  lb.innerHTML = html;
+  lb.addEventListener('click',function(e){ if(!e.target.closest('.info')) closeLightbox(); });
+  document.body.appendChild(lb);
+}
+function closeLightbox(){ var lb=document.getElementById('lightbox'); if(lb) lb.remove(); }
 
 get().then(apply).catch(fail);
 setInterval(function(){

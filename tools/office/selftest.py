@@ -46,7 +46,7 @@ def main():
 
     code, state = call("/api/state")
     check("GET /api/state", code == 200)
-    check("5 channels", len(state["channels"]) == 5)
+    check("base channels present", len([c for c in state["channels"] if not c.get("dm")]) == 5)
     check("board has doing tasks", len(state["board"]["doing"]) >= 1)
     check("citizens found", len(state["citizens"]) >= 2)
     dec = [c for c in state["channels"] if c["id"] == "decisions"][0]
@@ -71,9 +71,10 @@ def main():
     # -- reactions
     code, state = call("/api/react", {"channel": "general", "msg": 0, "emoji": "👍", "name": "Թեստ"})
     check("react toggle on", code == 200 and
-          state["reactions"].get("general", {}).get("0", {}).get("👍") == ["Թեստ"])
+          "Թեստ" in state["reactions"].get("general", {}).get("0", {}).get("👍", []))
     code, state = call("/api/react", {"channel": "general", "msg": 0, "emoji": "👍", "name": "Թեստ"})
-    check("react toggle off", code == 200 and not state["reactions"].get("general"))
+    check("react toggle off", code == 200 and
+          "Թեստ" not in state["reactions"].get("general", {}).get("0", {}).get("👍", []))
     code, _ = call("/api/react", {"channel": "general", "msg": 0, "emoji": "💣", "name": "X"})
     check("bad emoji rejected", code == 400)
 

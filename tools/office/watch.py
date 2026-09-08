@@ -28,9 +28,13 @@ def emit(line):
 
 
 def chat_files():
-    if not os.path.isdir(CHAT_DIR):
-        return []
-    return sorted(f for f in os.listdir(CHAT_DIR) if f.endswith(".md"))
+    out = []
+    if os.path.isdir(CHAT_DIR):
+        out += sorted(f for f in os.listdir(CHAT_DIR) if f.endswith(".md"))
+    dm = os.path.join(CHAT_DIR, "dm")
+    if os.path.isdir(dm):
+        out += sorted("dm/" + f for f in os.listdir(dm) if f.endswith(".md"))
+    return out
 
 
 def read_tail(path, offset):
