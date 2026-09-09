@@ -13,6 +13,10 @@ $map = [ordered]@{
   'decisions' = 'decisions.md'
 }
 
+# ---- լոկալ օֆիսի ռեակցիաները (channel -> entry index -> emoji -> [անուններ]) ----
+$rxPath = Join-Path $chatDir 'reactions.json'
+$rxAll = if (Test-Path $rxPath) { [IO.File]::ReadAllText($rxPath, [Text.Encoding]::UTF8) | ConvertFrom-Json } else { $null }
+
 # ---- արխիվի parse ----
 $archive = [ordered]@{}
 foreach ($ch in $map.Keys) {
@@ -38,6 +42,18 @@ foreach ($ch in $map.Keys) {
         author = $author
         ts     = "${date}T${time}:00"
         text   = $text
+      }
+    }
+  }
+  # ռեակցիաները կպցնում ենք ֆայլի հերթականության ինդեքսով՝ ՄԻՆՉԵՎ sort-ը
+  $chRx = if ($rxAll) { $rxAll.PSObject.Properties[$ch] } else { $null }
+  if ($chRx -and $chRx.Value) {
+    for ($n = 0; $n -lt $msgs.Count; $n++) {
+      $p = $chRx.Value.PSObject.Properties["$n"]
+      if ($p -and $p.Value) {
+        $r = [ordered]@{}
+        foreach ($e in $p.Value.PSObject.Properties) { $r[$e.Name] = @($e.Value) }
+        $msgs[$n] | Add-Member -NotePropertyName reactions -NotePropertyValue $r
       }
     }
   }

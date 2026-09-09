@@ -86,7 +86,28 @@
     color:var(--text); max-width:78ch; }
   .tx a { color:#00a8fc; text-decoration:none; }
   .tx a:hover { text-decoration:underline; }
+  .tx.jumbo { font-size:44px; line-height:1.2; }
   .empty { color:var(--muted); font-size:13.5px; padding:8px 16px; }
+
+  /* ---- ռեակցիաներ ---- */
+  .m { position:relative; }
+  .rxrow { display:flex; flex-wrap:wrap; gap:5px; margin-top:5px; }
+  .rx { display:inline-flex; align-items:center; gap:5px; background:var(--bg-side);
+    border:1px solid var(--line2); border-radius:9px; padding:2px 8px; font-size:13px; }
+  .rx b { font:700 12px var(--mono); color:var(--muted); }
+  .rx:hover { border-color:var(--muted2); }
+  .rx.mine { border-color:var(--brand); background:rgba(255,210,122,.1); }
+  .rx.mine b { color:var(--brand); }
+  .rxadd { color:var(--muted2); font-size:14px; padding:2px 7px; border:1px dashed var(--line2);
+    border-radius:9px; opacity:0; }
+  .m:hover .rxadd, .rxrow:not(:empty) .rxadd { opacity:1; }
+  @media (hover:none) { .rxadd { opacity:1; } }
+  .rxadd:hover { color:var(--text); border-color:var(--muted2); }
+  #picker { position:fixed; z-index:20; background:var(--bg-deep); border:1px solid var(--line2);
+    border-radius:12px; padding:8px; display:none; gap:2px; box-shadow:0 8px 26px rgba(0,0,0,.5); }
+  #picker.open { display:flex; }
+  #picker button { font-size:21px; padding:6px 8px; border-radius:8px; }
+  #picker button:hover { background:var(--bg-active); }
 
   #compose { flex:none; padding:0 16px calc(16px + env(safe-area-inset-bottom)); }
   #cbar { display:flex; align-items:flex-end; background:var(--bg-input); border-radius:10px; }
@@ -138,6 +159,7 @@
     <div id="note">Գրածդ պահվում ա օֆիսի բազայում. Սևակը հերթական արթնացմանը կարդում ա ու մտցնում git արխիվ։ Չաթը append-only ա — գրվածը մնում ա։</div>
   </div>
 </div>
+<div id="picker"></div>
 
 <script>
 "use strict";
@@ -173,8 +195,10 @@ function avatarOf(author) {
 }
 
 let cur = "general";
-const live = {}, unread = {};
+const live = {}, unread = {}, rx = {};
+const REACT_SET = ["❤️","😂","👍","🔥","👏","😮","🎉","💪"];
 let dbRef = null;
+const isJumbo = (t) => t.length <= 16 && /^[\p{Extended_Pictographic}\p{Emoji_Component}‍️\s]+$/u.test(t);
 
 const fmtT = (ts) => ts.slice(11, 16);
 const dayOf = (ts) => ts.slice(0, 10);
@@ -206,6 +230,28 @@ function allMsgs(ch) {
   const ids = new Set(arc.map(m => m.id));
   return arc.concat(web.filter(m => !ids.has(m.id))).sort((a, b) => a.ts < b.ts ? -1 : 1);
 }
+/* արխիվում ներդրված ռեակցիաներ + db-ի doc-ը → մեկ միասնական {emoji:[անուններ]} */
+function mergedRx(m) {
+  const out = {};
+  for (const src of [m.reactions, (rx[cur] || {})[m.id]]) {
+    if (!src) continue;
+    for (const e in src) {
+      if (!Array.isArray(src[e])) continue;
+      out[e] = [...new Set([...(out[e] || []), ...src[e].map(String)])];
+    }
+  }
+  return out;
+}
+function rxRowHtml(m) {
+  const r = mergedRx(m);
+  let chips = "";
+  for (const e of Object.keys(r)) {
+    if (!r[e].length) continue;
+    const mine = r[e].some(n => n === myName || n.split(" ")[0] === myName.split(" ")[0]);
+    chips += `<button class="rx ${mine ? "mine" : ""}" data-mid="${m.id}" data-e="${e}" title="${esc(r[e].join(", "))}">${e}<b>${r[e].length}</b></button>`;
+  }
+  return `<div class="rxrow">${chips}<button class="rxadd" data-mid="${m.id}" title="Ռեակցիա">☺+</button></div>`;
+}
 function renderMsgs() {
   const list = allMsgs(cur);
   let html = "", lastDay = "", prev = null;
@@ -215,22 +261,60 @@ function renderMsgs() {
     const grouped = prev && prev.author === m.author &&
       (Date.parse(m.ts) - Date.parse(prev.ts)) < 7 * 60000 && prev.src === m.src;
     const role = roleOf(m.author);
+    const tx = `<div class="tx ${isJumbo(m.text) ? "jumbo" : ""}">${linkify(m.text)}</div>`;
     if (grouped) {
-      html += `<div class="m"><div class="avgap"></div><div class="body"><div class="tx">${linkify(m.text)}</div></div></div>`;
+      html += `<div class="m"><div class="avgap"></div><div class="body">${tx}${rxRowHtml(m)}</div></div>`;
     } else {
       html += `<div class="m first"><img class="av" src="${avatarOf(m.author)}" alt="" loading="lazy">` +
         `<div class="body"><div class="mh"><span class="au ${esc(role)}">${esc(m.author)}</span>` +
         `<span class="ts">${dayOf(m.ts)} · ${fmtT(m.ts)}</span>` +
         (m.src === "web" ? `<span class="new">ՆՈՐ</span>` : "") +
-        `</div><div class="tx">${linkify(m.text)}</div></div></div>`;
+        `</div>${tx}${rxRowHtml(m)}</div></div>`;
     }
     prev = m;
   }
   if (!list.length) html = `<div class="empty">Դեռ գրառում չկա — առաջինը գրի։</div>`;
   const el = $("msgs");
+  const stick = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
   el.innerHTML = html;
-  el.scrollTop = el.scrollHeight;
+  if (stick || !el.dataset.drawn) { el.scrollTop = el.scrollHeight; el.dataset.drawn = "1"; }
 }
+
+/* ---- ռեակցիա դնել/հանել ---- */
+async function toggleReact(mid, emoji) {
+  if (!dbRef) { sendErr("Կապը բազայի հետ չկա — ռեակցիան չպահվեց։"); return; }
+  const m = allMsgs(cur).find(x => x.id === mid);
+  if (!m) return;
+  const merged = mergedRx(m);
+  const names = merged[emoji] || [];
+  const i = names.indexOf(myName);
+  if (i >= 0) names.splice(i, 1); else names.push(myName);
+  merged[emoji] = names;
+  for (const e in merged) if (!merged[e].length) delete merged[e];
+  try { await dbRef.doc("channels/" + cur + "/reactions/" + mid).set(merged); }
+  catch (e) { sendErr("Ռեակցիան չպահվեց (" + (e && e.code || "սխալ") + ")։"); }
+}
+const picker = $("picker");
+let pickerMid = null;
+document.addEventListener("click", (ev) => {
+  const add = ev.target.closest(".rxadd");
+  const chip = ev.target.closest(".rx");
+  if (add) {
+    pickerMid = add.dataset.mid;
+    picker.innerHTML = REACT_SET.map(e => `<button data-e="${e}">${e}</button>`).join("");
+    picker.classList.add("open");
+    const r = add.getBoundingClientRect(), pw = 8 * 41 + 16;
+    picker.style.left = Math.max(8, Math.min(innerWidth - pw - 8, r.left)) + "px";
+    picker.style.top = Math.max(8, r.top - 54) + "px";
+    ev.stopPropagation(); return;
+  }
+  if (ev.target.closest("#picker button")) {
+    toggleReact(pickerMid, ev.target.closest("#picker button").dataset.e);
+    picker.classList.remove("open"); return;
+  }
+  if (chip) { toggleReact(chip.dataset.mid, chip.dataset.e); return; }
+  picker.classList.remove("open");
+});
 
 function sendErr(msg) { const e = $("err"); e.textContent = msg; e.style.display = "block"; setTimeout(() => e.style.display = "none", 6000); }
 
@@ -296,6 +380,11 @@ renderSide(); renderHead(); renderMsgs(); renderUser();
       renderSide();
       if (c.id === cur) renderMsgs();
     }, err => { if (err && err.code === "revoked") { $("conn").classList.remove("on"); $("conn").title = "կապը կտրվեց"; } });
+    db.collection("channels/" + c.id + "/reactions").onSnapshot(snap => {
+      rx[c.id] = {};
+      for (const d of snap.docs) if (d.exists) rx[c.id][d.id] = d.data() || {};
+      if (c.id === cur) renderMsgs();
+    }, () => {});
   }
 })();
 </script>
