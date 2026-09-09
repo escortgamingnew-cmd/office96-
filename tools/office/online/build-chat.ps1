@@ -10,6 +10,9 @@ $map = [ordered]@{
   'product'   = 'product.md'
   'club96'    = 'club96.md'
   'dm-sevak'  = 'dm\sevak.md'
+  'dm-tigran' = 'dm\tigran.md'
+  'dm-anania' = 'dm\anania.md'
+  'dm-lusine' = 'dm\lusine.md'
   'decisions' = 'decisions.md'
 }
 
