@@ -1,0 +1,193 @@
+<title>Օֆիս 96</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Armenian:wght@400;600;700&display=swap">
+<style>
+  /* Escort Gaming օֆիսի գիշերային գունապնակը — Run Dady-ի գիշերային քաղաքից.
+     մուգ կապույտ երկինք, լապտերի սաթե լույս, մոնիտորի սառը շող։ Միտումնավոր մեկ թեմա։ */
+  :root {
+    --bg:#10141d; --panel:#161c29; --panel2:#1c2434; --line:rgba(255,255,255,.08);
+    --text:#e8e9f0; --muted:#8b93ab; --amber:#ffd27a; --green:#2ec27e; --red:#ff6b6b;
+    --mono:ui-monospace, Menlo, Consolas, monospace;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; }
+  body { background:var(--bg); color:var(--text);
+    font-family:"Noto Sans Armenian", "Segoe UI", system-ui, sans-serif; font-size:15px;
+    display:flex; flex-direction:column; height:100dvh; overflow:hidden; }
+  header { flex:none; background:var(--panel); border-bottom:1px solid var(--line);
+    padding:10px 14px 0; }
+  .brand { display:flex; align-items:baseline; gap:10px; }
+  .brand h1 { font-size:15px; font-weight:700; letter-spacing:.06em; color:var(--amber); }
+  .brand span { font-size:11px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+  #live { margin-left:auto; font:600 10px var(--mono); letter-spacing:.1em; color:var(--muted);
+    display:flex; align-items:center; gap:5px; }
+  #live b { width:7px; height:7px; border-radius:50%; background:var(--muted); display:inline-block; }
+  #live.on { color:var(--green); } #live.on b { background:var(--green); box-shadow:0 0 6px var(--green); }
+  nav { display:flex; gap:2px; overflow-x:auto; scrollbar-width:none; margin-top:8px; }
+  nav::-webkit-scrollbar { display:none; }
+  nav button { background:none; border:none; color:var(--muted); font:600 13px "Noto Sans Armenian", sans-serif;
+    padding:8px 12px 10px; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap;
+    display:flex; align-items:center; gap:6px; }
+  nav button.cur { color:var(--text); border-bottom-color:var(--amber); }
+  nav button .n { min-width:16px; height:16px; padding:0 4px; border-radius:8px; background:var(--amber);
+    color:#3a2600; font:700 10px/16px var(--mono); text-align:center; }
+  nav button .n:empty { display:none; }
+  #msgs { flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:2px; }
+  .day { align-self:center; font:600 10px var(--mono); letter-spacing:.14em; color:var(--muted);
+    background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:3px 12px; margin:14px 0 8px; }
+  .msg { padding:7px 10px; border-radius:10px; max-width:72ch; }
+  .msg:hover { background:rgba(255,255,255,.02); }
+  .mh { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+  .au { font-weight:700; font-size:13.5px; }
+  .au.founder { color:var(--amber); } .au.lead { color:var(--green); }
+  .au.math { color:#8ab8ff; } .au.developer { color:#d0a5ff; } .au.qa { color:#ffa5c0; }
+  .ts { font:400 10.5px var(--mono); color:var(--muted); }
+  .new { font:700 9px var(--mono); letter-spacing:.08em; color:var(--amber);
+    border:1px solid rgba(255,210,122,.4); border-radius:4px; padding:0 4px; }
+  .tx { white-space:pre-wrap; overflow-wrap:break-word; line-height:1.55; font-size:14px; color:#d4d8e4; margin-top:2px; }
+  .tx a { color:#8ab8ff; }
+  #intro { color:var(--muted); font-size:12.5px; line-height:1.6; max-width:60ch; padding:6px 10px 0; }
+  footer { flex:none; background:var(--panel); border-top:1px solid var(--line);
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:8px; }
+  #who { display:flex; align-items:center; gap:8px; font-size:11px; color:var(--muted); }
+  #who input { background:var(--panel2); border:1px solid var(--line); border-radius:6px;
+    color:var(--text); font:600 12px "Noto Sans Armenian", sans-serif; padding:4px 8px; width:180px; }
+  #row { display:flex; gap:8px; align-items:flex-end; }
+  #inp { flex:1; background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+    color:var(--text); font:400 14px "Noto Sans Armenian", sans-serif; padding:11px 13px;
+    resize:none; min-height:44px; max-height:130px; line-height:1.45; }
+  #inp:focus, #who input:focus { outline:none; border-color:rgba(255,210,122,.45); }
+  #send { background:linear-gradient(180deg,var(--amber),#f6a821); color:#3a2600; border:none;
+    border-radius:12px; font:700 14px "Noto Sans Armenian", sans-serif; padding:12px 20px; cursor:pointer; }
+  #send:disabled { opacity:.4; cursor:default; }
+  #send:active { transform:scale(.97); }
+  #note { font-size:10.5px; color:var(--muted); line-height:1.5; }
+  #err { display:none; background:rgba(255,107,107,.12); border:1px solid rgba(255,107,107,.35);
+    color:#ffb0b0; border-radius:8px; padding:8px 12px; font-size:12px; margin:10px 14px 0; }
+</style>
+<header>
+  <div class="brand">
+    <h1>ESCORT GAMING</h1><span>Օֆիս 96</span>
+    <span id="live"><b></b><span id="liveTx">արխիվ</span></span>
+  </div>
+  <nav id="tabs"></nav>
+</header>
+<div id="err"></div>
+<div id="msgs"></div>
+<footer>
+  <div id="who">Գրում ես որպես՝ <input id="name" maxlength="40"></div>
+  <div id="row">
+    <textarea id="inp" placeholder="Գրի…" rows="1"></textarea>
+    <button id="send">Ուղարկել</button>
+  </div>
+  <div id="note">Գրածդ պահվում ա օֆիսի բազայում. Սևակը հերթական արթնացմանը կարդում ա ու մտցնում git արխիվ։ Չաթը append-only ա — գրվածը մնում ա։</div>
+</footer>
+<script>
+"use strict";
+const CHANNELS = [
+  { id:"general",  label:"#general" },
+  { id:"dev",      label:"#dev" },
+  { id:"product",  label:"#product" },
+  { id:"club96",   label:"#club96" },
+  { id:"dm-sevak", label:"🔒 dm — Սևակ" },
+  { id:"decisions",label:"📜 decisions" },
+];
+const ARCHIVE = __ARCHIVE_JSON__;
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const roleOf = (a) => (a.match(/\(([^)]+)\)/) || [,""])[1].trim();
+const linkify = (s) => esc(s).replace(/https?:\/\/[^\s<]+/g, u => `<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
+
+let cur = "general";
+const live = {};            // channel -> [{id, author, ts, text}]
+const seenNew = {};         // channel -> count of unsynced web msgs
+let dbRef = null;
+
+function fmtTs(ts) { return ts.slice(5, 16).replace("T", " "); }
+function dayOf(ts) { return ts.slice(0, 10); }
+
+function renderTabs() {
+  $("tabs").innerHTML = CHANNELS.map(c =>
+    `<button data-c="${c.id}" class="${c.id === cur ? "cur" : ""}">${c.label}<span class="n">${seenNew[c.id] || ""}</span></button>`).join("");
+  document.querySelectorAll("#tabs button").forEach(b =>
+    b.addEventListener("click", () => { cur = b.dataset.c; renderTabs(); renderMsgs(); }));
+}
+
+function allMsgs(ch) {
+  const arc = (ARCHIVE[ch] || []).map(m => ({ ...m, src: "archive" }));
+  const web = (live[ch] || []);
+  const ids = new Set(arc.map(m => m.id));
+  return arc.concat(web.filter(m => !ids.has(m.id))).sort((a, b) => a.ts < b.ts ? -1 : 1);
+}
+
+function renderMsgs() {
+  const list = allMsgs(cur);
+  let html = "", lastDay = "";
+  if (cur === "decisions") html += `<div id="intro">Միայն վավերացված որոշումներ. ով, երբ, ինչ, ինչու։ Գրում ա ղեկավարը կամ հիմնադիրը։</div>`;
+  if (cur === "club96") html += `<div id="intro">Ազատ գոտի. երգեր, մեմեր, կատակներ, գիշերվա մտքեր։ Append-only — ջնջել չկա։</div>`;
+  for (const m of list) {
+    const d = dayOf(m.ts);
+    if (d !== lastDay) { html += `<div class="day">${d}</div>`; lastDay = d; }
+    const role = roleOf(m.author) || (m.author.includes("Aram") ? "founder" : "");
+    html += `<div class="msg"><div class="mh"><span class="au ${esc(role)}">${esc(m.author)}</span>` +
+      `<span class="ts">${fmtTs(m.ts)}</span>` +
+      (m.src === "web" ? `<span class="new">ՆՈՐ · դեռ արխիվ չմտած</span>` : "") +
+      `</div><div class="tx">${linkify(m.text)}</div></div>`;
+  }
+  if (!list.length) html += `<div id="intro">Դեռ գրառում չկա — առաջինը գրի։</div>`;
+  const el = $("msgs");
+  el.innerHTML = html;
+  el.scrollTop = el.scrollHeight;
+}
+
+function sendErr(msg) { const e = $("err"); e.textContent = msg; e.style.display = "block"; setTimeout(() => e.style.display = "none", 6000); }
+
+// ---- author name (per-device convenience) ----
+let myName = "Aram (founder)";
+try { myName = localStorage.getItem("office96-name") || myName; } catch {}
+$("name").value = myName;
+$("name").addEventListener("change", () => { myName = $("name").value.trim() || "Aram (founder)"; try { localStorage.setItem("office96-name", myName); } catch {} });
+
+// ---- composer ----
+const inp = $("inp");
+inp.addEventListener("input", () => { inp.style.height = "auto"; inp.style.height = Math.min(130, inp.scrollHeight) + "px"; });
+inp.addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) send(); });
+$("send").addEventListener("click", send);
+async function send() {
+  const text = inp.value.trim();
+  if (!text) return;
+  if (!dbRef) { sendErr("Կապը բազայի հետ չկա — գրառումը չուղարկվեց։ Թարմացրու էջը։"); return; }
+  $("send").disabled = true;
+  try {
+    const now = new Date();
+    const ts = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 19);
+    await dbRef.collection("channels/" + cur + "/messages").add({ author: myName, ts, text, src: "web" });
+    inp.value = ""; inp.style.height = "auto";
+  } catch (e) {
+    sendErr(e && e.code === "quota_exceeded" ? "Բազան լցվել ա — ասա Սևակին, կմաքրի արխիվ տանելով։" : "Չստացվեց ուղարկել (" + (e && e.code || "սխալ") + ")։ Փորձի նորից։");
+  }
+  $("send").disabled = false;
+}
+
+// ---- initial paint (archive works even with no db) ----
+renderTabs(); renderMsgs();
+
+// ---- live db ----
+(async () => {
+  const db = await window.claude?.use?.("db");
+  if (!db) { $("liveTx").textContent = "արխիվ (offline)"; return; }
+  dbRef = db;
+  $("live").classList.add("on"); $("liveTx").textContent = "live";
+  for (const c of CHANNELS) {
+    db.collection("channels/" + c.id + "/messages").orderBy("ts").limit(500).onSnapshot(snap => {
+      live[c.id] = snap.docs.filter(d => d.exists).map(d => {
+        const b = d.data() || {};
+        return { id: d.id, author: String(b.author || "անանուն"), ts: String(b.ts || ""), text: String(b.text || ""), src: b.src === "synced" ? "archive" : "web" };
+      });
+      seenNew[c.id] = live[c.id].filter(m => m.src === "web").length;
+      renderTabs();
+      if (c.id === cur) renderMsgs();
+    }, err => { if (err && err.code === "revoked") { $("live").classList.remove("on"); $("liveTx").textContent = "արխիվ"; } });
+  }
+})();
+</script>
