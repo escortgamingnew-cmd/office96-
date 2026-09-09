@@ -1,6 +1,8 @@
-$ErrorActionPreference = 'Stop'
-$chatDir = 'D:\Escort gaming\escort-stake\office\chat'
-$out = Join-Path $PSScriptRoot 'office96-chat.html'
+﻿$ErrorActionPreference = 'Stop'
+$repo = 'D:\Escort gaming\escort-stake'
+$chatDir = Join-Path $repo 'office\chat'
+$avDir = Join-Path $repo 'office\citizens\avatars'
+$out = Join-Path $env:TEMP 'office96-chat.html'
 
 $map = [ordered]@{
   'general'   = 'general.md'
@@ -11,6 +13,7 @@ $map = [ordered]@{
   'decisions' = 'decisions.md'
 }
 
+# ---- արխիվի parse ----
 $archive = [ordered]@{}
 foreach ($ch in $map.Keys) {
   $path = Join-Path $chatDir $map[$ch]
@@ -22,7 +25,6 @@ foreach ($ch in $map.Keys) {
     foreach ($b in $blocks) {
       $b = $b.Trim()
       if ($b -eq '') { continue }
-      # entry header: [YYYY-MM-DD HH:MM] Author   (decisions: [YYYY-MM-DD] D-xxx — Author)
       $m = [regex]::Match($b, '(?m)^\[(\d{4}-\d{2}-\d{2})(?: (\d{2}:\d{2}))?\]\s*(.+)$')
       if (-not $m.Success) { continue }
       $date = $m.Groups[1].Value
@@ -40,14 +42,45 @@ foreach ($ch in $map.Keys) {
     }
   }
   $archive[$ch] = @($msgs | Sort-Object ts)
-  "{0}: {1} msgs" | ForEach-Object { $_ -f $ch, $msgs.Count }
+  '{0}: {1} msgs' -f $ch, $msgs.Count
 }
 
-$json = ($archive | ConvertTo-Json -Depth 6 -Compress)
+# ---- ավատարներ. 96px քառակուսի JPEG, base64 ----
+Add-Type -AssemblyName System.Drawing
+function AvatarB64($file) {
+  $img = [Drawing.Image]::FromFile($file)
+  try {
+    $side = [Math]::Min($img.Width, $img.Height)
+    $srcX = [int](($img.Width - $side) / 2); $srcY = [int](($img.Height - $side) / 2)
+    $bmp = New-Object Drawing.Bitmap 96, 96
+    $g = [Drawing.Graphics]::FromImage($bmp)
+    $g.InterpolationMode = 'HighQualityBicubic'
+    $g.DrawImage($img, (New-Object Drawing.Rectangle 0,0,96,96), (New-Object Drawing.Rectangle $srcX,$srcY,$side,$side), 'Pixel')
+    $g.Dispose()
+    $ms = New-Object IO.MemoryStream
+    $enc = [Drawing.Imaging.ImageCodecInfo]::GetImageEncoders() | Where-Object MimeType -eq 'image/jpeg'
+    $ep = New-Object Drawing.Imaging.EncoderParameters 1
+    $ep.Param[0] = New-Object Drawing.Imaging.EncoderParameter([Drawing.Imaging.Encoder]::Quality, 82L)
+    $bmp.Save($ms, $enc, $ep)
+    $bmp.Dispose()
+    return 'data:image/jpeg;base64,' + [Convert]::ToBase64String($ms.ToArray())
+  } finally { $img.Dispose() }
+}
+# բանալին՝ հեղինակի անվան ՍԿԻԶԲԸ (startsWith match էջում)
+$avMap = [ordered]@{}
+$avFiles = [ordered]@{ 'Սևակ'='sevak.png'; 'Անանիա'='anania.png'; 'Տիգրան'='tigran.png'; 'Լուսինե'='lusine.png' }
+foreach ($k in $avFiles.Keys) {
+  $f = Join-Path $avDir $avFiles[$k]
+  if (Test-Path $f) { $avMap[$k] = AvatarB64 $f; 'avatar: {0}' -f $k }
+}
+
+# ---- հավաքում ----
+$json = ($archive | ConvertTo-Json -Depth 6 -Compress).Replace('</', '<\/')
+$avJson = ($avMap | ConvertTo-Json -Compress).Replace('</', '<\/')
 $tpl = [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'chat-template.html'), [Text.Encoding]::UTF8)
-if (-not $tpl.Contains('__ARCHIVE_JSON__')) { throw 'placeholder missing' }
-# escape </script> inside embedded JSON
-$json = $json.Replace('</', '<\/')
-$tpl = $tpl.Replace('__ARCHIVE_JSON__', $json)
+foreach ($ph in '__ARCHIVE_JSON__','__AVATARS_JSON__') {
+  if (-not $tpl.Contains($ph)) { throw "placeholder missing: $ph" }
+}
+$tpl = $tpl.Replace('__ARCHIVE_JSON__', $json).Replace('__AVATARS_JSON__', $avJson)
 [IO.File]::WriteAllText($out, $tpl, (New-Object Text.UTF8Encoding($false)))
 "written: $out ($([math]::Round((Get-Item $out).Length/1KB)) KB)"
