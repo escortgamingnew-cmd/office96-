@@ -32,8 +32,13 @@ export function initFeelLab({ onChange, world }) {
     const gdef = TUNE_GROUPS.find(g => g[0] === id);
     title.textContent = gdef ? gdef[2] : id;
     $("tuneProto").style.display = id === "light" ? "" : "none";
+    $("tuneDepth").style.display = id === "light" ? "" : "none";
     try { localStorage.setItem("feel.group", id); } catch (_) {}
   };
+  // T-0009. հակա-«թղթե» փաթեթի toggle (💡 պանել) — before/after. P.depthFx-ը Copy JSON-ի մեջ ա, Reset-ը ON ա բերում
+  const depthLbl = () => { $("tuneDepth").textContent = "Հակա-թղթե շենքեր: " + (P.depthFx > 0 ? "ON" : "OFF"); };
+  $("tuneDepth").addEventListener("click", () => { P.depthFx = P.depthFx > 0 ? 0 : 1; depthLbl(); onChange("depthFx"); });
+  depthLbl();
   for (const [id, icon, label] of TUNE_GROUPS) {
     const b = document.createElement("button");
     b.type = "button"; b.dataset.g = id; b.textContent = icon; b.title = label;
@@ -43,7 +48,7 @@ export function initFeelLab({ onChange, world }) {
   let saved = null; try { saved = localStorage.getItem("feel.group"); } catch (_) {}
   showGroup(TUNE_GROUPS.some(g => g[0] === saved) ? saved : "cam");
 
-  const refresh = () => { for (const [key] of TUNE_DEFS) { rows.querySelector(`input[data-k="${key}"]`).value = P[key]; vals[key].textContent = P[key]; } };
+  const refresh = () => { for (const [key] of TUNE_DEFS) { rows.querySelector(`input[data-k="${key}"]`).value = P[key]; vals[key].textContent = P[key]; } depthLbl(); };
   const toggle = () => tuneEl.classList.toggle("open");
   $("tuneBtn").addEventListener("click", e => { e.stopPropagation(); toggle(); });
   for (const ev of ["pointerdown", "pointerup"]) { $("tuneBtn").addEventListener(ev, e => e.stopPropagation()); tuneEl.addEventListener(ev, e => e.stopPropagation()); }

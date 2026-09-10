@@ -47,6 +47,10 @@ export const P = {
   lampHalo:  1.35,   // լապտերի baked halo-ի ուժ (1 = պրոտո)
   starBright: 1.2,   // աստղերի պայծառություն (1 = պրոտո, alpha .85)
   bbNeon:    1.3,    // billboard-ի նեոն glow (1 = պրոտո)
+  // --- հակա-«թղթե» շենքեր (T-0009). depthFx 0 = հին տեսքը (before), 1 = փաթեթը (after)
+  depthFx:   1,      // կոնտակտային ստվեր հիմքի տակ + կողի մգացում + պարապետ + ֆասադի cap-ի ստվեր
+  sideDark:  0.28,   // ճամփի կողմի երեսի մգացում ֆասադի նկատմամբ (0 = նույն գույնը, «թղթե» անկյուն)
+  baseShadow: 0.55,  // հիմքի կոնտակտային ստվերի ուժ (0 = չկա)
   // --- rewind
   rewindLose: 0.55,  // loseAnim տեմպ. պարտությունից հետո (դանդաղ «ժապավեն»)
   rewindCash: 1.2,   // cashout-ից հետո (արագ)
@@ -97,8 +101,11 @@ export const TUNE_DEFS = [
   ["lampHalo",  "Լապտերի halo", 0, 2.5, 0.05, "light"],
   ["starBright","Աստղեր", 0, 1.5, 0.05, "light"],
   ["bbNeon",    "Billboard նեոն", 0, 2.5, 0.05, "light"],
+  ["sideDark",  "Կողի մգացում", 0, 0.6, 0.02, "light"],
+  ["baseShadow","Հիմքի ստվեր", 0, 1, 0.05, "light"],
   ["rewindLose","Rewind պարտ.", 0.2, 3, 0.05, "misc"],
   ["rewindCash","Rewind cashout", 0.2, 4, 0.05, "misc"],
 ];
-/* Լույսի բանալիները — փոփոխությունը texture regen ա պահանջում (debounce-ով, main.js) */
-export const LIGHT_KEYS = new Set(["skyDark", "fogHue", "winPct", "lampHalo", "starBright", "bbNeon"]);
+/* Լույսի բանալիները — փոփոխությունը texture regen ա պահանջում (debounce-ով, main.js)։
+ * depthFx-ը ֆասադների regen ա (cap-ի ստվերը baked ա). sideDark/baseShadow-ը ամեն կադր P-ից են կարդացվում, regen չկա */
+export const LIGHT_KEYS = new Set(["skyDark", "fogHue", "winPct", "lampHalo", "starBright", "bbNeon", "depthFx"]);

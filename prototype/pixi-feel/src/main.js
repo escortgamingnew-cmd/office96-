@@ -24,7 +24,11 @@ import { initFeelLab, initAssetLab } from "./feellab.js";
     resizeTo: window, background: COL.fog, antialias: false,
     resolution: Math.min(window.devicePixelRatio || 1, IS_MOBILE ? 1.5 : 2), autoDensity: true,
   });
-  app.ticker.maxFPS = IS_MOBILE ? 30 : 60;   // պրոտո. frame cap = մոբայլի սառեցման գլխավոր լծակը
+  // Frame cap. մոբայլում 30 (պրոտո. սառեցման գլխավոր լծակը)։ Desktop-ում ՉԿԱ (display rate, շարժումը dt-ով ա)։
+  // T-0009. maxFPS=60-ը 60Hz էկրանին hitch-ի աղբյուր էր. Pixi-ի Ticker-ը delta-ն ամբողջ թվի ա կտրում ((now−last)|0),
+  // rAF-ի 16.67-ը դառնում ա 16 < 16.67 → կադրը ցատկվում ա, հաջորդը 33ms-ով ա գալիս (կրկնակի քայլ) — մոտ ամեն 35 կադրը մեկ։
+  // Ապացույցը՝ Pixi 8.16 Ticker-ի սիմուլյացիա 60Hz ±0.3ms jitter-ով. 104 կրկնակի կադր/րոպե, uncapped՝ 0 (T-0009 Log)։
+  app.ticker.maxFPS = IS_MOBILE ? 30 : 0;
   document.getElementById("stage").appendChild(app.canvas);
   document.body.style.background = COL.fog;   // գունապնակը applyLight()-ից ա (P.skyDark), ոչ CSS-ի ֆիքս թվից
   const W = () => app.screen.width, H = () => app.screen.height;
@@ -164,6 +168,22 @@ import { initFeelLab, initAssetLab } from "./feellab.js";
     feel: feelLab,                               // showGroup("light"), group()
     relight,                                     // relight("skyDark") — P-ն ձեռքով փոխելուց հետո
     P,
+    app,                                         // QA/perf. app.renderer.render(app.stage) ձեռքով
+    // perf(sec) — ԻՐԱԿԱՆ կադրերի ցատկերը (rAF delta), tab-ը պիտի visible լինի. {p50,p95,p99,max,over40,over80}
+    perf: (sec = 60) => new Promise(res => {
+      const d = []; let last = performance.now(); const t0 = last;
+      (function f() { const n = performance.now(); d.push(n - last); last = n; if (n - t0 < sec * 1000) requestAnimationFrame(f); else {
+        const raw = d.slice(); d.sort((a, b) => a - b); const q = (p) => +d[Math.min(d.length - 1, Math.floor(p * d.length))].toFixed(1);
+        res({ n: d.length, p50: q(.5), p95: q(.95), p99: q(.99), max: +d[d.length - 1].toFixed(1), over40: raw.filter(x => x > 40).length, over80: raw.filter(x => x > 80).length }); } })();
+    }),
+    // bench(n) — CPU frame time (update + renderer.render), rAF-ից անկախ, hidden tab-ում էլ. GC/rebuild ցատկերը էստեղ են երևում
+    bench: (n = 3600) => {
+      const r = app.renderer, st = app.stage, d = new Float64Array(n);
+      for (let i = 0; i < 120; i++) { frame(1 / 60); r.render(st); }
+      for (let i = 0; i < n; i++) { const t = performance.now(); frame(1 / 60); r.render(st); d[i] = performance.now() - t; }
+      const s = Array.from(d).sort((a, b) => a - b), q = (p) => +s[Math.min(n - 1, Math.floor(p * n))].toFixed(2);
+      return { n, p50: q(.5), p95: q(.95), p99: q(.99), max: +s[n - 1].toFixed(2), over16: s.filter(x => x > 16.7).length, over40: s.filter(x => x > 40).length };
+    },
   };
 
   // ---------- Կերպարների նկարումը ----------

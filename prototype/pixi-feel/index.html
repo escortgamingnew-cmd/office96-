@@ -119,7 +119,7 @@
   #tuneDock button { flex:1; height:36px; padding:0; font-size:17px; line-height:1; background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.1); }
   #tuneDock button.on { background:rgba(255,201,77,.28); border-color:#ffc94d; }
   #tuneGroup { color:#ffc94d; font-size:10px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:2px; }
-  #tuneProto { margin-top:6px; width:100%; background:rgba(120,160,255,.15); }
+  #tuneProto, #tuneDepth { margin-top:6px; width:100%; background:rgba(120,160,255,.15); }
   /* ---- DEV. Asset Lab toolbar (T-0007) — երևում ա, երբ շենք ա ընտրված ---- */
   #alab { position:fixed; top:74px; right:10px; z-index:5; display:none; flex-direction:column; gap:5px; align-items:flex-end;
           font-size:11px; color:#e8e4f0; background:rgba(14,19,27,.85); border:1px solid rgba(255,210,122,.4); border-radius:8px; padding:6px 8px; pointer-events:auto; }
@@ -180,6 +180,7 @@
 <div id="tune"><h4>Feel lab <span class="devtag">DEV</span></h4>
   <div id="tuneDock"></div><div id="tuneGroup"></div><div id="tuneRows"></div>
   <button id="tuneProto" title="Լույսը v16_14 պրոտոյի հին գունապնակին (համեմատելու համար). Reset-ը նոր default-ն ա բերում">v16_14 լույս (հին)</button>
+  <button id="tuneDepth" title="T-0009. հիմքի կոնտակտային ստվեր + կողի մգացում + պարապետ + cap-ի ստվեր — OFF = հին «թղթե» տեսքը (before/after)">Հակա-թղթե շենքեր: ON</button>
   <div class="btns"><button id="tuneCopy">Copy JSON</button><button id="tuneReset">Reset</button></div>
   <div class="note">Խաղի մաս չի — զգացողությունը լարելու գործիք ա։ Թվերը պրոտոյի միավորներով են (մ/վ, °, մ)։
   Icon → միայն էդ խմբի սլայդերները։ Copy JSON-ը ամեն ինչ քլիփբորդ ա տալիս (feel spec + շենքերի scale), Reset-ը ամեն ինչ ետ ա բերում։</div>

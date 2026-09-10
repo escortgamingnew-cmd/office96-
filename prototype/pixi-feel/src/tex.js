@@ -2,7 +2,7 @@
  * ոչ մի runtime filter։ Ամեն glow baked ա։ Գունապնակը v16_14 պրոտոյի ռենդերից ա
  * (գունատ low-poly քաղաք, կապույտ գիշեր, բաց մշուշ)։
  */
-import { P } from "./params.js";
+import { P, IS_MOBILE } from "./params.js";
 
 /* v16_14 պրոտոյի գունապնակը — ԱՆՓՈՓՈԽ ռեֆերենս։ COL-ը սրանից ա հաշվվում applyLight()-ով (P.skyDark/fogHue) */
 export const COL_PROTO = Object.freeze({
@@ -114,6 +114,11 @@ export function facadeCanvas(wM, hM, wall, winPct, opts = {}) {
   // տանիքի cap + հիմք
   x.fillStyle = COL.roofCap; x.fillRect(0, 0, w, .35 * PX);
   x.fillStyle = "rgba(0,0,0,.08)"; x.fillRect(0, .35 * PX, w, 3);
+  if (P.depthFx > 0) {                          // T-0009. պարապետի ստվերը ֆասադի վրա (baked). cap-ը 0.22մ առաջ ա, տակը մթնում ա
+    const g = x.createLinearGradient(0, .35 * PX, 0, .95 * PX);
+    g.addColorStop(0, "rgba(0,0,0,.30)"); g.addColorStop(1, "rgba(0,0,0,0)");
+    x.fillStyle = g; x.fillRect(0, .35 * PX, w, .6 * PX);
+  }
   x.fillStyle = COL.base; x.fillRect(0, h - .3 * PX, w, .3 * PX);
   if (opts.door) {
     const dw = 1.2 * PX, dh = 2.0 * PX, dx = w / 2 - dw / 2, dy = h - .3 * PX - dh;
@@ -289,5 +294,112 @@ export function makeShadowTex() {
   const g = x.createRadialGradient(64, 32, 2, 64, 32, 32);
   g.addColorStop(0, "rgba(0,0,0,.55)"); g.addColorStop(.6, "rgba(0,0,0,.25)"); g.addColorStop(1, "rgba(0,0,0,0)");
   x.fillStyle = g; x.save(); x.scale(2, 1); x.beginPath(); x.arc(32, 32, 32, 0, 7); x.fill(); x.restore();
+  return tex(c);
+}
+
+/* ================= T-0009. Գետին + հակա-«թղթե» շենքեր ================= */
+
+/* Առանձին PRNG — քաղաքի rnd() հաջորդականությունը չշարժենք (նույն շենքերը, ինչ առաջ) */
+function prng(seed) { let s = seed >>> 0; return () => { s = (s + 0x6d2b79f5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+
+/* Գետնի cross-section texture. Մեկ canvas, 0 asset. x-ով՝ [−gx, gx] մ (գետին | մայթ | curb | ասֆալտ | curb | մայթ | գետին),
+ * z-ով՝ GROUND_TILE մ, repeat (մայթի սալիկ 2մ × 8, dash 8մ × 2)։ Դետալը ամբողջությամբ baked ա. մայթի սալիկ-կարաններ ու
+ * տոնային տարբերություն, ճաքեր, բծեր, ասֆալտի հատիկ, կարկատաններ, եզրի մաշվածություն, curb երկտոն + երկու կոնտակտային ստվեր,
+ * գծանշում։ Mesh-ը (world.js) ամեն կադր միայն vertex-ներն ա շարժում — per-frame poly/ալոկացիա 0։
+ * Chrome-ի canvas-ը ~10–25ms ա նկարում (մեկ անգամ boot-ին, հետո միայն 💡 regen-ին)։ POT չափ՝ mipmap-ը WebGL1-ում էլ աշխատի։ */
+export const GROUND_TILE = 16;
+export function makeGroundTex(roadW) {
+  const hw = roadW / 2, swO = hw + 3, gx = swO + 6;
+  const W = IS_MOBILE ? 1024 : 2048, H = W / 2, kx = W / (2 * gx), kz = H / GROUND_TILE, GT = GROUND_TILE;
+  const [c, x] = cv(W, H);
+  const R = prng(2026);
+  const X = (m) => (m + gx) * kx, Z = (m) => m * kz;
+  const rect = (x0, x1, z0, z1, col) => { x.fillStyle = col; x.fillRect(X(Math.min(x0, x1)), Z(z0), Math.abs(x1 - x0) * kx, (z1 - z0) * kz); };
+  const grain = (x0, x1, n, a, px) => { const w = (x1 - x0) * kx; for (let i = 0; i < n; i++) { x.fillStyle = R() < .5 ? `rgba(255,255,255,${a})` : `rgba(0,0,0,${a})`; x.fillRect(X(x0) + R() * w, R() * H, px, px); } };
+  const blot = (x0, x1, n, rM, a) => { for (let i = 0; i < n; i++) { const cx = X(x0 + R() * (x1 - x0)), cy = R() * H, r = (rM * (0.5 + R())) * kx; const g = x.createRadialGradient(cx, cy, 0, cx, cy, r); g.addColorStop(0, `rgba(0,0,0,${a})`); g.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = g; x.fillRect(cx - r, cy - r, 2 * r, 2 * r); } };
+  const crack = (x0, x1, n, a, lw) => { x.strokeStyle = `rgba(0,0,0,${a})`; x.lineWidth = lw; x.lineCap = "round"; for (let i = 0; i < n; i++) { let px = X(x0 + R() * (x1 - x0)), py = R() * H; x.beginPath(); x.moveTo(px, py); const segs = 4 + Math.floor(R() * 5); for (let k = 0; k < segs; k++) { px += (R() - .5) * .5 * kx; py += (R() * .9 - .2) * .5 * kz; x.lineTo(px, py); } x.stroke(); } };
+  // --- գետին (ամբողջ լայնք). եզրի սյուները մաքուր գետնի գույն են — mesh-ի u=0/1 clamp-ը էդ ա ձգում դեպի էկրանի եզր
+  rect(-gx, gx, 0, GT, COL.ground);
+  blot(-gx + 1.5, gx - 1.5, 10, 1.6, .05); grain(-gx + .5, gx - .5, 1200, .04, 2);
+  const seam = _shade(COL.sidewalk, .28), curbTop = _mix(COL.curb, "#ffffff", .22), curbFace = _shade(COL.curb, .30);
+  for (const s of [-1, 1]) {
+    const S = (m) => s * m;
+    // --- մայթ. սալիկներ 2×~1.65մ, ամեն մեկը իրա տոնով, կարաններ (լայնակի ամեն 2մ + երկայնակի մեջտեղով), ճաքեր, բծեր
+    rect(S(hw), S(swO), 0, GT, COL.sidewalk);
+    const xm = hw + 1.65;
+    for (let z = 0; z < GT; z += 2) for (const [a, b] of [[hw + .3, xm], [xm, swO]]) {
+      const k = (R() - .5) * .07; rect(S(a), S(b), z, z + 2, k > 0 ? `rgba(255,255,255,${k})` : `rgba(0,0,0,${-k})`);
+    }
+    for (let z = 0; z < GT; z += 2) rect(S(hw + .34), S(swO), z - .03, z + .03, `rgba(${_hx(seam).join(",")},.55)`);
+    rect(S(xm - .03), S(xm + .03), 0, GT, `rgba(${_hx(seam).join(",")},.35)`);
+    crack(Math.min(S(hw + .4), S(swO - .2)), Math.max(S(hw + .4), S(swO - .2)), 5, .16, 1.5);
+    blot(Math.min(S(hw + .6), S(swO - .4)), Math.max(S(hw + .6), S(swO - .4)), 5, .5, .07);
+    grain(Math.min(S(hw + .3), S(swO)), Math.max(S(hw + .3), S(swO)), 700, .045, 2);
+    // --- curb. երես (մուգ) / վերև (բաց), ստվեր մայթի վրա (նուրբ) ու կոնտակտային ստվեր ասֆալտի վրա (gradient)
+    rect(S(hw), S(hw + .08), 0, GT, curbFace);
+    rect(S(hw + .08), S(hw + .30), 0, GT, curbTop);
+    { const g = x.createLinearGradient(X(S(hw + .30)), 0, X(S(hw + .62)), 0); g.addColorStop(0, "rgba(0,0,0,.10)"); g.addColorStop(1, "rgba(0,0,0,0)"); rect(S(hw + .30), S(hw + .62), 0, GT, g); }
+  }
+  // --- ասֆալտ. հատիկ, եզրի մուգ գոտի + մաշվածություն, կարկատաններ (մուգ՝ բաց եզրով), «վերանորոգված» բաց խայտեր, ձյութի գծեր, ճաքեր
+  rect(-hw, hw, 0, GT, COL.asphalt);
+  grain(-hw, hw, IS_MOBILE ? 1800 : 4000, .06, 2);
+  for (const s of [-1, 1]) {
+    const S = (m) => s * m;
+    rect(S(hw * .82), S(hw), 0, GT, `rgba(${_hx(COL.asphaltEdge).join(",")},.45)`);
+    rect(S(hw * .90), S(hw * .97), 0, GT, `rgba(${_hx(COL.sidewalk).join(",")},.13)`);
+    { const g = x.createLinearGradient(X(S(hw - .45)), 0, X(S(hw)), 0); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.26)"); rect(S(hw - .45), S(hw), 0, GT, g); }
+  }
+  for (let i = 0; i < 6; i++) {                 // կարկատան. անկանոն բազմանկյուն, նուրբ — ֆոն ա, ոչ առաջին պլան
+    const cx = (R() - .5) * 2 * (hw - 1.2), cz = R() * GT, rx = .35 + R() * .6, rz = .5 + R() * 1.2, n = 6 + Math.floor(R() * 4);
+    x.beginPath();
+    for (let k = 0; k < n; k++) { const a = k / n * Math.PI * 2, rr = .75 + R() * .35; x.lineTo(X(cx + Math.cos(a) * rx * rr), Z(cz + Math.sin(a) * rz * rr)); }
+    x.closePath();
+    const light = R() < .3;
+    x.fillStyle = light ? `rgba(${_hx(COL.sidewalk).join(",")},.05)` : `rgba(0,0,0,${.05 + R() * .05})`; x.fill();
+    x.strokeStyle = light ? "rgba(0,0,0,.06)" : "rgba(255,255,255,.05)"; x.lineWidth = 1.5; x.stroke();
+  }
+  crack(-hw + .8, hw - .8, 4, .14, 2);          // ձյութած ճաքեր
+  crack(-hw + .8, hw - .8, 3, .09, 1);
+  blot(-hw + 1, hw - 1, 6, .9, .05);
+  // --- գծանշում. կենտրոնի dash 0.47×2.73 ամեն 8մ + երկու թույլ գոտու գիծ ±2.6 (հատիկը վրայից՝ մաշված)
+  for (const z of [0, 8]) rect(-.235, .235, z, z + 2.73, COL.lane);
+  for (const s of [-1, 1]) rect(s * 2.6 - .06, s * 2.6 + .06, 0, GT, "rgba(255,255,255,.12)");
+  grain(-.3, .3, 60, .10, 2);
+  const t = tex(c);
+  t.source.style.addressModeU = "clamp-to-edge";  // եզրից դուրս՝ գետնի գույնը (mesh-ի արտաքին սյուները u=0/1)
+  t.source.style.addressModeV = "repeat";         // z-ով tile
+  t.source.style.maxAnisotropy = IS_MOBILE ? 4 : 8;
+  t.source.autoGenerateMipmaps = true;            // հեռվում shimmer չլինի (trilinear + aniso)
+  return { texture: t, gx, gt: GT, roadW };
+}
+
+/* Գետնի մշուշի overlay. Գետնի (y=0) հարթության վրա խորությունը միայն էկրանի y-ի ֆունկցիա ա. sy − hy = F·h/(cosθ·d),
+ * ուրեմն u = (sy − hy)/(y_near − hy) = near/d, t = fogT(d) = k/(1−k)·(1−u)/u, k = fogNearK — ԱՆԿԱԽ կամեռայի բարձրությունից/FOV-ից։
+ * Մեկ սպիտակ gradient sprite (alpha = t), tint = COL.fog, hy-ից մինչև y_near ձգված — ամեն կադր 4 թիվ, 0 ալոկացիա */
+export function makeGroundFogTex() {
+  const N = 256, [c, x] = cv(4, N), kk = P.fogNearK / (1 - P.fogNearK);
+  const img = x.createImageData(4, N);
+  for (let r = 0; r < N; r++) {
+    const u = (r + .5) / N, a = Math.min(1, kk * (1 - u) / u);
+    for (let i = 0; i < 4; i++) { const o = (r * 4 + i) * 4; img.data[o] = img.data[o + 1] = img.data[o + 2] = 255; img.data[o + 3] = Math.round(a * 255); }
+  }
+  x.putImageData(img, 0, 0);
+  return tex(c);
+}
+
+/* Շենքի հիմքի կոնտակտային ստվեր (AO). Փափուկ եզրով ուղղանկյուն — կենտրոնը շենքի տակ ա, երևում ա միայն 1.6մ շրջագիծը */
+export function makeFootTex() {
+  const S = 128, [c, x] = cv(S, S);
+  for (let i = 1; i <= 16; i++) { x.fillStyle = "rgba(0,0,0,.05)"; x.beginPath(); x.roundRect(i, i, S - 2 * i, S - 2 * i, Math.max(3, 18 - i)); x.fill(); }
+  return tex(c);
+}
+
+/* Պարապետ/քիվ. վերին լուսավոր եզր, կողի գիծ, ներքևի մութ underside — կամերան ներքևից ա նայում, տակն ա երևում */
+export function makeCornTex() {
+  const [c, x] = cv(32, 16);
+  x.fillStyle = COL.roofCap; x.fillRect(0, 0, 32, 16);
+  x.fillStyle = "rgba(255,255,255,.20)"; x.fillRect(0, 0, 32, 5);
+  x.fillStyle = "rgba(0,0,0,.12)"; x.fillRect(0, 5, 32, 4);
+  x.fillStyle = "rgba(0,0,0,.45)"; x.fillRect(0, 9, 32, 7);
   return tex(c);
 }

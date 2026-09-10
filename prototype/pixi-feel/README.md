@@ -43,9 +43,29 @@ Pixi.js v8.16.0-ը քաշվում ա cdnjs-ից (pinned) — ինտերնետ ա
   before/after համեմատելու համար ա, **Reset**-ը նոր default-ն ա բերում
 - **Copy JSON** — P ամբողջությամբ + `bScale` (շենքերի ոչ-default scale-երը, `"L3": 1.4`)։
   **Reset** — P default + բոլոր շենքերի scale 1
-- Գետինը (T-0008). մայթի սալիկ-կարաններ ամեն 2մ (հոսում են), curb երկտոն + կոնտակտային
-  ստվեր, ասֆալտի եզրի մաշվածություն, բանդերի sin-ալիք աշխարհի z-ով։ Նույն մեկ Graphics,
-  0 filter, մանրամասնությունը միայն <70մ (հեռվում subpixel ա)։ CPU ~0.45 ms/կադր desktop
+- **Հակա-թղթե շենքեր: ON/OFF** կոճակ (T-0009) — հիմքի կոնտակտային ստվեր, կողի մգացում
+  (`sideDark`), պարապետ, ֆասադի cap-ի baked ստվեր։ OFF = հին «թղթե» տեսքը, before/after։
+  `depthFx`/`sideDark`/`baseShadow`-ը P-ում են (Copy JSON-ում կան, Reset-ը ON ա բերում)
+
+## Գետինը (T-0009 — perf + procedural դետալ)
+
+- **Մեկ textured Mesh** (`world.js` `_drawGround`), 48 շարք խորությամբ × 32 բջիջ լայնությամբ,
+  ամեն կադր միայն vertex-ների դիրքն ու v-ն են գրվում ֆիքսված Float32Array-ի մեջ — **per-frame
+  ալոկացիա 0, poly 0**։ T-0008-ի տարբերակը ամեն կադր `Graphics.clear()` + ~470 `fill()` էր
+  (Pixi v8-ում ամեն fill-ը instruction/path օբյեկտներ + geometry rebuild + GPU upload → GC)
+- **Texture-ը canvas-ով ա գեներացվում** (`tex.js` `makeGroundTex`, 2048×1024 desktop /
+  1024×512 mobile, 0 image ֆայլ), cross-section x-ով (գետին | մայթ | curb | ասֆալտ), 16մ tile
+  z-ով repeat-ով։ Մեջը՝ մայթի սալիկներ իրենց տոնով + կարաններ + ճաքեր + բծեր, curb երկտոն + երկու
+  կոնտակտային ստվեր, ասֆալտի հատիկ/կարկատան/ձյութի ճաքեր/եզրի մաշվածություն, գծանշում։ Mipmap +
+  anisotropy (հեռվում shimmer չկա)։ Regen՝ 💡 skyDark/fogHue-ին (debounce) ու 🌆 roadW-ին (throttle)
+- **Մշուշը գետնի վրա** մեկ gradient sprite ա (`makeGroundFogTex`), tint = fog. գետնի հարթության
+  վրա fogT-ն միայն էկրանի y-ի ֆունկցիա ա (u = near/d), ուրեմն alpha-ն baked ա, կամեռայից անկախ
+- Ինչի՞ 32 բջիջ լայնությամբ. GPU-ն texture-ը եռանկյան մեջ affine ա interpolate անում — trapezoid
+  բանդի անկյունագծին ուղիղ գիծը կոտրվում ա (PS1 warping)։ Բջիջը փոքրացնելով կոտրվածքը subpixel ա,
+  custom shader պետք չի
+- **Frame cap.** desktop-ում `maxFPS` ՉԿԱ (display rate)։ `maxFPS=60`-ը 60Hz էկրանին hitch-ի
+  աղբյուր էր. Pixi-ի Ticker-ը delta-ն ամբողջ թվի ա կտրում (`(now−last)|0`), 16.67 → 16 < 16.67,
+  կադրը ցատկվում ա, հաջորդը 33ms-ով ա (կրկնակի քայլ) ~ամեն 35 կադրը մեկ։ Մոբայլում 30-ը մնում ա
 
 ## Asset Lab (DEV, T-0007 — խաղի մաս չի)
 
@@ -116,9 +136,12 @@ Pixi.js v8.16.0-ը քաշվում ա cdnjs-ից (pinned) — ինտերնետ ա
 
 ## Մոբայլ բյուջեն
 
-- DPR cap ≤2 (mobile 1.5), antialias off, ticker maxFPS 30 mobile / 60 desktop
-- 0 filter, 0 blur; ~122 display object (+400/140 աստղ sprite), ~85 տեսանելի
-- Մեկ Graphics rebuild/կադր (գետին+ճամփա, ~120 quad), PerspectiveMesh 4×4 (32 tri) երեսների համար
+- DPR cap ≤2 (mobile 1.5), antialias off, ticker maxFPS 30 mobile / uncapped desktop (տես Գետինը)
+- 0 filter, 0 blur; ~194 display object (+400/140 աստղ sprite), ~146 տեսանելի (85՝ depthFx OFF)
+- Գետինը մեկ Mesh (1680 vertex, ֆիքսված բուֆեր, 0 ալոկացիա/կադր), PerspectiveMesh 4×4 (32 tri)
+  երեսների/հիմքի ստվերի համար, 2×2 պարապետների համար. բոլորը batched
+- CPU frame time (update + render, `__feel.bench`). desktop p50 0.4 / p95 0.5 / p99 0.7 ms,
+  mobile viewport p50 0.3 / p95 0.5 / p99 0.7 ms (T-0008-ը՝ 1.1/2.7/4.2 և 0.9/1.6/2.5)
 - `dt` clamp 0.05 վ
 
 ## Debug (`window.__feel`)
@@ -128,7 +151,9 @@ crash-կետը ստիպել), `step(dt, n)` (դետերմինիստիկ քայլ
 `budget()`, `P`, `world` (`buildings[i]`, `pickBuilding(x, y)`, `scales()`),
 `asset` — Asset Lab. `select(i)`, `selected()`, `cycle()`, `face("front"|"side")`,
 `scale(1.4)`, `loadFile(file)`, `loadUrl("assets/papi-run-20f.webp")` (drop-ի տեղ՝ թեստի համար),
-`feel.showGroup("light")`, `relight("skyDark")` (P-ն ձեռքով փոխելուց հետո)։
+`feel.showGroup("light")`, `relight("skyDark")` (P-ն ձեռքով փոխելուց հետո),
+`app` (Pixi Application), `perf(60)` → Promise. իրական rAF կադրերի p50/p95/p99/max + >40/>80ms
+հաշիվ (tab-ը visible պիտի լինի), `bench(3600)` — CPU frame time update+render, hidden tab-ում էլ։
 
 ## Ասեթ
 

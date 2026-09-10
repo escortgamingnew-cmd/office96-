@@ -5,9 +5,12 @@
  */
 import { P } from "./params.js";
 import * as T from "./tex.js";
+import { makeGroundTex, makeGroundFogTex, makeFootTex, makeCornTex } from "./tex.js"; // T-0009 (անունով, ոչ T.* — bundle-ի texNS ցուցակը չի փոխվում)
 
 const SPAWN_Z = 40;
 const LAMP_N = 14;
+const GROUND_ROWS = 48, GROUND_XN = 32, GROUND_COLS = GROUND_XN + 3; // գետնի mesh. 48 շարք խորությամբ (հաստատուն d-հարաբերություն) × (−∞ | 32 բջիջ −gx..+gx | +∞)
+const CORN_H = 0.5, CORN_P = 0.22, FOOT_M = 1.6; // պարապետի բարձրություն/ելուստ (մ), հիմքի ստվերի շրջագիծ (մ)
 const clamp01 = (v) => v < 0 ? 0 : v > 1 ? 1 : v;
 
 function hexLerp(a, b, t) {
@@ -18,9 +21,9 @@ const hexN = (s) => parseInt(s.slice(1), 16);
 
 /* Պրոյեկցված քառանկյուն texture-ով. PerspectiveMesh (perspective-correct) կամ MeshSimple fallback */
 class Quad {
-  constructor(texture) {
+  constructor(texture, sub = 4) {             // sub = subdivision. 4×4 մեծ երեսներին, 2×2 բարակ շերտերին (պարապետ)
     if (PIXI.PerspectiveMesh) {
-      this.m = new PIXI.PerspectiveMesh({ texture, verticesX: 4, verticesY: 4, x0: 0, y0: 0, x1: 1, y1: 0, x2: 1, y2: 1, x3: 0, y3: 1 });
+      this.m = new PIXI.PerspectiveMesh({ texture, verticesX: sub, verticesY: sub, x0: 0, y0: 0, x1: 1, y1: 0, x2: 1, y2: 1, x3: 0, y3: 1 });
       this.persp = true;
     } else {
       this.m = new PIXI.MeshSimple({ texture, vertices: new Float32Array(8), uvs: new Float32Array([0, 0, 1, 0, 1, 1, 0, 1]), indices: new Uint32Array([0, 1, 2, 0, 2, 3]) });
@@ -49,7 +52,7 @@ class Quad {
 export class World {
   constructor(cam) {
     this.cam = cam;
-    this.ground = new PIXI.Graphics();          // գետին + ճամփա + մայթ (ամեն կադր)
+    this.ground = new PIXI.Container();         // գետին + ճամփա + մայթ. մեկ textured Mesh + մշուշի gradient sprite (T-0009)
     this.stars = new PIXI.Container();
     this.objs = new PIXI.Container();           // z-sorted sprite-եր/mesh-եր
     this.objs.sortableChildren = true;
@@ -57,7 +60,9 @@ export class World {
     this.bbTimer = 0;
     this.billboards = [];
     this.pt = {};
+    this.pq = [{}, {}, {}, {}];                 // project() pool քառանկյունների համար — hot path-ում նոր օբյեկտ չկա
     this._build();
+    this._buildGround();
   }
 
   _spr(texture, ax = .5, ay = 1) { const s = new PIXI.Sprite(texture); s.anchor.set(ax, ay); this.objs.addChild(s); return s; }
@@ -69,14 +74,16 @@ export class World {
     this.roofTex = T.makeRoofTex();
     this.treeTexes = [T.makeTreeTex(), T.makeTreeTex(), T.makeTreeTex()];
     this.bushTexes = [T.makeBushTex(), T.makeBushTex()];
+    this.footTex = makeFootTex(); this.cornTex = makeCornTex();   // T-0009. հիմքի ստվեր, պարապետ
     this.buildings = [];
     this.selected = null;                       // Asset Lab. ընտրված շենքը (buildings[i] օբյեկտ, ոչ էկրանային դիրք)
     for (const side of [-1, 1]) for (let i = 0; i < P.count; i++) {
       const v = T.pick(this.variants);
       // tex = Asset Lab-ի override-ներ (drop արած նկար), null = վարիանտի canvas-ը
       // sc = Asset Lab-ի scale (0.6–1.8), sv = վարիանտի չափերը × sc (render-ը սրանով ա, չափերը փոխվելիս ա հաշվվում, ոչ ամեն կադր)
-      const b = { side, i, v, vi: this.variants.indexOf(v), sc: 1, sv: null, tex: { front: null, side: null }, xj: T.rnd(0, 2), z: SPAWN_Z - i * P.seg, front: this._spr(v.front), sideQ: new Quad(v.side), roofQ: new Quad(this.roofTex), antenna: null, trees: [], bushes: [] };
-      this.objs.addChild(b.sideQ.m, b.roofQ.m);
+      // footQ = հիմքի կոնտակտային ստվեր (գետնի վրա), cornF/cornS = պարապետ front/կող (T-0009, P.depthFx)
+      const b = { side, i, v, vi: this.variants.indexOf(v), sc: 1, sv: null, tex: { front: null, side: null }, xj: T.rnd(0, 2), z: SPAWN_Z - i * P.seg, front: this._spr(v.front), sideQ: new Quad(v.side), roofQ: new Quad(this.roofTex), footQ: new Quad(this.footTex), cornF: new Quad(this.cornTex, 2), cornS: new Quad(this.cornTex, 2), antenna: null, trees: [], bushes: [] };
+      this.objs.addChild(b.footQ.m, b.sideQ.m, b.roofQ.m, b.cornF.m, b.cornS.m);
       if (v.antenna) b.antenna = this._spr(this.antennaTex, .5, 1);
       if (T.rnd() < .7) b.trees.push({ tex: T.pick(this.treeTexes), sc: T.rnd(.8, 1.3), dz: T.rnd(-3, 3), sp: this._spr(T.pick(this.treeTexes).texture) });
       if (T.rnd() < .5) b.bushes.push({ tex: T.pick(this.bushTexes), dz: T.rnd(-4, 4), sp: this._spr(T.pick(this.bushTexes).texture) });
@@ -140,8 +147,16 @@ export class World {
       for (const b of this.billboards) { const i = old.indexOf(b.tex); b.tex = this.bbTexes[i < 0 ? 0 : i]; b.sp.texture = b.tex.texture; }
       if (old) for (const t of old) t.texture.destroy(true);
     }
-    if (all || key === "winPct" || key === "skyDark" || key === "fogHue") {
+    if (all || key === "skyDark" || key === "fogHue") {
+      // գետնի texture-ը (գույները baked են) + պարապետի cap-ը (T-0009)
+      this._regenGround();
+      const oc = this.cornTex; this.cornTex = makeCornTex();
+      for (const b of this.buildings) { b.cornF.m.texture = this.cornTex; b.cornS.m.texture = this.cornTex; }
+      if (oc) oc.destroy(true);
+    }
+    if (all || key === "winPct" || key === "skyDark" || key === "fogHue" || key === "depthFx") {
       // ֆասադներ. նույն seed → նույն երկրաչափություն ու պատուհանների դասավորություն, միայն գույներն են նոր։
+      // depthFx-ը էստեղ ա, որովհետև պարապետի ստվերը ֆասադի canvas-ում baked ա։
       // flat A/B build-ում վարիանտը regen չունի (կողը baked ա) — բաց ենք թողնում, կաշխատի reload-ով
       const olds = [];
       for (const v of this.variants) if (v.regen) olds.push(...v.regen());
@@ -261,13 +276,13 @@ export class World {
 
   /* ---- ռենդեր ---- */
   /* ուղղահայաց պատ x=xi հարթությունում, z∈[zNear,zFar], y∈[0,h]. near-clip ամեն տողին առանձին */
-  _wallQuad(q, xi, h, zNear, zFar, nearOnRight) {
-    const cam = this.cam, DMIN = 0.35;
-    const fb = cam.project(xi, 0, zFar, {}), ft = cam.project(xi, h, zFar, {});
+  _wallQuad(q, xi, h, zNear, zFar, nearOnRight, y0 = 0) {   // y0 = ներքևի եզրը (պարապետի շերտի համար ≠ 0)
+    const cam = this.cam, DMIN = 0.35, p = this.pq;
+    const fb = cam.project(xi, y0, zFar, p[0]), ft = cam.project(xi, h, zFar, p[1]);
     if (fb.d <= DMIN || ft.d <= DMIN || fb.d > P.fogFar + 10) { q.m.visible = false; return; }
-    let nb = cam.project(xi, 0, zNear, {}), nt = cam.project(xi, h, zNear, {});
-    if (nb.d <= DMIN) nb = cam.project(xi, 0, zNear + (zFar - zNear) * ((DMIN - nb.d) / (fb.d - nb.d)), {});
-    if (nt.d <= DMIN) nt = cam.project(xi, h, zNear + (zFar - zNear) * ((DMIN - nt.d) / (ft.d - nt.d)), {});
+    let nb = cam.project(xi, y0, zNear, p[2]), nt = cam.project(xi, h, zNear, p[3]);
+    if (nb.d <= DMIN) nb = cam.project(xi, y0, zNear + (zFar - zNear) * ((DMIN - nb.d) / (fb.d - nb.d)), p[2]);
+    if (nt.d <= DMIN) nt = cam.project(xi, h, zNear + (zFar - zNear) * ((DMIN - nt.d) / (ft.d - nt.d)), p[3]);
     q.m.visible = true;
     if (nearOnRight) q.set(ft.sx, ft.sy, nt.sx, nt.sy, nb.sx, nb.sy, fb.sx, fb.sy);
     else q.set(nt.sx, nt.sy, ft.sx, ft.sy, fb.sx, fb.sy, nb.sx, nb.sy);
@@ -276,15 +291,26 @@ export class World {
     q.m.zIndex = -dm + 0.01;
   }
   /* հորիզոնական տանիք y=h, x∈[x0,x1], z∈[zNear,zFar] */
-  _roofQuad(q, x0, x1, h, zNear, zFar) {
-    const cam = this.cam, DMIN = 0.35;
-    const a = cam.project(x0, h, zFar, {}), b = cam.project(x1, h, zFar, {}), c = cam.project(x1, h, zNear, {}), d = cam.project(x0, h, zNear, {});
-    if (a.d <= DMIN || b.d <= DMIN || c.d <= DMIN || d.d <= DMIN || a.d > P.fogFar + 10) { q.m.visible = false; return; }
+  _roofQuad(q, x0, x1, h, zNear, zFar) {      // վերադարձնում ա հեռու եզրի խորությունը (կամ -1)
+    const cam = this.cam, DMIN = 0.35, p = this.pq;
+    const a = cam.project(x0, h, zFar, p[0]), b = cam.project(x1, h, zFar, p[1]), c = cam.project(x1, h, zNear, p[2]), d = cam.project(x0, h, zNear, p[3]);
+    if (a.d <= DMIN || b.d <= DMIN || c.d <= DMIN || d.d <= DMIN || a.d > P.fogFar + 10) { q.m.visible = false; return -1; }
     q.m.visible = true;
     q.set(a.sx, a.sy, b.sx, b.sy, c.sx, c.sy, d.sx, d.sy);
     const dm = (a.d + c.d) / 2;
     q.m.alpha = 1 - this.fogT(dm);
     q.m.zIndex = -dm + 0.02;
+    return a.d;
+  }
+  /* կամեռային (z = const) ուղղահայաց շերտ. x∈[x0,x1], y∈[y0,y1] — պարապետի front-ը (T-0009) */
+  _faceQuad(q, x0, x1, y0, y1, z) {
+    const cam = this.cam, p = this.pq;
+    const a = cam.project(x0, y1, z, p[0]), b = cam.project(x1, y1, z, p[1]), c = cam.project(x1, y0, z, p[2]), d = cam.project(x0, y0, z, p[3]);
+    if (a.d <= 0.35 || c.d <= 0.35 || a.d > P.fogFar + 10) { q.m.visible = false; return; }
+    q.m.visible = true;
+    q.set(a.sx, a.sy, b.sx, b.sy, c.sx, c.sy, d.sx, d.sy);
+    q.m.alpha = 1 - this.fogT(a.d);
+    q.m.zIndex = -a.d + 0.005;
   }
   fogT(d) { const near = P.fogFar * P.fogNearK; return clamp01((d - near) / (P.fogFar - near)); }
 
@@ -305,6 +331,8 @@ export class World {
     const cam = this.cam, W = cam.W, H = cam.H;
     // շենքեր
     const xIn = P.roadW / 2 + P.gap;
+    // T-0009. հակա-«թղթե» փաթեթ (P.depthFx). կողի tint = ֆասադի նկատմամբ հաստատուն մգացում — անկյան «կոտրվածքը» դրանից ա
+    const fx = P.depthFx > 0, sideTint = fx ? hexLerp(0xffffff, 0x000000, P.sideDark) : 0xffffff;
     for (const b of this.buildings) {
       const v = b.sv, cx = b.side * (xIn + v.w / 2 + b.xj), zNear = b.z + v.d / 2, zFar = b.z - v.d / 2; // sv = չափերը × scale
       const d = this.place(b.front, cx, zNear, v.w, v.h);
@@ -312,9 +340,22 @@ export class World {
       // համար առանձին z-ով — խորությունը z-ի գծային ֆունկցիա ա, ուրեմն կտրվածքը ճիշտ ա ու pop չկա
       const xi = cx - b.side * v.w / 2;
       this._wallQuad(b.sideQ, xi, v.h, zNear, zFar, b.side > 0);
+      if (b !== this.selected) b.sideQ.m.tint = sideTint;
       // տանիք. երևում ա միայն երբ կամերան շենքից բարձր ա (rewind-ի դրոն-կամար)
       if (cam.y > v.h + 0.2) this._roofQuad(b.roofQ, cx - v.w / 2, cx + v.w / 2, v.h, zNear, zFar);
       else b.roofQ.m.visible = false;
+      // պարապետ. front-ը ֆասադից CORN_P առաջ ու լայն, կողինը՝ ճամփի կողմ. flat A/B build-ում (v.wFlat, կողը baked) չկա
+      if (fx && d > 0 && v.wFlat === undefined) this._faceQuad(b.cornF, cx - v.w / 2 - CORN_P, cx + v.w / 2 + CORN_P, v.h - CORN_H + .1, v.h + .1, zNear + CORN_P);
+      else b.cornF.m.visible = false;
+      if (fx && b.sideQ.m.visible) {
+        this._wallQuad(b.cornS, xi - b.side * CORN_P, v.h + .1, zNear + CORN_P, zFar - CORN_P, b.side > 0, v.h - CORN_H + .1);
+        b.cornS.m.tint = sideTint; b.cornS.m.zIndex = b.sideQ.m.zIndex + 0.004;
+      } else b.cornS.m.visible = false;
+      // հիմքի կոնտակտային ստվեր. գետնի վրա, footprint + FOOT_M շրջագիծ, մշուշին ենթարկվող, շենքի բոլոր օբյեկտներից ՀԵՏԵՎՈՒՄ
+      if (fx && P.baseShadow > 0) {
+        const df = this._roofQuad(b.footQ, cx - v.w / 2 - FOOT_M, cx + v.w / 2 + FOOT_M, 0, zNear + FOOT_M, zFar - FOOT_M);
+        if (df > 0) { b.footQ.m.alpha *= P.baseShadow; b.footQ.m.zIndex = -df - 0.05; }
+      } else b.footQ.m.visible = false;
       if (b.antenna) { if (d > 0 && v.antenna) { const p = cam.project(cx, v.h + .35, zNear, this.pt); b.antenna.visible = true; b.antenna.x = p.sx; b.antenna.y = p.sy; const s = p.s * 3.0 / b.antenna.texture.height; b.antenna.scale.set(s); b.antenna.alpha = b.front.alpha; b.antenna.zIndex = b.front.zIndex; } else b.antenna.visible = false; }
       for (const t of b.trees) this.place(t.sp, cx - b.side * (v.w / 2 + 2.2), b.z + t.dz, t.tex.wM * t.sc, t.tex.hM * t.sc);
       for (const s of b.bushes) this.place(s.sp, cx - b.side * (v.w / 2 + 1.2), b.z + s.dz, s.tex.wM, s.tex.hM);
@@ -345,92 +386,68 @@ export class World {
     this._drawGround();
   }
 
-  /* գետին + ճամփա + մայթ. խորության բանդեր, գույնը lerp դեպի մշուշ (ֆիզիկական fog-ի համարժեք)։
-   * T-0008. նույն ՄԵԿ Graphics-ը, 0 filter — խորությունը «ներկով» ա. մայթի սալիկ-կարաններ (հոսում են
-   * roadPhase-ով), curb երկտոն (երես մուգ / վերև բաց) + կոնտակտային ստվերագիծ ասֆալտի վրա, ասֆալտի եզրի
-   * մաշվածության գոտի, բանդերի նուրբ տոնային ալիք (sin աշխարհի z-ով → հոսում ա, չի թարթում)։
-   * Մանրամասնությունը միայն մոտ բանդերին ա (DETAIL_D), հեռվում subpixel ա՝ պոլիգոն չենք ծախսում։ */
+  /* ---- Գետին (T-0009). Մեկ textured Mesh + մշուշի gradient sprite — per-frame poly/ալոկացիա 0։
+   * T-0008-ի տարբերակը ամեն կադր Graphics.clear() + ~470 poly.fill() էր (27 բանդ × 16 strip + կարաններ + dash-եր).
+   * Pixi v8-ում ամեն fill-ը instruction/path/polygon օբյեկտներ ա, հետո ամբողջ geometry-ն rebuild + GPU upload —
+   * ~3000 կարճատև օբյեկտ/կադր → GC։ Հիմա. cross-section texture-ը (makeGroundTex, canvas, repeat z-ով) մեկ անգամ,
+   * ամեն կադր միայն vertex-ների դիրքն ու v-ն են գրվում ֆիքսված Float32Array-ի մեջ (4 project() + lerp ամեն շարքին)։
+   * Ցանցը՝ 48 շարք խորությամբ հաստատուն d-հարաբերությամբ (~1.13. մոտիկում խիտ) × 32 բջիջ լայնությամբ (−gx..+gx) +
+   * երկու արտաքին սյուն ±(gx + 3·d) — էկրանի եզրից դուրս ամեն խորության համար, u clamp → գետնի գույն։
+   * Ինչի՞ 32 բջիջ լայնությամբ. GPU-ն texture-ը եռանկյան մեջ affine ա interpolate անում — trapezoid բանդի անկյունագծին
+   * ուղիղ գիծը (curb, dash) կոտրվում ա (PS1-ի warping)։ Բջիջը փոքրացնելով կոտրվածքը subpixel ա դառնում. ձևը 3D-ի
+   * դասական quad-subdivision-ն ա, custom shader չի պահանջում։ Շարքը էկրանին ուղիղ գիծ ա (yaw≈0) → միջանկյալ
+   * սյուները lerp-ով են, ոչ project()-ով։
+   * Մշուշը գետնի վրա միայն էկրանի y-ի ֆունկցիա ա (makeGroundFogTex) — մեկ sprite, tint = fog։ */
+  _buildGround() {
+    const R = GROUND_ROWS, C = GROUND_COLS, N = GROUND_XN;
+    this.gnd = makeGroundTex(P.roadW);
+    this.gndT = performance.now();
+    const positions = new Float32Array(R * C * 2), uvs = new Float32Array(R * C * 2), indices = new Uint32Array((R - 1) * (C - 1) * 6);
+    for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) uvs[(r * C + c) * 2] = c === 0 ? 0 : c === C - 1 ? 1 : (c - 1) / N;   // u՝ ֆիքս, v՝ ամեն կադր
+    let k = 0;
+    for (let r = 0; r < R - 1; r++) for (let c = 0; c < C - 1; c++) {
+      const a = r * C + c, b = a + 1, d = a + C, e = d + 1;
+      indices[k++] = a; indices[k++] = b; indices[k++] = e; indices[k++] = a; indices[k++] = e; indices[k++] = d;
+    }
+    this.gGeo = new PIXI.MeshGeometry({ positions, uvs, indices });
+    this.gMesh = new PIXI.Mesh({ geometry: this.gGeo, texture: this.gnd.texture });
+    this.gFog = new PIXI.Sprite(makeGroundFogTex());
+    this.ground.addChild(this.gMesh, this.gFog);
+  }
+  /* texture regen. 💡 (skyDark/fogHue — գույները baked են) կամ 🌆 roadW (cross-section-ը փոխվում ա, throttle-ով) */
+  _regenGround() {
+    const old = this.gnd;
+    this.gnd = makeGroundTex(P.roadW);
+    this.gMesh.texture = this.gnd.texture;
+    if (old) old.texture.destroy(true);
+    this.gndT = performance.now();
+  }
   _drawGround() {
-    const g = this.ground, cam = this.cam, W = cam.W, H = cam.H;
-    g.clear();
-    const fog = hexN(T.COL.fog), asph = hexN(T.COL.asphalt), edge = hexN(T.COL.asphaltEdge), sw = hexN(T.COL.sidewalk), gnd = hexN(T.COL.ground), curb = hexN(T.COL.curb);
-    const curbTop = hexLerp(curb, 0xffffff, .22), curbFace = hexLerp(curb, 0x000000, .30), seam = hexLerp(sw, 0x000000, .28);
-    const hw = P.roadW / 2, swO = hw + 3, DETAIL_D = 70, ph = this.roadPhase;
-    const vary = (c, k) => k >= 0 ? hexLerp(c, 0xffffff, k) : hexLerp(c, 0x000000, -k);
-    // բանդերի z-սահմանները. կամեռայի հետևից (էկրանից ներքև) մինչև մշուշ, երկրաչափական քայլով
-    const zs = [];
-    let z = cam.z + 6, step = 0.6;
-    while (z > cam.z - P.fogFar - 20) { zs.push(z); z -= step; step *= 1.18; }
-    zs.push(cam.z - P.fogFar - 20);
-    const pr = (x, zz) => cam.project(x, 0, zz, {});
-    // հորիզոնից ներքև ամեն ինչ fog-գույն ա (գետնի հեռուն) — ֆոն
-    const hy = cam.horizonY();
-    g.rect(0, hy - 1, W, H - hy + 1).fill(fog);
-    const cx = W / 2;
-    for (let i = 0; i < zs.length - 1; i++) {
-      const zA = zs[i], zB = zs[i + 1];
-      const a = pr(0, zA), b = pr(0, zB);
-      if (b.d <= 0.3) continue;
-      const dm = (Math.max(a.d, 0.3) + b.d) / 2, t = this.fogT(dm);
-      const zAA = a.d > 0.35 ? zA : zA + (zB - zA) * ((0.35 - a.d) / (b.d - a.d)); // near clip
-      const aa = pr(0, zAA);
-      if (aa.sy < hy) continue;
-      const sA = aa.s, sB = b.s, yA = Math.min(aa.sy, H + 40), yB = b.sy;
-      // տոնային ալիք աշխարհի z-ով (ph-ը հոսքի հետ ա գնում). ասֆալտն ու մայթը տարբեր ֆազով, որ բանդը «միաձույլ» չկարդացվի
-      const wz = (zA + zB) / 2 - ph, kA = Math.sin(wz * .31) * .028, kS = Math.sin(wz * .23 + 1.7) * .022, kG = Math.sin(wz * .17 + .6) * .02;
-      // գետին (ամբողջ լայնք)
-      g.poly([0, yA, W, yA, W, yB, 0, yB]).fill(hexLerp(vary(gnd, kG), fog, t));
-      // մայթեր
-      for (const s of [-1, 1]) g.poly([cx + s * hw * sA, yA, cx + s * swO * sA, yA, cx + s * swO * sB, yB, cx + s * hw * sB, yB]).fill(hexLerp(vary(sw, kS), fog, t));
-      // ասֆալտ
-      g.poly([cx - hw * sA, yA, cx + hw * sA, yA, cx + hw * sB, yB, cx - hw * sB, yB]).fill(hexLerp(vary(asph, kA), fog, t));
-      const strip = (s, x0, x1, col, alpha) => g.poly([cx + s * x0 * sA, yA, cx + s * x1 * sA, yA, cx + s * x1 * sB, yB, cx + s * x0 * sB, yB]).fill(alpha === undefined ? col : { color: col, alpha });
-      if (dm < DETAIL_D) for (const s of [-1, 1]) {
-        strip(s, hw * .82, hw, hexLerp(edge, fog, t), .45);             // եզրի մուգ գոտի
-        strip(s, hw * .90, hw * .97, hexLerp(sw, fog, t), .13);          // մաշվածություն. բաց, «քերված» ասֆալտ եզրին
-        strip(s, hw - .45, hw, 0x000000, .26 * (1 - t));                 // curb-ի կոնտակտային ստվերը ասֆալտի վրա
-        strip(s, hw, hw + .08, hexLerp(curbFace, fog, t));               // curb երես (մուգ)
-        strip(s, hw + .08, hw + .30, hexLerp(curbTop, fog, t));          // curb վերև (բաց)
-        strip(s, hw + .30, hw + .62, 0x000000, .09 * (1 - t));           // curb-ի ստվեր մայթի վրա (նուրբ)
-      } else for (const s of [-1, 1]) {
-        strip(s, hw * .82, hw, hexLerp(edge, fog, t), .55);
-        strip(s, hw, hw + .18, hexLerp(curb, fog, t));
-      }
+    const cam = this.cam, W = cam.W, H = cam.H, R = GROUND_ROWS, C = GROUND_COLS, N = GROUND_XN, p = this.pq;
+    if (P.roadW !== this.gnd.roadW && performance.now() - this.gndT > 250) this._regenGround();
+    const pos = this.gGeo.positions, uv = this.gGeo.uvs, gx = this.gnd.gx, GT = this.gnd.gt;
+    const ph = ((this.roadPhase % GT) + GT) % GT;   // v-ն փոքր պահենք (float32-ի ճշտություն երկար վազքից հետո)
+    // խորությունը z-ի գծային ֆունկցիա ա (x=0). d(z) = d0 + B·(z − cam.z)
+    const d0 = cam.project(0, 0, cam.z, p[0]).d, B = (cam.project(0, 0, cam.z - 10, p[1]).d - d0) / -10;
+    const zOf = (d) => cam.z + (d - d0) / B;
+    const DMIN = 0.8, dFar = P.fogFar + 20;         // near clip 0.8 — yaw-ի (look.x, shake) շեղումով էլ արտաքին սյուները d>0.3 են մնում
+    const ratio = Math.pow(dFar / DMIN, 1 / (R - 1)); // շարքերի խորությունը DMIN·ratioʳ — վերջինը ճիշտ dFar-ին
+    let dr = DMIN;
+    for (let r = 0; r < R; r++, dr *= ratio) {
+      const zr = zOf(dr), v = (zr - ph) / GT, xo = gx + 3 * dr;
+      const q0 = cam.project(-xo, 0, zr, p[0]), q1 = cam.project(-gx, 0, zr, p[1]), q2 = cam.project(gx, 0, zr, p[2]), q3 = cam.project(xo, 0, zr, p[3]);
+      for (const q of p) if (q.s === 0) { q.sx = W / 2; q.sy = H * 4; }   // անվտանգության ցանց. d≤0.3 → էկրանից շատ ներքև
+      let o = r * C * 2;
+      pos[o] = q0.sx; pos[o + 1] = q0.sy; uv[o + 1] = v; o += 2;
+      const dx = (q2.sx - q1.sx) / N, dy = (q2.sy - q1.sy) / N;
+      for (let c = 0; c <= N; c++, o += 2) { pos[o] = q1.sx + dx * c; pos[o + 1] = q1.sy + dy * c; uv[o + 1] = v; }
+      pos[o] = q3.sx; pos[o + 1] = q3.sy; uv[o + 1] = v;
     }
-    // մայթի սալիկ-կարաններ. լայնակի՝ ամեն 2մ (հոսում են աշխարհի հետ), երկայնակի՝ մեկ գիծ մայթի մեջտեղով
-    {
-      const SEAM = 2.0, SEAM_FAR = 60, phase = ((ph % SEAM) + SEAM) % SEAM;
-      for (const s of [-1, 1]) {
-        for (let k = -2; k < SEAM_FAR / SEAM + 2; k++) {
-          const z0 = cam.z + phase - k * SEAM + 3, z1 = z0 - .06;
-          const a = pr(0, z0), b = pr(0, z1);
-          if (a.d <= 0.35 || b.d <= 0.35 || a.d > SEAM_FAR) continue;
-          const t = this.fogT((a.d + b.d) / 2), y0 = Math.min(a.sy, H + 40), y1 = Math.min(b.sy, y0 - 1); // ≥1px
-          g.poly([cx + s * (hw + .34) * a.s, y0, cx + s * swO * a.s, y0, cx + s * swO * b.s, y1, cx + s * (hw + .34) * b.s, y1])
-            .fill({ color: hexLerp(seam, fog, t), alpha: .38 * (1 - t) * Math.min(1, 1.6 - a.d / SEAM_FAR) });
-        }
-        const xm = s * (hw + 1.65), zn = cam.z + 1.2, zf = cam.z - SEAM_FAR;
-        const a = pr(xm, zn), b = pr(xm, zf);
-        if (a.d > 0.3 && b.d > 0.3) g.poly([a.sx - .03 * a.s, Math.min(a.sy, H + 40), a.sx + .03 * a.s, Math.min(a.sy, H + 40), b.sx + .4, b.sy, b.sx - .4, b.sy]).fill({ color: seam, alpha: .22 });
-      }
-    }
-    // գծանշում. կենտրոնի dash (24×700 @512×2048 → 0.47մ × 2.73մ, քայլ 8մ) + երկու թույլ գոտու գիծ ±2.6մ
-    const lane = hexN(T.COL.lane);
-    const phase = ((this.roadPhase % 8) + 8) % 8;
-    for (let k = -1; k < P.fogFar / 8 + 2; k++) {
-      const z0 = cam.z + phase - k * 8 + 4, z1 = z0 - 2.73; // z0 = մոտ ծայր
-      const a = pr(0, z0), b = pr(0, z1);
-      if (b.d <= 0.3) continue;
-      const zA = a.d > 0.35 ? z0 : z0 + (z1 - z0) * ((0.35 - a.d) / (b.d - a.d));
-      const aa = pr(0, zA);
-      const t = this.fogT((aa.d + b.d) / 2);
-      const wA = .235 * aa.s, wB = .235 * b.s;
-      g.poly([cx - wA, Math.min(aa.sy, H + 40), cx + wA, Math.min(aa.sy, H + 40), cx + wB, b.sy, cx - wB, b.sy]).fill({ color: hexLerp(lane, fog, t), alpha: 1 - t * .5 });
-    }
-    for (const s of [-1, 1]) {
-      const zn = cam.z + 1.2, zf = cam.z - P.fogFar;
-      const a = pr(s * 2.6, zn), b = pr(s * 2.6, zf);
-      if (a.d > 0.3 && b.d > 0.3) g.poly([a.sx - .06 * a.s, Math.min(a.sy, H + 40), a.sx + .06 * a.s, Math.min(a.sy, H + 40), b.sx + .5, b.sy, b.sx - .5, b.sy]).fill({ color: 0xffffff, alpha: .12 });
-    }
+    this.gGeo.attributes.aPosition.buffer.update();
+    this.gGeo.attributes.aUV.buffer.update();
+    // մշուշի overlay. hy-ից մինչև near-ի y-ը, 3W լայն (roll-ի անկյունները ծածկի), tint = ընթացիկ fog
+    const hy = cam.horizonY(), yn = cam.project(0, 0, zOf(P.fogFar * P.fogNearK), p[0]).sy;
+    const f = this.gFog;
+    f.x = -W; f.y = hy; f.width = 3 * W; f.height = Math.max(1, yn - hy); f.tint = hexN(T.COL.fog);
   }
 }
