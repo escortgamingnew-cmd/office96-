@@ -88,3 +88,33 @@ Asset Lab)։ Ստուգելի արդյունքներով.
   scale 1.6, վազի 200մ+ — չափը մնում ա; (դ) v16_14 կոճակ ↔ Reset՝ before/after;
   (ե) 💡 սլայդերները քաշելիս reload չկա, FPS չի ընկնում, Copy JSON-ում նոր
   դաշտերը կան։
+- [2026-09-10 14:20] Լուսինե (QA). **Review ԱՆՑԱՎ, review → done։** Ստուգած՝
+  իրական աշխատացնելով. լոկալ serve.py (7788) + Browser pane, desktop ու
+  375×812 մոբայլ viewport (Android UA, touch 5, fogFar 120 branch-ը բռնեց)։
+  1. Icon dock — 5 icon-ից ամեն մեկը ՄԻԱՅՆ իրա խմբի սլայդերներն ա ցույց
+     տալիս (📷 10, 🏃 8, 🌆 7, 💡 6, ⚙ 2), Copy JSON/Reset ընդհանուր են։
+     Խումբը հիշվում ա (feel.group=misc → reload → պանելը misc-ով բացվեց)։
+     Մոբայլում dock-ի կոճակները 42×36px՝ մատով բռնվող։
+  2. Գետին — մայթի կարանները roadPhase-ով են (կոդ + վազքի կադրերում փուլը
+     շարժվում ա), մոբայլ 1:1 կադրում կարանները, curb երկտոնը, կոնտակտային
+     ստվերագիծն ու եզրի մաշվածությունը հստակ երևում են։ Մեկ Graphics, 0 filter։
+     CPU 0.389 ms/կադր մոբայլ viewport-ում վազքի ժամանակ (step×300 չափում) —
+     բյուջեի մեջ ա. real-time FPS counter-ը էս session-ում չստուգվեց, որովհետև
+     Browser pane-ը մեջտեղում թաքցվեց (rAF չկա hidden վիճակում), CPU չափումն
+     ա դրա փոխարինումը։
+  3. Scale — select → toolbar slider (0.6–1.8) → ×1.6 live մեծացավ, 270մ
+     վազք + ռեցիրկուլյացիա → նույն օբյեկտի sc=1.6, cashout rewind-ից հետո էլ
+     տեղում ա։ Reset-ը scale-երն էլ ա 1 դարձնում (ըստ սպեցի)։
+  4. Գիշեր default (skyDark .4/lampHalo 1.35/starBright 1.2/bbNeon 1.3) ↔
+     «v16_14 լույս (հին)» — երկու ուղղությամբ էլ live փոխարկվում ա, reload
+     չկա (JS marker-ը ապրում ա), տարբերությունը էկրանին ակնհայտ ա։
+  5. 💡 6 սլայդեր — բոլորը live. 40 արագ input-ը debounce-ը չկախեց, extreme
+     արժեքները (skyDark 1, winPct .15, starBright 1.5) ճիշտ քաշվեցին։
+  Edge-եր. slider վազքի կեսին ✓, Reset վազքի կեսին ✓, կրկնակի cashout ✓,
+  կրկնակի restart ✓, refresh → մաքուր վիճակ ✓ (scales {}, նոր default-ներ)։
+  Copy JSON = P + bScale ({"L3":1.6} ստացա console-ում)։ Console՝ 0 error
+  ամբողջ session-ում։ Budget 122 obj / 0 filter / 400 star։
+  Bundle-ներ. երկու script-ը HEAD-ից անսխալ հավաքվեցին (970/971 KB), երկուսն
+  էլ բրաուզերում boot են լինում console-մաքուր, dock/💡/scale աշխատում են,
+  flat-ում FLAT badge + wFlat-ը scale-ի հետ ճիշտ ա (23=16.4×1.4)։ Երկու
+  ոչ-բլոկեր դիտարկում dev.md-ում (charset, decode §4-ի հաստատում)։
