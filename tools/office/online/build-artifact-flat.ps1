@@ -83,6 +83,7 @@ $body = $body.Replace('<button id="fpsBtn"', $badge + '<button id="fpsBtn"')
 
 $sb = New-Object Text.StringBuilder
 [void]$sb.AppendLine('<title>Run Dady Flat</title>')
+[void]$sb.AppendLine('<meta charset="utf-8">')
 [void]$sb.AppendLine($style)
 [void]$sb.AppendLine($body)
 [void]$sb.AppendLine('<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/8.16.0/pixi.min.js"></script>')

@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $proto = 'D:\Escort gaming\escort-stake\prototype\pixi-feel'
 $out = Join-Path $PSScriptRoot 'run-dady.html'
 
@@ -45,6 +45,7 @@ $body = [regex]::Match($html, '(?s)<body>(.*?)<script').Groups[1].Value.Trim()
 
 $sb = New-Object Text.StringBuilder
 [void]$sb.AppendLine('<title>Run Dady</title>')
+[void]$sb.AppendLine('<meta charset="utf-8">')
 [void]$sb.AppendLine($style)
 [void]$sb.AppendLine($body)
 [void]$sb.AppendLine('<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/8.16.0/pixi.min.js"></script>')
