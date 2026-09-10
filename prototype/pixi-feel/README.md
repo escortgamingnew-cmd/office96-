@@ -29,6 +29,24 @@ Pixi.js v8.16.0-ը քաշվում ա cdnjs-ից (pinned) — ինտերնետ ա
 - Վերևի pills՝ վերջին 6 արդյունքը, ▾ → մոդալ (մինչև 60)
 - **F / ƒ** — FPS, **T / ⚙** — Feel Lab (DEV պանել, խաղի մաս չի)
 
+## Feel Lab (DEV, T-0008 — խաղի մաս չի)
+
+- **Icon dock.** 📷 կամերա · 🏃 վազք/հերոս · 🌆 քաղաք · 💡 լույս · ⚙ այլ — icon-ին սեղմելիս
+  միայն էդ խմբի սլայդերներն են (ընտրած խումբը localStorage-ում ա մնում)
+- **💡 Լույս.** երկնքի մթություն (`skyDark`), մշուշի երանգ (`fogHue` −1 սառը … +1 տաք),
+  պատուհան վառ % (`winPct`), լապտերի halo (`lampHalo`), աստղեր (`starBright`),
+  billboard նեոն (`bbNeon`)։ Փոփոխությունը live ա. գունապնակը (`applyLight`, tex.js)
+  անմիջապես, texture regen-ը (երկինք, ֆասադներ, լապտեր, billboard) 180ms debounce-ով։
+  Ֆասադները seed-ով են regen լինում — նույն շենքեր, նույն պատուհանների դասավորություն
+- **Default-ը գիշերային ա** (`skyDark .4`, `lampHalo 1.35`, `starBright 1.2`, `bbNeon 1.3`).
+  0/1 արժեքները v16_14 պրոտոյի գունապնակն են ճիշտ — **v16_14 լույս (հին)** կոճակը
+  before/after համեմատելու համար ա, **Reset**-ը նոր default-ն ա բերում
+- **Copy JSON** — P ամբողջությամբ + `bScale` (շենքերի ոչ-default scale-երը, `"L3": 1.4`)։
+  **Reset** — P default + բոլոր շենքերի scale 1
+- Գետինը (T-0008). մայթի սալիկ-կարաններ ամեն 2մ (հոսում են), curb երկտոն + կոնտակտային
+  ստվեր, ասֆալտի եզրի մաշվածություն, բանդերի sin-ալիք աշխարհի z-ով։ Նույն մեկ Graphics,
+  0 filter, մանրամասնությունը միայն <70մ (հեռվում subpixel ա)։ CPU ~0.45 ms/կադր desktop
+
 ## Asset Lab (DEV, T-0007 — խաղի մաս չի)
 
 Դիզայներն իր շենքի ասեթը խաղի մեջ ա տեսնում առանց build-ի.
@@ -37,10 +55,13 @@ Pixi.js v8.16.0-ը քաշվում ա cdnjs-ից (pinned) — ինտերնետ ա
   **tap ընտրվածի վրա** → հաջորդ վարիանտը (10-ից, ցիկլով). **tap դատարկ տեղ** → հանել
 - **Նկար (PNG/WebP/JPG) drag&drop** պատուհանի վրա → ընտրված շենքի տեքստուրան փոխվում ա
   live, առանց reload։ Drop-ը ուղիղ շենքի վրա՝ էդ շենքն ա ընտրվում
-- Toolbar. **front/side** (drop/Load-ի թիրախը), **Load** (file input — մոբայլ ու iframe,
-  որտեղ drop չկա), **Next** (վարիանտ), **Reset** (վերադարձ canvas ֆասադին), **✕**
-- Ընտրությունը `world.buildings[i]` ՕԲՅԵԿՏԻՆ ա կապված — sprite-երը z-flow-ով
-  րեցիրկուլացվում են, ասեթը շենքի հետ ա գնում-գալիս
+- Toolbar. **front/side** (drop/Load-ի թիրախը, նոր ընտրության հետ ետ front ա), **Load**
+  (file input — մոբայլ ու iframe, որտեղ drop չկա), **Next** (վարիանտ), **Reset**
+  (վերադարձ canvas ֆասադին), **✕**, **scale** սլայդեր 0.6–1.8× (T-0008)
+- Ընտրությունը և scale-ը `world.buildings[i]` ՕԲՅԵԿՏԻՆ են կապված — sprite-երը z-flow-ով
+  րեցիրկուլացվում են, ասեթն ու չափը շենքի հետ են գնում-գալիս
+- Կիսատ/վնասված նկարը Chrome-ը լուռ decode ա անում → սև texture. 8×8 sanity-check-ը
+  console-ում warn ա տալիս («ամբողջը սև/թափանցիկ»)
 - Aspect-ը շենքին (w/h, asset-spec 2.1) չի համընկնում → v1-ում ձգվում ա, console-ում warn
 - Բյուջե. 0 filter, 0 լրացուցիչ display object. hit-test-ը միայն tap-ի պահին (24 շենք)
 - Կոդը՝ `feellab.js` (initAssetLab) + `world.js` (select/cycle/setBuildingTex/pickBuilding)
@@ -104,9 +125,10 @@ Pixi.js v8.16.0-ը քաշվում ա cdnjs-ից (pinned) — ինտերնետ ա
 
 `state()`, `placeBet(b)`, `hold(on)`, `cashout()`, `restart()`, `setCrash(d)` (sandbox
 crash-կետը ստիպել), `step(dt, n)` (դետերմինիստիկ քայլ՝ rAF-ից անկախ թեստի համար),
-`budget()`, `P`, `world` (`buildings[i]`, `pickBuilding(x, y)`),
+`budget()`, `P`, `world` (`buildings[i]`, `pickBuilding(x, y)`, `scales()`),
 `asset` — Asset Lab. `select(i)`, `selected()`, `cycle()`, `face("front"|"side")`,
-`loadFile(file)`, `loadUrl("assets/papi-run-20f.webp")` (drop-ի տեղ՝ թեստի համար)։
+`scale(1.4)`, `loadFile(file)`, `loadUrl("assets/papi-run-20f.webp")` (drop-ի տեղ՝ թեստի համար),
+`feel.showGroup("light")`, `relight("skyDark")` (P-ն ձեռքով փոխելուց հետո)։
 
 ## Ասեթ
 

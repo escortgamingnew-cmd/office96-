@@ -3,8 +3,8 @@
  * արդյունքը՝ SANDBOX fake-book-ից՝ bet-ի պահին (D-003)։ RGS/network ԴԵՌ չկա։
  * Ոչ մի filter, DPR cap ≤2, pooling — մոբայլի բյուջեն սուրբ ա։
  */
-import { P, IS_MOBILE } from "./params.js";
-import { COL, makeSkyTex, makeChaserTex } from "./tex.js";
+import { P, IS_MOBILE, LIGHT_KEYS } from "./params.js";
+import { COL, applyLight, makeSkyTex, makeChaserTex } from "./tex.js";
 import { Camera } from "./cam.js";
 import { World } from "./world.js";
 import { UI } from "./ui.js";
@@ -26,6 +26,7 @@ import { initFeelLab, initAssetLab } from "./feellab.js";
   });
   app.ticker.maxFPS = IS_MOBILE ? 30 : 60;   // պրոտո. frame cap = մոբայլի սառեցման գլխավոր լծակը
   document.getElementById("stage").appendChild(app.canvas);
+  document.body.style.background = COL.fog;   // գունապնակը applyLight()-ից ա (P.skyDark), ոչ CSS-ի ֆիքս թվից
   const W = () => app.screen.width, H = () => app.screen.height;
 
   // ---------- Հերոսի spritesheet ----------
@@ -129,7 +130,20 @@ import { initFeelLab, initAssetLab } from "./feellab.js";
   function resetHero() { grandpa.visible = true; grandpa.x = 0; grandpa.y = CHAR_Y; grandpa.z = CHAR_Z(); grandpa.rot = 0; grandpa.sw = CHAR_W; grandpa.sh = CHAR_H; grandpa.frame = 0; }
 
   // ---------- Feel Lab / FPS / debug ----------
-  initFeelLab(() => { camCur.fov = P.fov; });
+  // Լույս (T-0008). Գունապնակը անմիջապես (գետինը ամեն կադր COL-ից ա կարդում), texture regen-ը debounce-ով (slider-ը քաշելիս ամեն tick-ին 20 canvas չնկարենք)
+  let relightTO = 0, relightKeys = new Set();
+  function relight(key) {
+    applyLight();
+    app.renderer.background.color = COL.fog; document.body.style.background = COL.fog;
+    relightKeys.add(key);
+    clearTimeout(relightTO);
+    relightTO = setTimeout(() => {
+      const keys = relightKeys; relightKeys = new Set();
+      if (keys.has("*")) world.relight("*"); else for (const k of keys) world.relight(k);
+      if (keys.has("*") || keys.has("skyDark") || keys.has("fogHue")) { const old = sky.texture; sky.texture = makeSkyTex(); old.destroy(true); }
+    }, key === "*" ? 0 : 180);
+  }
+  const feelLab = initFeelLab({ world, onChange(key) { camCur.fov = P.fov; if (key === "*" || LIGHT_KEYS.has(key)) relight(key); } });
   const assetLab = initAssetLab({ app, world });   // DEV (T-0007). Stake build-ում հանվում ա Feel Lab-ի հետ
   const fpsEl = document.getElementById("fps");
   let fpsOn = false, fpsAcc = 0, fpsN = 0, fpsT = 0;
@@ -145,8 +159,10 @@ import { initFeelLab, initAssetLab } from "./feellab.js";
     setCrash: (d) => { if (book) book.crashDist = d; },
     step: (dt = 1 / 60, n = 1) => { for (let i = 0; i < n; i++) frame(dt); },   // դետերմինիստիկ քայլ (թեստ. rAF-ից անկախ)
     budget: () => ({ objs: world.objs.children.length, stars: world.stars.children.length, visible: world.objs.children.filter(c => c.visible).length }),
-    asset: assetLab,                             // select(i|b), selected(), cycle(), loadFile(f), loadUrl(u), face("front"|"side")
-    world,                                       // debug/QA. world.buildings[i], world.pickBuilding(x, y)
+    asset: assetLab,                             // select(i|b), selected(), cycle(), loadFile(f), loadUrl(u), face("front"|"side"), scale(sc)
+    world,                                       // debug/QA. world.buildings[i], world.pickBuilding(x, y), world.scales()
+    feel: feelLab,                               // showGroup("light"), group()
+    relight,                                     // relight("skyDark") — P-ն ձեռքով փոխելուց հետո
     P,
   };
 

@@ -41,40 +41,64 @@ export const P = {
   cars:      4,
   carSpd:    0,      // 0 = կայանած (պրոտոյի default. «ճամփան վազորդինն ա»); >0 = երթևեկություն
   winPct:    0.6,
+  // --- լույս (T-0008, 💡 պանել). 0/1 = v16_14-ի հին գունապնակը ճիշտ, default-ը՝ «մի քայլ ավելի գիշեր»
+  skyDark:   0.4,    // երկնքի/մշուշի/գետնի/ֆասադների խորությունը դեպի գիշեր (0 = պրոտոյի գույները)
+  fogHue:    0,      // մշուշի երանգ. −1 սառը կապույտ … +1 տաք մանուշակ
+  lampHalo:  1.35,   // լապտերի baked halo-ի ուժ (1 = պրոտո)
+  starBright: 1.2,   // աստղերի պայծառություն (1 = պրոտո, alpha .85)
+  bbNeon:    1.3,    // billboard-ի նեոն glow (1 = պրոտո)
   // --- rewind
   rewindLose: 0.55,  // loseAnim տեմպ. պարտությունից հետո (դանդաղ «ժապավեն»)
   rewindCash: 1.2,   // cashout-ից հետո (արագ)
 };
 export const P_DEF = { ...P };
+/* v16_14 պրոտոյի լույսը՝ before/after համեմատելու համար (💡 պանելի «v16_14» կոճակ) */
+export const LIGHT_PROTO = { skyDark: 0, fogHue: 0, lampHalo: 1, starBright: 1, bbNeon: 1, winPct: 0.6 };
 
-/* DEV պանելի սահմանումները. [key, պիտակ, min, max, step] */
-export const TUNE_DEFS = [
-  ["target",    "Մաքս արագ. մ/վ", 5, 60, 1],
-  ["accelK",    "Արագացում", 0.5, 12, 0.5],
-  ["stopDecel", "Ստոպ արագ.", 1, 25, 0.5],
-  ["loseDecel", "Կանգի փափուկ.", 0.4, 16, 0.1],
-  ["multRate",  "Մուլտի տեմպ", 0.01, 0.2, 0.005],
-  ["animFps",   "Անիմ FPS", 6, 60, 1],
-  ["stride",    "Քայլ/ցիկլ (մ)", 2, 14, 0.1],
-  ["wobble",    "Դրդռոց", 0, 1.5, 0.05],
-  ["camY",      "Կամ. բարձր.", 1, 14, 0.1],
-  ["camZ",      "Կամ. հեռավ.", 6, 30, 0.5],
-  ["fov",       "FOV", 30, 90, 1],
-  ["zoomK",     "Zoom ուժ", 0, 2, 0.05],
-  ["camLag",    "Կամ. արագ.", 0.5, 12, 0.5],
-  ["shake",     "Shake", 0, 3, 0.05],
-  ["shakeF",    "Shake հաճախ.", 2, 40, 1],
-  ["tilt",      "Tilt", 0, 1, 0.05],
-  ["rhythm",    "Կամ. ռիթմ", 0, 1.5, 0.05],
-  ["losePull",  "Պարտ. հետ քաշ", 0, 8, 0.1],
-  ["roadW",     "Ասֆալտ լայնք", 6, 24, 0.5],
-  ["gap",       "Շենք ճամփից", 0, 20, 0.5],
-  ["seg",       "Շենք քայլ", 8, 40, 1],
-  ["lampStep",  "Լապտեր քայլ", 8, 30, 1],
-  ["fogFar",    "Մշուշ", 60, 400, 10],
-  ["bbEvery",   "Billboard վրկ", 3, 45, 1],
-  ["carSpd",    "Մեք. արագ.", 0, 30, 1],
-  ["winPct",    "Պատուհան վառ %", 0, 1, 0.05],
-  ["rewindLose","Rewind պարտ.", 0.2, 3, 0.05],
-  ["rewindCash","Rewind cashout", 0.2, 4, 0.05],
+/* DEV պանելի խմբերը (icon dock). [id, icon, պիտակ] */
+export const TUNE_GROUPS = [
+  ["cam",   "📷", "Կամերա"],
+  ["run",   "🏃", "Վազք"],
+  ["city",  "🌆", "Քաղաք"],
+  ["light", "💡", "Լույս"],
+  ["misc",  "⚙",  "Այլ"],
 ];
+
+/* DEV պանելի սահմանումները. [key, պիտակ, min, max, step, խումբ] */
+export const TUNE_DEFS = [
+  ["target",    "Մաքս արագ. մ/վ", 5, 60, 1, "run"],
+  ["accelK",    "Արագացում", 0.5, 12, 0.5, "run"],
+  ["stopDecel", "Ստոպ արագ.", 1, 25, 0.5, "run"],
+  ["loseDecel", "Կանգի փափուկ.", 0.4, 16, 0.1, "run"],
+  ["multRate",  "Մուլտի տեմպ", 0.01, 0.2, 0.005, "run"],
+  ["animFps",   "Անիմ FPS", 6, 60, 1, "run"],
+  ["stride",    "Քայլ/ցիկլ (մ)", 2, 14, 0.1, "run"],
+  ["wobble",    "Դրդռոց", 0, 1.5, 0.05, "run"],
+  ["camY",      "Կամ. բարձր.", 1, 14, 0.1, "cam"],
+  ["camZ",      "Կամ. հեռավ.", 6, 30, 0.5, "cam"],
+  ["fov",       "FOV", 30, 90, 1, "cam"],
+  ["zoomK",     "Zoom ուժ", 0, 2, 0.05, "cam"],
+  ["camLag",    "Կամ. արագ.", 0.5, 12, 0.5, "cam"],
+  ["shake",     "Shake", 0, 3, 0.05, "cam"],
+  ["shakeF",    "Shake հաճախ.", 2, 40, 1, "cam"],
+  ["tilt",      "Tilt", 0, 1, 0.05, "cam"],
+  ["rhythm",    "Կամ. ռիթմ", 0, 1.5, 0.05, "cam"],
+  ["losePull",  "Պարտ. հետ քաշ", 0, 8, 0.1, "cam"],
+  ["roadW",     "Ասֆալտ լայնք", 6, 24, 0.5, "city"],
+  ["gap",       "Շենք ճամփից", 0, 20, 0.5, "city"],
+  ["seg",       "Շենք քայլ", 8, 40, 1, "city"],
+  ["lampStep",  "Լապտեր քայլ", 8, 30, 1, "city"],
+  ["fogFar",    "Մշուշ", 60, 400, 10, "city"],
+  ["bbEvery",   "Billboard վրկ", 3, 45, 1, "city"],
+  ["carSpd",    "Մեք. արագ.", 0, 30, 1, "city"],
+  ["skyDark",   "Երկնքի մթություն", 0, 1, 0.05, "light"],
+  ["fogHue",    "Մշուշի երանգ", -1, 1, 0.05, "light"],
+  ["winPct",    "Պատուհան վառ %", 0, 1, 0.05, "light"],
+  ["lampHalo",  "Լապտերի halo", 0, 2.5, 0.05, "light"],
+  ["starBright","Աստղեր", 0, 1.5, 0.05, "light"],
+  ["bbNeon",    "Billboard նեոն", 0, 2.5, 0.05, "light"],
+  ["rewindLose","Rewind պարտ.", 0.2, 3, 0.05, "misc"],
+  ["rewindCash","Rewind cashout", 0.2, 4, 0.05, "misc"],
+];
+/* Լույսի բանալիները — փոփոխությունը texture regen ա պահանջում (debounce-ով, main.js) */
+export const LIGHT_KEYS = new Set(["skyDark", "fogHue", "winPct", "lampHalo", "starBright", "bbNeon"]);

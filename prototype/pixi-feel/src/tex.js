@@ -2,7 +2,10 @@
  * ոչ մի runtime filter։ Ամեն glow baked ա։ Գունապնակը v16_14 պրոտոյի ռենդերից ա
  * (գունատ low-poly քաղաք, կապույտ գիշեր, բաց մշուշ)։
  */
-export const COL = {
+import { P } from "./params.js";
+
+/* v16_14 պրոտոյի գունապնակը — ԱՆՓՈՓՈԽ ռեֆերենս։ COL-ը սրանից ա հաշվվում applyLight()-ով (P.skyDark/fogHue) */
+export const COL_PROTO = Object.freeze({
   skyTop: "#16418f", skyMid: "#2a68b8", skyHor: "#6d97d3",
   fog: "#b6bfda",                        // հորիզոնի/մշուշի գույնը (ամեն ինչ սրան ա հալվում)
   asphalt: "#8e93b6", asphaltEdge: "#7d82a3", lane: "#dcdde8",
@@ -15,7 +18,34 @@ export const COL = {
   lampPole: "#8f91aa", lampHead: "#ffd27a",
   trunk: "#8a5a3a", crowns: ["#8fd05a", "#7cc24a", "#a0dc66"],
   cars: ["#e0475a", "#ff6bc7", "#5ad0e8", "#f0d060"],
+});
+/* Խորը գիշերի թիրախները (skyDark=1)։ Նույն քաղաքն ա, նույն pastel-ը — ուղղակի ավելի ուշ ժամ */
+const COL_NIGHT = {
+  skyTop: "#050f2e", skyMid: "#0f2c66", skyHor: "#35538f", fog: "#5c6890",
+  asphalt: "#4f5476", asphaltEdge: "#41455f", lane: "#b9bacb",
+  sidewalk: "#9a99b0", curb: "#7a7a92", ground: "#8d8ea6",
+  wallK: 0.42,                           // ֆասադները մթնում են սրա չափով (պատուհանները չեն — կոնտրաստը դրանից ա)
+  winDark: "#3f3c5c", roofCap: "#77768c", base: "#7f7e94",
 };
+export const COL = { ...COL_PROTO, walls: [...COL_PROTO.walls] };
+
+const _hx = (s) => [parseInt(s.slice(1, 3), 16), parseInt(s.slice(3, 5), 16), parseInt(s.slice(5, 7), 16)];
+const _str = (r, g, b) => "#" + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join("");
+const _mix = (a, b, t) => { const A = _hx(a), B = _hx(b); return _str(A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t, A[2] + (B[2] - A[2]) * t); };
+const _shade = (a, k) => { const A = _hx(a); return _str(A[0] * (1 - k), A[1] * (1 - k), A[2] * (1 - k)); };
+/* մշուշի երանգ. h<0 սառը (կապույտ), h>0 տաք (մանուշակ-վարդագույն) — ալիքային ձևափոխում */
+const _hue = (a, h) => { const A = _hx(a), k = Math.abs(h); return h < 0 ? _str(A[0] * (1 - .22 * k), A[1] * (1 - .06 * k), A[2] * (1 + .10 * k)) : _str(A[0] * (1 + .14 * k), A[1] * (1 - .14 * k), A[2] * (1 + .02 * k)); };
+
+/* Գունապնակը P-ից. skyDark 0 = պրոտոն 1:1, 1 = COL_NIGHT։ Կանչվում ա boot-ին ու 💡 պանելից (հետո՝ regen) */
+export function applyLight() {
+  const d = Math.max(0, Math.min(1, P.skyDark)), h = Math.max(-1, Math.min(1, P.fogHue));
+  for (const k of ["skyTop", "skyMid", "skyHor", "fog", "asphalt", "asphaltEdge", "lane", "sidewalk", "curb", "ground", "winDark", "roofCap", "base"])
+    COL[k] = _mix(COL_PROTO[k], COL_NIGHT[k], d);
+  for (const k of ["skyHor", "fog", "ground", "sidewalk", "asphalt"]) COL[k] = _hue(COL[k], h * (k === "fog" || k === "skyHor" ? 1 : .5));
+  for (let i = 0; i < COL_PROTO.walls.length; i++) COL.walls[i] = _shade(COL_PROTO.walls[i], COL_NIGHT.wallK * d);
+  return COL;
+}
+applyLight();
 
 let _seed = 12345;
 export function rnd(a = 0, b = 1) { // deterministic — նույն քաղաքը ամեն reload-ին
@@ -76,7 +106,8 @@ export function facadeCanvas(wM, hM, wall, winPct, opts = {}) {
     x.fillStyle = "rgba(70,62,96,.35)"; x.fillRect(X - 3, Y - 3, WW + 6, WH + 6); // շրջանակ
     if (lit) {
       const col = pick(COL.winLit);
-      x.shadowColor = col; x.shadowBlur = 5; x.fillStyle = col; x.fillRect(X, Y, WW, WH); x.shadowBlur = 0;
+      // գիշերը վառ պատուհանը ավելի ա «ճառագայթում» (կոնտրաստը ֆասադի մթնելուց + glow-ից ա)
+      x.shadowColor = col; x.shadowBlur = 5 + 7 * P.skyDark; x.fillStyle = col; x.fillRect(X, Y, WW, WH); x.shadowBlur = 0;
     } else { x.fillStyle = COL.winDark; x.fillRect(X, Y, WW, WH); }
     x.fillStyle = "rgba(0,0,0,.12)"; x.fillRect(X, Y, WW, WH * .12); // sill ստվեր
   }
@@ -103,15 +134,24 @@ export function facadeCanvas(wM, hM, wall, winPct, opts = {}) {
 export function makeBuildingVariant() {
   // պրոտոյի ռենդերում շենքերը GLB-ից ֆիքս ~12մ բարձրության էին (cloneSlot(sl, 12)), լայնությունը՝ տարբեր.
   // tower/block արխետիպները պահված են, բարձրության ցրվածքը՝ նեղացրած էդ տեսքին
-  const tower = rnd() < .5;
-  const h = tower ? rnd(10.5, 13) : rnd(8, 10.5);
-  const d = tower ? rnd(5, 7) : rnd(8, 12);
-  const w = tower ? rnd(5, 8) : rnd(9, 14);
-  const wall = pick(COL.walls);
-  const winPct = 0.6;
-  const front = tex(facadeCanvas(w, h, wall, winPct, {}));
-  const side = tex(facadeCanvas(d, h, wall, winPct, { door: true, awning: rnd() < .4 ? pick(COL.awnings) : null }));
-  return { w, h, d, front, side, antenna: h > 12 };
+  // Seed-ը պահվում ա. regen()-ը (💡 պանել՝ winPct/skyDark) նույն երկրաչափությունն ու պատուհանների նույն
+  // դասավորությունն ա տալիս, միայն գույներն են նոր։ Վերադարձնում ա հին texture-ները՝ destroy-ի համար։
+  const seed = _seed, v = { seed, front: null, side: null };
+  const gen = () => {
+    const tower = rnd() < .5;
+    const h = tower ? rnd(10.5, 13) : rnd(8, 10.5);
+    const d = tower ? rnd(5, 7) : rnd(8, 12);
+    const w = tower ? rnd(5, 8) : rnd(9, 14);
+    const wall = pick(COL.walls);
+    const old = [v.front, v.side];
+    v.w = w; v.h = h; v.d = d; v.antenna = h > 12;
+    v.front = tex(facadeCanvas(w, h, wall, P.winPct, {}));
+    v.side = tex(facadeCanvas(d, h, wall, P.winPct, { door: true, awning: rnd() < .4 ? pick(COL.awnings) : null }));
+    return old;
+  };
+  gen();
+  v.regen = () => { const save = _seed; _seed = seed; const old = gen(); _seed = save; return old; };
+  return v;
 }
 
 export function makeRoofTex() {
@@ -130,19 +170,23 @@ export function makeAntennaTex() {
   return tex(c);
 }
 
-/* Լապտեր. սյուն 5մ, թև 1.2մ դեպի ճամփա, գլուխ + baked halo (2.6մ) */
+/* Լապտեր. սյուն 5մ, թև 1.2մ դեպի ճամփա, գլուխ + baked halo (2.6մ × P.lampHalo)։
+ * Canvas-ը 4.4×6.6մ ա, որ halo-ն 2.5×-ի վրա էլ տեղավորվի. սյունը նույն տեղում ա (poleX anchor) */
 export function makeLampTex() {
-  const S = 20, W = 3.2 * S, H = 5.6 * S;    // world 3.2×5.6 մ
+  const S = 20, W = 4.4 * S, H = 6.6 * S, halo = Math.max(0, P.lampHalo);
   const [c, x] = cv(W, H);
-  const px = 2.1 * S, hy = (5.6 - 4.9) * S;   // սյունը աջ մասում, թևը ձախ (ճամփայի կողմ)
-  const g = x.createRadialGradient(px - 1.0 * S, hy, 2, px - 1.0 * S, hy, 1.3 * S);
-  g.addColorStop(0, "rgba(255,210,122,.9)"); g.addColorStop(.35, "rgba(255,210,122,.45)"); g.addColorStop(1, "rgba(255,210,122,0)");
-  x.fillStyle = g; x.beginPath(); x.arc(px - 1.0 * S, hy, 1.3 * S, 0, 7); x.fill();
+  const px = 3.3 * S, hy = (6.6 - 4.9) * S;   // սյունը աջ մասում, թևը ձախ (ճամփայի կողմ)
+  if (halo > 0) {
+    const r = 1.3 * S * (0.6 + 0.4 * halo), a0 = Math.min(1, .9 * halo), a1 = Math.min(.85, .45 * halo);
+    const g = x.createRadialGradient(px - 1.0 * S, hy, 2, px - 1.0 * S, hy, r);
+    g.addColorStop(0, `rgba(255,210,122,${a0})`); g.addColorStop(.35, `rgba(255,210,122,${a1})`); g.addColorStop(1, "rgba(255,210,122,0)");
+    x.fillStyle = g; x.beginPath(); x.arc(px - 1.0 * S, hy, r, 0, 7); x.fill();
+  }
   x.fillStyle = COL.lampPole;
   x.fillRect(px - .09 * S, H - 5 * S, .18 * S, 5 * S);           // սյուն
-  x.fillRect(px - 1.1 * S, (5.6 - 5) * S, 1.2 * S, .09 * S);   // թև
+  x.fillRect(px - 1.1 * S, H - 5 * S, 1.2 * S, .09 * S);        // թև
   x.fillStyle = COL.lampHead; x.fillRect(px - 1.5 * S, hy - .08 * S, 1.0 * S, .16 * S); // գլուխ
-  return { texture: tex(c), wM: 3.2, hM: 5.6, poleX: 2.1 / 3.2 }; // poleX = anchor x
+  return { texture: tex(c), wM: 4.4, hM: 6.6, poleX: 3.3 / 4.4 }; // poleX = anchor x
 }
 
 /* Ծառ. բուն + low-poly սաղարթ (icosahedron-ի silhouette՝ բազմանկյուն) */
@@ -200,14 +244,15 @@ export function makeCarTex(rear) {
 
 /* Billboard 8×4մ վահանակ 5մ սյուների վրա — placeholder գովազդ (canvas տեքստ) */
 export function makeBillboardTex(line1, line2, c1, c2) {
-  const S = 28, W = 8 * S, H = 9 * S; // 9մ ընդհանուր բարձր. (5 սյուն + 4 վահանակ)
+  const S = 28, W = 8 * S, H = 9 * S, neon = Math.max(0, P.bbNeon); // 9մ ընդհանուր բարձր. (5 սյուն + 4 վահանակ)
   const [c, x] = cv(W, H);
   x.fillStyle = "#8f91aa"; x.fillRect(.7 * S - 3, 4 * S, 6, 5 * S); x.fillRect(W - .7 * S - 3, 4 * S, 6, 5 * S);
   x.fillStyle = "#12093a"; x.fillRect(0, .6 * S, W, 4 * S);
-  x.strokeStyle = "#ff2bd6"; x.lineWidth = 5; x.strokeRect(6, .6 * S + 6, W - 12, 4 * S - 12);
+  x.strokeStyle = "#ff2bd6"; x.lineWidth = 5; x.shadowColor = "#ff2bd6"; x.shadowBlur = 10 * neon; x.strokeRect(6, .6 * S + 6, W - 12, 4 * S - 12);
   x.textAlign = "center"; x.textBaseline = "middle";
-  x.fillStyle = c1; x.font = "bold " + (1.5 * S) + "px Arial"; x.shadowColor = c1; x.shadowBlur = 14; x.fillText(line1, W / 2, 2.0 * S);
-  x.fillStyle = c2; x.font = "bold " + (0.9 * S) + "px Arial"; x.shadowColor = c2; x.shadowBlur = 10; x.fillText(line2, W / 2, 3.6 * S);
+  x.fillStyle = c1; x.font = "bold " + (1.5 * S) + "px Arial"; x.shadowColor = c1; x.shadowBlur = 14 * neon; x.fillText(line1, W / 2, 2.0 * S);
+  if (neon > 1) x.fillText(line1, W / 2, 2.0 * S);                  // երկրորդ անցում = ավելի խիտ glow
+  x.fillStyle = c2; x.font = "bold " + (0.9 * S) + "px Arial"; x.shadowColor = c2; x.shadowBlur = 10 * neon; x.fillText(line2, W / 2, 3.6 * S);
   x.shadowBlur = 0;
   return { texture: tex(c), wM: 8, hM: 9 };
 }

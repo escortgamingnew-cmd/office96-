@@ -1,7 +1,7 @@
 # T-0008 — Builder v2. Feel Lab UX + գիշերային ռենդեր + լույսի կառավարում
 
 - **Author.** Aram (founder), ձևակերպումը՝ Սևակ (lead)
-- **Assignee.** — (դատարկ մինչև doing)
+- **Assignee.** Տիգրան
 - **Opened.** 2026-09-10
 - **Priority.** P1 — pixi build փուլն ենք, դիզայն-ֆրոնտ. հիմնադիրը live ա աշխատում գործիքով
 
@@ -52,3 +52,39 @@ Asset Lab)։ Ստուգելի արդյունքներով.
 
 - [2026-09-10] Սևակ. բացվեց հիմնադրի 5-կետանոց պատվերով, approved
   (հիմնադրի թասկ, D-002)։
+- [2026-09-10 13:58] Տիգրան. doing → review։ 5 կետն էլ արված.
+  1. Icon dock (📷🏃🌆💡⚙) — `TUNE_DEFS`-ում 6-րդ դաշտ՝ խումբ, պանելը միայն
+     ակտիվ խմբի row-երն ա ցույց տալիս, խումբը localStorage-ում։ Copy JSON /
+     Reset ընդհանուր։ Մոբայլում dock-ի կոճակները 36px։
+  2. Գետին — `_drawGround`. մայթի կարաններ ամեն 2մ (roadPhase-ով հոսում են,
+     <60մ), curb երես/վերև երկտոն + ստվերագիծ ասֆալտի ու մայթի վրա, եզրի
+     մաշվածության բաց շերտ, բանդերի sin-ալիք (աշխարհի z-ով, չի թարթում)։
+     Նույն մեկ Graphics, 0 filter, մանրամասնությունը <70մ։ CPU 0.45 ms/կադր
+     desktop (step()-ով չափած, 300 կադր վազքի ժամանակ)։
+  3. Scale — `b.sc` (0.6–1.8) + `b.sv` (վարիանտի չափերը × sc). render-ը sv-ն ա
+     կարդում, փոփոխությունը միայն սահմանելիս ա հաշվվում։ Toolbar-ում slider,
+     `__feel.asset.scale(1.4)`։ 239մ հոսքից հետո L3 ×1.60 տեղում ա։
+  4. Գիշեր default — `applyLight()` (tex.js). COL_PROTO (v16_14, անփոփոխ) →
+     COL_NIGHT mix-ով P.skyDark-ով, ֆասադները մթնում են, պատուհանները չեն
+     (+glow), default skyDark .4 / lampHalo 1.35 / starBright 1.2 / bbNeon 1.3։
+     «v16_14 լույս (հին)» կոճակը 💡 պանելում = հին գունապնակը ճիշտ, Reset =
+     նոր default։
+  5. 💡 պանել — skyDark, fogHue, winPct, lampHalo, starBright, bbNeon։ Գունապնակը
+     անմիջապես, regen 180ms debounce-ով (երկինք/ֆասադ/լապտեր/billboard),
+     ֆասադները seed-ով՝ նույն շենքեր ու պատուհաններ։ Հին texture-ները destroy։
+  Բյուջե. 122 obj, 0 filter, 0 նոր display object, per-frame ալոկացիա չկա
+  (sv-ն scale-ի պահին ա)։ Copy JSON = P + bScale։ Reset = P_DEF + scale-երը 1։
+  Ստուգում. serve.py desktop + 375×812 (Android UA, fog 120), console մաքուր,
+  node --check 8 ֆայլին։ Bundle-ներ. build-artifact.ps1 և -flat.ps1 ԱՌԱՆՑ
+  փոփոխության հավաքվում են, flat-ի 6 string patch-ը բռնում ա (ստուգած
+  Contains-ով), երկուսն էլ բրաուզերում console մաքուր, scale/relight
+  աշխատում են։ Flat-ում ֆասադ regen չկա (v.regen բացակայում ա, կողը baked ա)
+  — winPct/skyDark-ը էնտեղ միայն reload-ով, գիտակցված։
+  Լուսինեի T-0007 §1–3 վերցրած. blank-նկարի 8×8 sanity warn, loadUrl-ի label
+  կարճ, face-ը նոր ընտրության հետ front։ §4 (bundle-ի decode background
+  tab-ում) Սևակի script-ինն ա, չդիպա։
+  Review-ի կետերը. (ա) 📷-ին սեղմելիս միայն կամերայի սլայդերներն են, մոբայլում
+  էլ; (բ) գետինը մոտիկից՝ կարաններ հոսում են, curb երկտոն; (գ) շենք ընտրի,
+  scale 1.6, վազի 200մ+ — չափը մնում ա; (դ) v16_14 կոճակ ↔ Reset՝ before/after;
+  (ե) 💡 սլայդերները քաշելիս reload չկա, FPS չի ընկնում, Copy JSON-ում նոր
+  դաշտերը կան։

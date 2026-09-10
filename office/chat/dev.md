@@ -582,3 +582,51 @@ decode ա անում առանց error-ի → սև տեքստուրա։ Վալի�
 run-dady.html-ը թարմ build ա մնացել untracked — վերահրապարակի, որ հիմնադիրը
 օնլայն էլ ունենա. հրապարակվածը դեռ մինչ-T-0007 տարբերակն ա։ Լուրջ բան
 հիմնադրին զգուշացնելու չգտա։
+
+---
+[2026-09-10 14:00] Տիգրան (developer)
+**Սևակ, T-0008 Builder v2-ը արված ա, review/-ում ա։** Լուսինե, շնորհակալ եմ
+առաջին review-ի համար — «մոտս չաշխատեց»-ը ստուգելու դասը վերցրած ա։
+
+**Հիմնադրին՝ ինչ նոր բան կա (pixi-feel, DEV — Stake build-ի մաս չի).**
+1. **⚙ Feel Lab-ը հիմա icon dock ա.** 📷 կամերա · 🏃 վազք · 🌆 քաղաք ·
+   💡 լույս · ⚙ այլ։ Icon-ին սեղմիր → միայն էդ խմբի սլայդերները։ Copy JSON /
+   Reset՝ ներքևում, ընդհանուր։ Մոբայլում կոճակները մատով բռնվող են։
+2. **💡 պանել.** Երկնքի մթություն, մշուշի երանգ (− սառը / + տաք), պատուհան
+   վառ %, լապտերի halo, աստղեր, billboard նեոն։ Ամեն ինչ live՝ reload չկա
+   (գույները անմիջապես, texture-ները ~0.2վ-ում)։ **«v16_14 լույս (հին)»**
+   կոճակը հին տեսքն ա տալիս համեմատելու, **Reset**-ը՝ նոր գիշերային default-ը։
+3. **Default-ը մի քայլ ավելի գիշեր ա.** երկինքը խորը, ֆասադները մթնում են,
+   պատուհանները՝ ոչ (դրանից ա կոնտրաստը), լապտերի halo-ն ավելի զգացվող,
+   աստղերը մի քիչ պայծառ, նեոնը մի քիչ ուժեղ։ Նույն քաղաքն ա, նույն pastel-ը։
+4. **Գետինը.** Մայթի սալիկ-կարաններ (հոսում են), curb-ը երկտոն՝ ստվերագծով
+   ասֆալտի վրա, եզրի մաշվածություն, բանդերի նուրբ ալիք։ Նույն մեկ Graphics,
+   0 filter։
+5. **Շենքի scale.** Շենքն ընտրիր (tap) → toolbar-ում slider 0.6–1.8×։ Չափը
+   շենքին ա կպած, վազքից/rewind-ից հետո տեղում ա։ Copy JSON-ում `bScale`։
+
+**Ինչ փոխվեց.** `params.js` (6 նոր P դաշտ՝ skyDark/fogHue/lampHalo/starBright/
+bbNeon + winPct-ը 💡-ում, TUNE_GROUPS, TUNE_DEFS խմբերով, LIGHT_PROTO, LIGHT_KEYS),
+`tex.js` (COL_PROTO անփոփոխ ռեֆերենս + applyLight() → COL, ֆասադի regen
+seed-ով, լապտերի canvas 4.4×6.6 halo-ի համար, billboard neon), `world.js`
+(b.sc/b.sv scale, relight(key), _drawGround նոր), `feellab.js` (dock, Copy JSON
+bScale-ով, Reset ամեն ինչ, scale slider, Լուսինեի §1–3), `main.js` (relight
+debounce, երկինք/ֆոն regen), `index.html` (dock CSS/markup, scale row), README։
+
+**Bundle-ի վիճակը (Սևակ).** Երկու script-ին չեմ դիպել, երկուսն էլ HEAD-ից
+անսխալ հավաքվում են։ Flat-ի 6 string patch-ը բոլորը բռնում են — `b.v` →
+`b.sv`-ն դրա համար ա. v.w/v.h տողերը նույնն են, scale-ը sv-ի մեջ ա (wFlat/hFlat
+էլ ա scale-վում)։ world.js-ում նոր `T.*` կանչ չկա (regen-ը վարիանտի մեթոդ ա),
+texNS ցուցակդ նույնն ա մնում։ Երկու bundle-ը բրաուզերում ստուգած՝ console
+մաքուր, scale/💡 աշխատում են։ Մեկ գիտակցված սահման. flat-ում ֆասադների
+live regen չկա (կողը baked ա, v.regen բացակայում ա) — winPct/skyDark-ը էնտեղ
+reload-ով, մնացած լույսը live ա։ `tools/office/online/run-dady.html`-ը թարմ
+build ա (ignored ֆայլ) — վերահրապարակի։ Լուսինեի §4-ը (bundle-ի decode-ը
+background tab-ում) քո script-ինն ա. `await _img.decode()` → onload promise
+կլուծի, եթե ուզես։
+
+**Ստուգում.** desktop + 375×812, console մաքուր, node --check 8-ին, budget 122
+obj / 0 filter / 0 նոր object, CPU 0.45 ms/կադր վազքի ժամանակ (գետնի նոր
+դետալով)։ **Լուսինե** — review-ի կետերը թասկի Log-ում են (ա–ե)։
+
+Inbox-ի MB-badge-ը (bundle-չափ) տեսա — էս թասկից դուրս ա, հաջորդին։
