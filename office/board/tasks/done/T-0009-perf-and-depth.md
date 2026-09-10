@@ -128,3 +128,50 @@
   ուղիղ (զիգզագ չկա), կարանները հոսում են, հեռվում shimmer չկա. (դ) 🌆 roadW քաշելիս գետինը
   հետևում ա (regen throttle). (ե) 375×812 `__feel.bench(3600)` max < 80, console մաքուր.
   (զ) Copy JSON-ում depthFx/sideDark/baseShadow, Reset → ON։
+
+- [2026-09-10 18:30] Լուսինե (qa). **Review ԱՆՑԱՎ → done/**։ Ստուգված՝ իրական
+  աշխատացնելով (serve.py 7788 + Browser pane, desktop 1614×918 + 375×812
+  Android emulation), HEAD = 596b1a8։
+
+  **1. Perf — երկու աղբյուրն էլ ստուգված, fix-երը հաստատված.**
+  - **Աղբյուր A (Ticker maxFPS).** Տիգրանի սիմուլյացիան ԱՆԿԱԽ վերարտադրեցի
+    խաղի loaded Pixi 8.16.0-ի ԻՍԿԱԿԱՆ Ticker class-ով, սինթետիկ timestamp-ներ,
+    իմ seed-երով. maxFPS=60 @60Hz ±0.3ms → **103 կրկնակի (>25ms) կադր/րոպե**
+    (Տիգրանի 104-ի դիմաց), eff 58.3fps, max delta 33.5ms. ±1ms → 120 (իրա՝ 119).
+    @144Hz → eff 58.5, մշտական judder (max 21.6ms). **maxFPS=0 → 0 կրկնակի, max
+    17.0ms**։ Մոբայլի 30 cap-ը՝ նորմալ (eff 29.5)։ Live boot-ում desktop-ում
+    `ticker.maxFPS === 0` ✓։
+  - **Աղբյուր B (գետնի ալոկացիաներ).** Կառուցվածքը ստուգած՝ ground = Container
+    [1 Mesh (2048px tex) + 1 fog Sprite], Graphics/poly չկա ✓։ CPU frame time
+    `bench(3600)` վազքի ժամանակ. **desktop p50 0.3 / p95 0.4 / p99 0.5 / max 1.0,
+    over40 = 0; մոբայլ p50 0.3 / p95 0.4 / p99 0.5 / max 4.6, over40 = 0** —
+    3600 կադրում GC ցատկ չկա, այսինքն ալոկացիաների զրոյացումը իրական ա։
+  - **Ազնիվ սահման (նույնը, ինչ Տիգրանինը).** rAF-ի իրական perf(60) visible
+    tab-ում ինձ էլ չհաջողվեց. pane-ը hidden էր (rAF սառած), իսկ իրական Chrome-ում
+    tab-ս առանց հիմնադրի պատուհանից focus խլելու ակտիվացնել չկա — ինքը հենց էդ
+    պահին flat A/B-ն էր խաղում, չխանգարեցի։ Փոխարենը վերևի երկու անկախ չափումն
+    են, որոնք երկու hitch-աղբյուրն էլ ուղիղ ծածկում են։ **Հիմնադրին. visible
+    tab-ում մեկ անգամ `await __feel.perf(60)` — over40 պիտի 0 լինի. > 0 եղավ՝
+    reopen կանեմ։**
+  **2. Գետին.** Սալիկներ/կարաններ/հատիկ/կարկատան/dash երևում են (desktop +
+  մոբայլ կադր)։ Հոսքը ստուգած պիքսելով՝ մայթի լյումինանս-պրոֆիլը կանգնած՝
+  diff 0.00, վազքում՝ 3.8–4.7/6 կադր ✓։ Curb/dash ուղիղ են, զիգզագ չկա։
+  Regen՝ skyDark 0.4→0.8 tex uid 98→125 ✓, fogHue → 148 ✓, roadW 4 արագ
+  քաշում (14→8→12→15) → առանց կախելու, ճամփան լայնացավ, uid →171 ✓։
+  **3. Հակա-թղթե.** 💡 toggle OFF→ON, չափած canvas-ից (լյումինանս, նույն կադրը).
+  կողի երես **166.0 → 124.9**, տանիք L **114.8 → 85.6** / R **103.4 → 79.2**
+  (պարապետ), հիմքի գոտի **175.1 → 156.3** (կոնտակտ ստվեր)։ OFF = հին տեսք,
+  visible 146 → 84 (Տիգրանի 85-ի դիմաց)։ sideDark 0.28→0.6 → կող 124.9→78.1
+  live ✓. baseShadow slider → footQ.alpha 0.094↔0.842, մշուշով մարում ✓։
+  Copy JSON-ում depthFx/sideDark/baseShadow երեքն էլ կան ✓, Reset → բոլորը
+  default + ON ✓։
+  **4. Ռեգրեսիա.** Ռաունդի լրիվ ցիկլ՝ bet→hold→run (mult 4.85@77մ)→cashout→
+  idle ✓; catch @setCrash(30) → CAUGHT 2.51x → Keep Running → idle→նոր bet ✓։
+  Refresh ընդհատված ռաունդի կեսին → մաքուր boot ✓։ Կրկնակի placeBet → չկոտրվեց ✓։
+  Asset Lab՝ select/cycle (vi 4→5)/loadUrl(papi)/scale 1.5/toolbar Reset/✕ ✓։
+  Feel Lab dock՝ խմբերի ֆիլտրումը ✓։ Console՝ խաղի 0 error (միակ error-ը իմ
+  գործիքային extract-փորձինն էր, ոչ խաղինը)։ Budget՝ **194 obj / 0 filter**
+  (stage-ը ամբողջությամբ սկանած), DPR cap 2/1.5 ✓, mobile gate-երը (UA→30fps,
+  fogFar 120, 140 աստղ) ✓։
+  **5. Bundle-ներ.** Երկուսն էլ HEAD-ից անսխալ՝ 987/989 KB, output-ը temp-ում,
+  repo-ն մաքուր (git status դատարկ), charset meta-ն տեղում ✓։
