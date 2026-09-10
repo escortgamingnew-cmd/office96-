@@ -18,5 +18,7 @@ class H(SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 7788
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    if hasattr(sys.stdout, "reconfigure"):  # pipe-ի տակ (cp1252) հայերեն print-ը չընկնի
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     print(f"pixi-feel → http://127.0.0.1:{port}/  (Ctrl+C՝ կանգնեցնել)")
     ThreadingHTTPServer(("127.0.0.1", port), H).serve_forever()

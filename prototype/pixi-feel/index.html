@@ -114,6 +114,16 @@
   #tune .btns { display:flex; gap:6px; margin-top:10px; }
   #tune button { flex:1; border:1px solid rgba(255,255,255,.14); background:rgba(255,201,77,.15); color:#e8e4f0; border-radius:6px; padding:5px 0; font-size:11px; }
   #tune .note { color:#9aa0b8; margin-top:8px; line-height:1.5; }
+  /* ---- DEV. Asset Lab toolbar (T-0007) — երևում ա, երբ շենք ա ընտրված ---- */
+  #alab { position:fixed; top:74px; right:10px; z-index:5; display:none; flex-direction:column; gap:5px; align-items:flex-end;
+          font-size:11px; color:#e8e4f0; background:rgba(14,19,27,.85); border:1px solid rgba(255,210,122,.4); border-radius:8px; padding:6px 8px; pointer-events:auto; }
+  #alab.show { display:flex; }
+  #alab .t { color:#ffd27a; letter-spacing:.08em; text-transform:uppercase; font-size:9px; }
+  #alab .t i { color:#ff6b6b; font-style:normal; border:1px solid #6b3030; border-radius:4px; padding:0 3px; margin-left:4px; }
+  #alab .r { display:flex; gap:4px; }
+  #alab button { border:1px solid rgba(255,255,255,.14); background:rgba(255,201,77,.15); color:#e8e4f0; border-radius:6px; padding:5px 8px; font-size:11px; min-width:34px; }
+  #alab button:active { background:rgba(255,201,77,.35); }
+  #alabFile { display:none; }
 </style>
 </head>
 <body>
@@ -162,7 +172,14 @@
   <div class="btns"><button id="tuneCopy">Copy JSON</button><button id="tuneReset">Reset</button></div>
   <div class="note">Խաղի մաս չի — զգացողությունը լարելու գործիք ա։ Թվերը պրոտոյի միավորներով են (մ/վ, °, մ)։
   Copy JSON-ը արժեքները քլիփբորդ ա տալիս (feel spec-ի համար)։ Հեռանկարում՝ կոնստրուկտորի սաղմը։</div>
+  <div class="note"><b>Asset Lab.</b> Tap շենքի վրա → ընտրվում ա, tap նույնի վրա → հաջորդ վարիանտ, tap դատարկ տեղ → հանել։
+  Նկար (PNG/WebP/JPG) drop արա պատուհանի/շենքի վրա կամ Load կոճակով — front/side տեքստուրան live փոխվում ա։</div>
 </div>
+<div id="alab"><div class="t">Asset Lab <i>DEV</i></div><div id="alabLbl">—</div>
+  <div class="r"><button id="alabFace" title="Drop/Load-ի թիրախը">front</button><button id="alabLoad" title="Նկար ֆայլից (մոբայլ/iframe)">Load</button>
+    <button id="alabNext" title="Հաջորդ վարիանտ">Next</button><button id="alabReset" title="Վերադարձ canvas ֆասադին">Reset</button><button id="alabOff" title="Հանել ընտրությունը">✕</button></div>
+</div>
+<input id="alabFile" type="file" accept="image/png,image/webp,image/jpeg">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/8.16.0/pixi.min.js"></script>
 <script type="module" src="src/main.js"></script>
 </body>

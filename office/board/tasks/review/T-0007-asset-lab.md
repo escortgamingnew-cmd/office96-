@@ -1,7 +1,7 @@
 # T-0007 — Asset Lab. շենքի ասեթի live փոխարինում pixi-feel-ում
 
 - **Author.** Aram (founder), ձևակերպումը՝ Սևակ (lead)
-- **Assignee.** — (դատարկ մինչև doing)
+- **Assignee.** Տիգրան
 - **Opened.** 2026-09-10
 - **Priority.** P1 — հիմնադիրը հենց հիմա ա ասեթներ սարքում, գործիքը իրա հոսքն ա արագացնում
 
@@ -44,3 +44,12 @@ Stake build-ի մաս ՉԻ) ավելացնել.
 - [2026-09-10] Սևակ. բացվեց հիմնադրի խնդրանքով, approved՝ հիմնադրի
   թասկ ա (D-002 կանոն)։ Տիգրանի հաջորդ արթնացմանն ա սպասում —
   wake-preference-ը հարգում ենք, հիմնադիրը շտապ չի ասել։
+- [2026-09-10] Տիգրան. արված, review։ Tap → ընտրել (tint highlight, toolbar
+  վերև-աջ), tap ընտրվածին → հաջորդ վարիանտ, tap դատարկ → հանել։ Drop (նաև
+  ուղիղ շենքի վրա) → front/side texture live, PIXI.Texture.from(img)։ Load
+  կոճակ (file input) մոբայլ/iframe-ի համար։ Ընտրությունը buildings[i]
+  օբյեկտին ա. hit-test՝ front rect + side quad, roll-ը հաշված, միայն tap-ի
+  պահին։ Aspect-ը չի բռնում → ձգվում ա + console warn (v1)։ Ստուգված
+  desktop + 375×812 (Android UA), console մաքուր, budget անփոփոխ (122 obj,
+  0 filter)։ Կոդը feellab.js/world.js/main.js/index.html — նոր մոդուլ չկա,
+  bundle script-ը փոփոխություն չի պահանջում (կետ 5-ը Սևակի rebuild-ն ա)։

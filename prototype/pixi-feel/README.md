@@ -29,6 +29,22 @@ Pixi.js v8.16.0-ը քաշվում ա cdnjs-ից (pinned) — ինտերնետ ա
 - Վերևի pills՝ վերջին 6 արդյունքը, ▾ → մոդալ (մինչև 60)
 - **F / ƒ** — FPS, **T / ⚙** — Feel Lab (DEV պանել, խաղի մաս չի)
 
+## Asset Lab (DEV, T-0007 — խաղի մաս չի)
+
+Դիզայներն իր շենքի ասեթը խաղի մեջ ա տեսնում առանց build-ի.
+
+- **Tap/click շենքի վրա** → ընտրվում ա (տաք tint highlight, վերև-աջ toolbar).
+  **tap ընտրվածի վրա** → հաջորդ վարիանտը (10-ից, ցիկլով). **tap դատարկ տեղ** → հանել
+- **Նկար (PNG/WebP/JPG) drag&drop** պատուհանի վրա → ընտրված շենքի տեքստուրան փոխվում ա
+  live, առանց reload։ Drop-ը ուղիղ շենքի վրա՝ էդ շենքն ա ընտրվում
+- Toolbar. **front/side** (drop/Load-ի թիրախը), **Load** (file input — մոբայլ ու iframe,
+  որտեղ drop չկա), **Next** (վարիանտ), **Reset** (վերադարձ canvas ֆասադին), **✕**
+- Ընտրությունը `world.buildings[i]` ՕԲՅԵԿՏԻՆ ա կապված — sprite-երը z-flow-ով
+  րեցիրկուլացվում են, ասեթը շենքի հետ ա գնում-գալիս
+- Aspect-ը շենքին (w/h, asset-spec 2.1) չի համընկնում → v1-ում ձգվում ա, console-ում warn
+- Բյուջե. 0 filter, 0 լրացուցիչ display object. hit-test-ը միայն tap-ի պահին (24 շենք)
+- Կոդը՝ `feellab.js` (initAssetLab) + `world.js` (select/cycle/setBuildingTex/pickBuilding)
+
 ## Կառուցվածքը (`src/`)
 
 | Ֆայլ | Ինչ ա |
@@ -39,7 +55,7 @@ Pixi.js v8.16.0-ը քաշվում ա cdnjs-ից (pinned) — ինտերնետ ա
 | `tex.js` | Canvas-ով նկարած բոլոր texture-ները (ֆասադ, լապտեր, ծառ, մեքենա, billboard, հետապնդող, ստվեր) |
 | `ui.js` | DOM/CSS UI՝ պրոտոյից պորտ. bet↔run մորֆ, CASH OUT/WON, պատմություն, մուլտի |
 | `sandbox.js` | Fake-book. crash-կետը bet-ի պահին (placeholder distribution, ոչ իրական մաթ) |
-| `feellab.js` | DEV պանել |
+| `feellab.js` | DEV. Feel Lab պանել + Asset Lab (tap/drop ասեթի փոխարինում) — մեկ ֆայլ, որ bundle-ը չփոխվի |
 | `main.js` | Ռաունդի հոսքը (պրոտոյի animateBody-ի վերաշարադրանք), կերպարներ, loop |
 
 ## Ինչ ա 1:1 պրոտոյից (կոդի ուղիղ ընթերցումով)
@@ -88,7 +104,9 @@ Pixi.js v8.16.0-ը քաշվում ա cdnjs-ից (pinned) — ինտերնետ ա
 
 `state()`, `placeBet(b)`, `hold(on)`, `cashout()`, `restart()`, `setCrash(d)` (sandbox
 crash-կետը ստիպել), `step(dt, n)` (դետերմինիստիկ քայլ՝ rAF-ից անկախ թեստի համար),
-`budget()`, `P`։
+`budget()`, `P`, `world` (`buildings[i]`, `pickBuilding(x, y)`),
+`asset` — Asset Lab. `select(i)`, `selected()`, `cycle()`, `face("front"|"side")`,
+`loadFile(file)`, `loadUrl("assets/papi-run-20f.webp")` (drop-ի տեղ՝ թեստի համար)։
 
 ## Ասեթ
 

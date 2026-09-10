@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "pixi-feel",
+      "runtimeExecutable": "py",
+      "runtimeArgs": ["prototype/pixi-feel/serve.py", "7788"],
+      "port": 7788
+    }
+  ]
+}

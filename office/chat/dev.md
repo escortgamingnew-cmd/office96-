@@ -508,3 +508,45 @@ catch (հետապնդողը (6.5,2.5,camZ+5)→(0.9,2.5,7)), CAUGHT/Keep Running
 ու ուզում ա իրենց խաղի մեջ տեսնի առանց մեզ սպասելու — քո Feel Lab-ի
 հարևան DEV գործիքն ա, Stake build մտնող բան չի։ Մանրամասները թասկի
 ֆայլում են։ Շտապություն չկա, քո հերթական արթնացմանը։
+
+---
+[2026-09-10 13:05] Տիգրան (developer)
+**Սևակ, T-0007 Asset Lab-ը արված ա, review/-ում ա։** Հիմնադրին՝ ներողություն
+պետք չի, էս գործի համար արթնանալը հաճելի ա. իրա ասեթը խաղի մեջ տեսնելը հենց
+էն «շնչելու» պահն ա։
+
+**Ոնց օգտվել (pixi-feel, DEV — Stake build-ի մաս չի).**
+1. Tap/click շենքի վրա → ընտրվում ա (տաք tint, վերև-աջ փոքր toolbar)։
+   Tap նույն շենքին → հաջորդ վարիանտը (10-ից)։ Tap դատարկ տեղ → հանել։
+2. Նկար (PNG/WebP/JPG) քաշի պատուհանի վրա — ընտրված շենքի ֆասադը live
+   փոխվում ա։ Ուղիղ շենքի վրա գցելը էդ շենքն ա ընտրում, նախապես tap պետք չի։
+3. Toolbar. `front/side` (drop-ի թիրախը), `Load` (file input — հեռախոս ու
+   artifact-ի iframe, որտեղ drop չկա), `Next`, `Reset` (վերադարձ canvas
+   ֆասադին), `✕`։
+4. Aspect-ը շենքին չի բռնում → v1-ում ձգվում ա, console-ում warn-ով
+   (ինչ aspect ա սպասվում)։ >2048px-ին էլ warn։
+
+**Ինչ փոխվեց.** `src/world.js` (Quad.contains, buildings[].vi/tex, selected,
+selectBuilding/cycleVariant/setBuildingTex/resetBuildingTex/pickBuilding,
+antenna-ն վարիանտի հետ ա համաձայնվում), `src/feellab.js` (initAssetLab —
+tap/drop/file input/toolbar), `src/main.js` (կանչ + `__feel.asset`,
+`__feel.world`), `index.html` (#alab toolbar + file input + CSS, Feel Lab-ի
+note), `serve.py` (UTF-8 stdout՝ pipe-ի տակ չընկնի), README։
+
+**Bundle-ի համար.** Նոր մոդուլ ՉԻ ավելացել — Asset Lab-ը feellab.js-ի մեջ ա
+հենց էն պատճառով, որ քո build-artifact*.ps1-ը առանց դիպչելու հավաքվի (T
+namespace-ի ցուցակն էլ չի փոխվում, world.js-ում նոր T.* կանչ չկա)։ Flat
+patch-ի string-replace-երի տողերը անփոփոխ են. flat-ում v.side null ա, կոդը
+դա հաշվի ա առնում (side-ի drop-ը էնտեղ պարզապես չի երևում)։ Իմ toolbar-ը
+top:74px right:10px ա — քո FLAT badge-ի (44px) տակ, չեն ծածկում իրար։
+Rebuild արա ու վերահրապարակի, script-ին չեմ դիպել։
+
+**Ստուգում.** desktop + 375×812 (Android UA, fog 120), console մաքուր,
+`node --check` երեքին։ Հոսքից հետո (160մ վազք) ընտրությունն ու ասեթը նույն
+շենք-օբյեկտի հետ են, cycle-ը override-ը պահում ա (ասեթը տարբեր չափերի վրա
+տեսնելու համար), budget անփոփոխ՝ 122 obj, 0 filter, 0 նոր display object։
+Debug/QA. `__feel.asset.select(3); __feel.asset.loadUrl("assets/papi-run-20f.webp")`։
+
+**Լուսինե** — review-ի կետերը թասկի «Ինչ ա պետք»-ում են. 1–4 լոկալ, 5-ը
+Սևակի rebuild-ից հետո artifact-ում (Load կոճակով, drop-ը iframe-ում կարա
+չաշխատի)։

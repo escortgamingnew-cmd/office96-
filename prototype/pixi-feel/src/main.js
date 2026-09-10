@@ -9,7 +9,7 @@ import { Camera } from "./cam.js";
 import { World } from "./world.js";
 import { UI } from "./ui.js";
 import { drawBook } from "./sandbox.js";
-import { initFeelLab } from "./feellab.js";
+import { initFeelLab, initAssetLab } from "./feellab.js";
 
 (async () => {
   "use strict";
@@ -130,6 +130,7 @@ import { initFeelLab } from "./feellab.js";
 
   // ---------- Feel Lab / FPS / debug ----------
   initFeelLab(() => { camCur.fov = P.fov; });
+  const assetLab = initAssetLab({ app, world });   // DEV (T-0007). Stake build-ում հանվում ա Feel Lab-ի հետ
   const fpsEl = document.getElementById("fps");
   let fpsOn = false, fpsAcc = 0, fpsN = 0, fpsT = 0;
   const toggleFps = () => { fpsOn = !fpsOn; fpsEl.style.display = fpsOn ? "block" : "none"; };
@@ -144,6 +145,8 @@ import { initFeelLab } from "./feellab.js";
     setCrash: (d) => { if (book) book.crashDist = d; },
     step: (dt = 1 / 60, n = 1) => { for (let i = 0; i < n; i++) frame(dt); },   // դետերմինիստիկ քայլ (թեստ. rAF-ից անկախ)
     budget: () => ({ objs: world.objs.children.length, stars: world.stars.children.length, visible: world.objs.children.filter(c => c.visible).length }),
+    asset: assetLab,                             // select(i|b), selected(), cycle(), loadFile(f), loadUrl(u), face("front"|"side")
+    world,                                       // debug/QA. world.buildings[i], world.pickBuilding(x, y)
     P,
   };
 

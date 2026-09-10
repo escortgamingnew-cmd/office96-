@@ -26,10 +26,23 @@ class Quad {
       this.m = new PIXI.MeshSimple({ texture, vertices: new Float32Array(8), uvs: new Float32Array([0, 0, 1, 0, 1, 1, 0, 1]), indices: new Uint32Array([0, 1, 2, 0, 2, 3]) });
       this.persp = false;
     }
+    this.c = new Float32Array(8);               // վերջին անկյունները (էկրան), hit-test-ի համար
   }
   set(x0, y0, x1, y1, x2, y2, x3, y3) {
     if (this.persp) this.m.setCorners(x0, y0, x1, y1, x2, y2, x3, y3);
     else { const v = this.m.vertices; v[0] = x0; v[1] = y0; v[2] = x1; v[3] = y1; v[4] = x2; v[5] = y2; v[6] = x3; v[7] = y3; }
+    const c = this.c; c[0] = x0; c[1] = y0; c[2] = x1; c[3] = y1; c[4] = x2; c[5] = y2; c[6] = x3; c[7] = y3;
+  }
+  /* կետը քառանկյան մեջ ա՞ (ուռուցիկ. պրոյեկցված ուղղանկյուն) — Asset Lab-ի hit-test */
+  contains(px, py) {
+    if (!this.m.visible) return false;
+    const c = this.c; let neg = false, pos = false;
+    for (let i = 0; i < 4; i++) {
+      const ax = c[i * 2], ay = c[i * 2 + 1], bx = c[(i * 2 + 2) % 8], by = c[(i * 2 + 3) % 8];
+      const cr = (bx - ax) * (py - ay) - (by - ay) * (px - ax);
+      if (cr < 0) neg = true; else if (cr > 0) pos = true;
+    }
+    return !(neg && pos);
   }
 }
 
@@ -57,9 +70,11 @@ export class World {
     this.treeTexes = [T.makeTreeTex(), T.makeTreeTex(), T.makeTreeTex()];
     this.bushTexes = [T.makeBushTex(), T.makeBushTex()];
     this.buildings = [];
+    this.selected = null;                       // Asset Lab. ընտրված շենքը (buildings[i] օբյեկտ, ոչ էկրանային դիրք)
     for (const side of [-1, 1]) for (let i = 0; i < P.count; i++) {
       const v = T.pick(this.variants);
-      const b = { side, i, v, xj: T.rnd(0, 2), z: SPAWN_Z - i * P.seg, front: this._spr(v.front), sideQ: new Quad(v.side), roofQ: new Quad(this.roofTex), antenna: null, trees: [], bushes: [] };
+      // tex = Asset Lab-ի override-ներ (drop արած նկար), null = վարիանտի canvas-ը
+      const b = { side, i, v, vi: this.variants.indexOf(v), tex: { front: null, side: null }, xj: T.rnd(0, 2), z: SPAWN_Z - i * P.seg, front: this._spr(v.front), sideQ: new Quad(v.side), roofQ: new Quad(this.roofTex), antenna: null, trees: [], bushes: [] };
       this.objs.addChild(b.sideQ.m, b.roofQ.m);
       if (v.antenna) b.antenna = this._spr(this.antennaTex, .5, 1);
       if (T.rnd() < .7) b.trees.push({ tex: T.pick(this.treeTexes), sc: T.rnd(.8, 1.3), dz: T.rnd(-3, 3), sp: this._spr(T.pick(this.treeTexes).texture) });
@@ -146,6 +161,55 @@ export class World {
   clearBillboards() { for (const b of this.billboards) { this.objs.removeChild(b.sp); b.sp.destroy(); } this.billboards.length = 0; this.bbTimer = 0; }
   idleCars(dt) { if (P.carSpd > 0) for (const c of this.cars) { const ll = LAMP_N * P.lampStep; c.z += c.dir * P.carSpd * dt; if (c.z > SPAWN_Z) c.z -= ll; if (c.z < SPAWN_Z - ll) c.z += ll; } }
 
+  /* ---- Asset Lab (DEV գործիք, Stake build-ի մաս ՉԻ — feellab.js-ից ա կանչվում) ----
+   * Ամեն ինչ շենք-ՕԲՅԵԿՏԻ վրա ա (buildings[i]). sprite-երը z-flow-ով րեցիրկուլացվում են, էկրանային դիրքը անցողիկ ա։
+   * Highlight-ը tint ա (0 filter, 0 լրացուցիչ draw)։ */
+  static SEL_TINT = 0xffd27a;
+  _applyBuildingTex(b) {
+    const v = b.v, sel = b === this.selected, tint = sel ? World.SEL_TINT : 0xffffff;
+    b.front.texture = b.tex.front || v.front;
+    const st = b.tex.side || v.side;              // flat A/B build-ում v.side null ա — texture-ը չենք դիպչում
+    if (st) b.sideQ.m.texture = st;
+    b.front.tint = tint; b.sideQ.m.tint = tint;
+    if (v.antenna && !b.antenna) b.antenna = this._spr(this.antennaTex, .5, 1);
+    if (b.antenna) b.antenna.visible = false;    // render()-ը v.antenna-ով ա որոշում
+  }
+  selectBuilding(b) {
+    const prev = this.selected;
+    this.selected = b || null;
+    if (prev) this._applyBuildingTex(prev);
+    if (b) this._applyBuildingTex(b);
+  }
+  /* հաջորդ վարիանտը (10-ի մեջ ցիկլով). drop-ած override-ները մնում են՝ ասեթը հարկավոր ա տարբեր չափերի վրա տեսնել */
+  cycleVariant(b, step = 1) {
+    const n = this.variants.length;
+    b.vi = ((b.vi + step) % n + n) % n; b.v = this.variants[b.vi];
+    this._applyBuildingTex(b);
+    return b.vi;
+  }
+  /* face = "front" | "side". texture = PIXI.Texture կամ null (վերադարձ canvas-ին)։ Հինը destroy՝ GPU-ն չլցվի */
+  setBuildingTex(b, face, texture) {
+    const old = b.tex[face];
+    b.tex[face] = texture || null;
+    this._applyBuildingTex(b);
+    if (old && old !== texture) old.destroy(true);
+  }
+  resetBuildingTex(b) { this.setBuildingTex(b, "front", null); this.setBuildingTex(b, "side", null); }
+  /* էկրանի կետ (objs-ի local, roll-ը հաշված) → ամենամոտ շենքը, որի front sprite-ը կամ side երեսը ծածկում ա կետը */
+  pickBuilding(px, py) {
+    let best = null, bestZ = -Infinity;
+    for (const b of this.buildings) {
+      const f = b.front; let hit = false, zi = -Infinity;
+      if (f.visible) {
+        const hw = Math.abs(f.width) / 2;
+        if (px >= f.x - hw && px <= f.x + hw && py >= f.y - f.height && py <= f.y) { hit = true; zi = f.zIndex; }
+      }
+      if (b.sideQ.contains(px, py)) { hit = true; zi = Math.max(zi, b.sideQ.m.zIndex); }
+      if (hit && zi > bestZ) { bestZ = zi; best = b; }
+    }
+    return best;
+  }
+
   /* ---- ռենդեր ---- */
   /* ուղղահայաց պատ x=xi հարթությունում, z∈[zNear,zFar], y∈[0,h]. near-clip ամեն տողին առանձին */
   _wallQuad(q, xi, h, zNear, zFar, nearOnRight) {
@@ -202,7 +266,7 @@ export class World {
       // տանիք. երևում ա միայն երբ կամերան շենքից բարձր ա (rewind-ի դրոն-կամար)
       if (cam.y > v.h + 0.2) this._roofQuad(b.roofQ, cx - v.w / 2, cx + v.w / 2, v.h, zNear, zFar);
       else b.roofQ.m.visible = false;
-      if (b.antenna) { if (d > 0) { const p = cam.project(cx, v.h + .35, zNear, this.pt); b.antenna.visible = true; b.antenna.x = p.sx; b.antenna.y = p.sy; const s = p.s * 3.0 / b.antenna.texture.height; b.antenna.scale.set(s); b.antenna.alpha = b.front.alpha; b.antenna.zIndex = b.front.zIndex; } else b.antenna.visible = false; }
+      if (b.antenna) { if (d > 0 && v.antenna) { const p = cam.project(cx, v.h + .35, zNear, this.pt); b.antenna.visible = true; b.antenna.x = p.sx; b.antenna.y = p.sy; const s = p.s * 3.0 / b.antenna.texture.height; b.antenna.scale.set(s); b.antenna.alpha = b.front.alpha; b.antenna.zIndex = b.front.zIndex; } else b.antenna.visible = false; }
       for (const t of b.trees) this.place(t.sp, cx - b.side * (v.w / 2 + 2.2), b.z + t.dz, t.tex.wM * t.sc, t.tex.hM * t.sc);
       for (const s of b.bushes) this.place(s.sp, cx - b.side * (v.w / 2 + 1.2), b.z + s.dz, s.tex.wM, s.tex.hM);
     }
