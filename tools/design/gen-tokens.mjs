@@ -162,7 +162,7 @@ for (const [name, s] of Object.entries(textStyles)) {
  * նույն variable-ը purpose-ով խմբավորված անուն ա կրում. kit-ը վերանվանում ա ՏԵՂՈՒՄ (ID-ն
  * նույնը → binding-ները չեն կոտրվում)։ Global = ընդհանուր UI (Frame/Shape/Text/Border/Icon),
  * Action/State/Surface/Difficulty = խաղային շերտ։ */
-const ABBR = { sm: "SM", md: "MD", hud: "HUD", css: "CSS" };
+const ABBR = { sm: "SM", md: "MD", hud: "HUD", css: "CSS", lh: "Line Height" };
 const cap = (s) => s.split("-").map((w) => ABBR[w] || w[0].toUpperCase() + w.slice(1)).join(" ").replace(/ (X|Y)$/, "/$1"); /* button-y → Button/Y */
 const FIG = {
   "surface/panel": "Colors/Global/Frame/Panel", "surface/pill": "Colors/Global/Frame/Pill",
