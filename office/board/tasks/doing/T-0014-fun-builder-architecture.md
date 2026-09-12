@@ -75,3 +75,49 @@ system-ը էս արխիտեկտուրային մոտեցումով կարգավ�
 - Ամեն փուլ՝ commit + push. ավարտին review/, ռեպորտ product.md։
 
 ## Log
+
+### 2026-09-12 — Արեգ. փուլ 1-2 ավարտված, թասկը doing/-ում ա (փուլ 3-ը Տիգրանի պատասխանից հետո)
+
+**Փուլ 1ա — tokens.json.** Քանդված ա. Primitives (Blue/Red/Yellow/Green 50–900,
+Gray 0–900, Utility alpha, Typography, Numbers pool 18 արժեք) → Semantic (100%
+alias. կոմպոնենտ-scoped Form Fields/Button/Toggle/Color Picker, Global Text/Shape,
+Dimensions Radius/Height/Padding/Border/Size՝ կոմպոնենտային + Global սանդղակ,
+Opacity)։ State suffix `-Hover/-Focus/-Active/-Error/-Selected`, Disabled =
+Opacity։ Ձևաչափը՝ DTCG/Tokens Studio (`number`, ոչ `dimension`; `global` set
+դատարկ; `$description` չկա)։ Թերությունները ազնիվ ցուցակով՝ architecture.md 3.2։
+
+**Փուլ 1բ — Figma (read-only, 0 մուտացիա. 3 get_metadata, 3 use_figma read
+script, 8 screenshot).** Բացահայտում. live ֆայլը JSON-ից առաջ ա անցել — 390
+variable (Primitives 105, Semantic 285՝ Desktop/Mobile mode, որից 7-ն ա
+տարբերվում), Typography լրիվ (16 size, 9 weight STRING, 7 lh ratio), Gap/Width
+խմբեր, Colors/Global/{Frame,Stroke}, 6 նոր կոմպոնենտի semantic։ Atoms (`4:55`)
+= Icons 43×3, Form Hint, Dropzone — state-ից անկախ leaf-եր։ Molecules
+(`500:1686`) = State×Size variant set-եր (12 հատ) + կոմպոզիցիաներ (FormField,
+LabeledToggle, Segmented Control…)։ Հին Button set-ը (Type variant, Click/Disable)
+կողքին ա — նորերում Type-ը առանձին set ա դարձել. **մեկ set ↔ մեկ token խումբ**։
+Binding-ը ամբողջական ա (root՝ height/padding/gap/radius×4/opacity/fill,
+text՝ fill/size/weight/family)։ Line-height-ը style-երում PERCENT ա, variable-ի
+կապված չի (Figma-ի սահմանափակումն ա, T-0012-ում մենք էլ դրան բախվեցինք)։
+337 variable scope `[]`, բայց կապված — Tokens Studio-ով apply-ի հետք, հիմնադրին
+հարց product.md-ում։
+
+**Փուլ 1գ — `docs/design/architecture.md`** գրված ա. 1 Fun Builder token
+արխիտեկտուրա · 2 Figma կազմակերպում · 3 պրոֆեսիոնալ գնահատական (7 ուժեղ, 10
+թերի) · 4 համեմատություն մեր v1.2-ի հետ (աղյուսակ. համընկնում ա՝ ramp-եր, alpha,
+100% alias, Global purpose, hidden primitives, disabled=opacity, typography շղթա;
+տարբեր ա՝ Number pool, կոմպոնենտ-scoped կաղապար, state suffix, Sm/Md/Lg + xs…2xl,
+Atoms/Molecules, set↔խումբ, DTCG export) · 5 Escort Gaming ստանդարտ (կաղապար,
+Run Dady-ի բոլոր կոմպոնենտները քարտեզագրված, անվանակարգի 6 կանոն, scope
+քաղաքականություն, էջեր) · 6 migration 6 քայլով + 3 ռիսկ։
+
+**Փուլ 2 — dev.md** գրառում Տիգրանին. 7 հարց (CSS անվանակարգ + legacy alias
+հորիզոն, Pixi-ի սպառում CSS/JS մոդուլ, DTCG export, Number pool CSS-ում, ֆրոնտի
+state-երն ու մեխանիզմը, lh px/ratio, mode-երի ապագա)։ product.md-ում հիմնադրին
+2 հարց (Tokens Studio, Button 3 set թե Kind variant)։
+
+**Փուլ 3-ի ռիսկեր** (architecture.md 6). Button set-ի բաժանումը Screens-ի
+instance swap ա պահանջում; legacy alias-ների կրկնակի շերտ; Figma-ում variable-ը
+collection-ից collection API-ով չի տեղափոխվում (Layout/UI/Type→Semantic
+միավորումը ID կփոխի — առաջարկում եմ չմիավորել)։
+
+Fun Builder ֆայլում ոչ մի մուտացիա. Run Dady UI-ին էս session-ում ձեռք չեմ տվել։

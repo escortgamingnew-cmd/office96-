@@ -138,6 +138,9 @@
   .pcard .pr { font:700 11px var(--mono); letter-spacing:.06em; text-transform:uppercase;
     color:var(--brand); margin:3px 0 10px; }
   .pcard p { font-size:13.5px; line-height:1.55; color:var(--text); white-space:pre-wrap; }
+  .pedit { margin-top:12px; border:1px solid var(--line2); border-radius:8px; padding:7px 13px;
+    font-size:13px; color:var(--muted); }
+  .pedit:hover { color:var(--brand); border-color:var(--brand); }
 
   /* ---- սթորիներ ---- */
   #stbar { flex:none; display:flex; gap:12px; padding:10px 16px 6px; overflow-x:auto;
@@ -251,6 +254,7 @@
 <div id="story"></div>
 <input id="attFile" type="file" accept="image/*" style="display:none">
 <input id="stFile" type="file" accept="image/*" style="display:none">
+<input id="prFile" type="file" accept="image/*" style="display:none">
 
 <script>
 "use strict";
@@ -291,9 +295,43 @@ function fallbackAv(author) {
     `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><circle cx="48" cy="48" r="48" fill="${c}"/>` +
     `<text x="48" y="63" font-family="Arial" font-size="44" font-weight="700" fill="#1e1f22" text-anchor="middle">${ch}</text></svg>`);
 }
+let livePr = {};   // db-ից դրված պրոֆիլի նկարներ (D-011. ամեն մեկը իրանն ա փոխում)
 function avatarOf(author) {
+  for (const k in livePr) if (author.startsWith(k) && livePr[k]) return livePr[k];
   for (const k in AVATARS) if (author.startsWith(k)) return AVATARS[k];
   return fallbackAv(author);
+}
+
+/* ---- ֆայլ → data URL. GIF-ը պահում ենք անփոփոխ (անիմացիան չկորի),
+   մնացածը canvas-ով սեղմում ենք. cb(dataUrl) կամ sendErr ---- */
+function fileToImg(f, cb) {
+  if (f.type === "image/gif") {
+    const r = new FileReader();
+    r.onload = () => {
+      if (r.result.length > 230000) { sendErr("GIF-ը մեծ ա — մաքս ~170KB (բազայի սահմանն ա)։"); return; }
+      cb(r.result);
+    };
+    r.onerror = () => sendErr("GIF-ը չբացվեց։");
+    r.readAsDataURL(f);
+    return;
+  }
+  const img = new Image();
+  img.onload = () => {
+    const tryEnc = (maxDim, q) => {
+      const k = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      return c.toDataURL("image/jpeg", q);
+    };
+    let d = tryEnc(1000, 0.8);
+    if (d.length > 230000) d = tryEnc(760, 0.7);
+    if (d.length > 230000) d = tryEnc(560, 0.6);
+    if (d.length > 230000) { sendErr("Նկարը շատ մեծ ա — չկարողացա սեղմել բավարար չափի։"); return; }
+    cb(d);
+  };
+  img.onerror = () => sendErr("Նկարը չբացվեց — PNG/JPG/WebP/GIF փորձի։");
+  img.src = URL.createObjectURL(f);
 }
 
 let cur = "general";
@@ -452,25 +490,11 @@ $("attX").addEventListener("click", () => { pendingImg = null; attBar.classList.
 $("attFile").addEventListener("change", () => {
   const f = $("attFile").files[0];
   if (!f) return;
-  const img = new Image();
-  img.onload = () => {
-    const tryEnc = (maxDim, q) => {
-      const k = Math.min(1, maxDim / Math.max(img.width, img.height));
-      const c = document.createElement("canvas");
-      c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
-      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      return c.toDataURL("image/jpeg", q);
-    };
-    let d = tryEnc(1000, 0.8);
-    if (d.length > 230000) d = tryEnc(760, 0.7);
-    if (d.length > 230000) d = tryEnc(560, 0.6);
-    if (d.length > 230000) { sendErr("Նկարը շատ մեծ ա — չկարողացա սեղմել բավարար չափի։"); return; }
+  fileToImg(f, (d) => {
     pendingImg = d;
-    $("attPrev").src = d; $("attInfo").textContent = Math.round(d.length / 1024) + " KB";
+    $("attPrev").src = d; $("attInfo").textContent = Math.round(d.length / 1024) + " KB" + (f.type === "image/gif" ? " · GIF" : "");
     attBar.classList.add("show");
-  };
-  img.onerror = () => sendErr("Նկարը չբացվեց — PNG/JPG/WebP փորձի։");
-  img.src = URL.createObjectURL(f);
+  });
 });
 
 /* ---- lightbox (կցված նկար) + պրոֆիլ քարտ (ավատար) ---- */
@@ -491,14 +515,21 @@ function profKey(author) { for (const k in PROFILES) if (author.startsWith(k)) r
 function profOpen(author) {
   const k = profKey(author);
   const p = k ? PROFILES[k] : null;
-  const img = (p && p.big) || avatarOf(author);
+  const img = (k && livePr[k]) || (p && p.big) || avatarOf(author);
   const role = (p && p.role) || roleOf(author) || "";
   const bio = (p && p.bio) || "Կենսագրությունը դեռ գրված չի։";
+  const mine = k && myName.startsWith(k);
   $("prof").innerHTML = `<div class="pcard"><img class="big" src="${img}" alt="">` +
-    `<div class="pb"><h3>${esc(k || author)}</h3><div class="pr">${esc(role)}</div><p>${esc(bio)}</p></div></div>`;
+    `<div class="pb"><h3>${esc(k || author)}</h3><div class="pr">${esc(role)}</div><p>${esc(bio)}</p>` +
+    (mine ? `<button class="pedit" id="prEdit" data-k="${esc(k)}">📷 Փոխել նկարս</button>` : "") +
+    `</div></div>`;
   $("prof").classList.add("open");
 }
 $("prof").addEventListener("click", (e) => {
+  if (e.target.id === "prEdit") {
+    prTarget = e.target.dataset.k;
+    $("prFile").click(); return;
+  }
   if (e.target.classList && e.target.classList.contains("big")) {
     $("lbImg").src = e.target.src; $("lb").classList.add("open"); return;
   }
@@ -610,23 +641,25 @@ $("stFile").addEventListener("change", () => {
   const f = $("stFile").files[0];
   $("stFile").value = "";
   if (!f) return;
-  const img = new Image();
-  img.onload = () => {
-    const tryEnc = (maxDim, q) => {
-      const k = Math.min(1, maxDim / Math.max(img.width, img.height));
-      const c = document.createElement("canvas");
-      c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
-      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      return c.toDataURL("image/jpeg", q);
-    };
-    let d = tryEnc(1000, 0.8);
-    if (d.length > 230000) d = tryEnc(760, 0.7);
-    if (d.length > 230000) d = tryEnc(560, 0.6);
-    if (d.length > 230000) { sendErr("Նկարը շատ մեծ ա — չկարողացա սեղմել բավարար չափի։"); return; }
-    stCompose(d);
-  };
-  img.onerror = () => sendErr("Նկարը չբացվեց — PNG/JPG/WebP փորձի։");
-  img.src = URL.createObjectURL(f);
+  fileToImg(f, stCompose);
+});
+
+/* ---- պրոֆիլի նկարը փոխելը (իմ սեփականը միայն) ---- */
+let prTarget = null;
+$("prFile").addEventListener("change", () => {
+  const f = $("prFile").files[0];
+  $("prFile").value = "";
+  if (!f || !prTarget) return;
+  fileToImg(f, async (d) => {
+    if (!dbRef) { sendErr("Կապը բազայի հետ չկա — նկարը չպահվեց։"); return; }
+    try {
+      const now = new Date();
+      const ts = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 19);
+      await dbRef.doc("profiles/" + prTarget).set({ img: d, author: myName, ts });
+      $("prof").classList.remove("open");
+      armBridge();
+    } catch (e) { sendErr("Նկարը չպահվեց (" + (e && e.code || "սխալ") + ")։"); }
+  });
 });
 
 /* ---- @mention typeahead ---- */
@@ -757,6 +790,12 @@ renderSide(); renderHead(); renderMsgs(); renderUser(); renderStories();
     stCm = {};
     for (const d of snap.docs) if (d.exists) stCm[d.id] = d.data() || {};
     if (curSt) renderStory();
+  }, () => {});
+  /* պրոֆիլի նկարներ (db-ից դրվածները գերակա են build-ի վրա) */
+  db.collection("profiles").onSnapshot(snap => {
+    livePr = {};
+    for (const d of snap.docs) if (d.exists) livePr[d.id] = safeImg((d.data() || {}).img);
+    renderUser(); renderMsgs(); renderStories();
   }, () => {});
 })();
 </script>

@@ -792,3 +792,74 @@ Panel) — 169 node սկան, hardcoded paint/padding/radius 0. strokeWeight-ի 
 **Հիմնադրին (D-002).** 5 բաց որոշումը (difficulty անուններ/քանակ, սայդբար
 390, disabled chip, mode-եր, on-bet/lh px) դիզայնի վավերացում են —
 product.md-ում քեզ են սպասում, review-ի բլոկեր չեն։
+
+---
+[2026-09-12 19:40] Արեգ (designer)
+**Տիգրան — T-0014 փուլ 2. հիմնադրի Fun Builder արխիտեկտուրան ուսումնասիրեցի,
+քեզ կոնկրետ հարցեր ունեմ։** Ամբողջը՝ `docs/design/architecture.md` (Fun
+Builder-ի քանդում, մեր v1.2-ի հետ համեմատություն, թիրախային ստանդարտ, migration
+պլան)։ Կարճ էությունը.
+
+Ինչ ենք ընդունում որպես ստուդիայի ստանդարտ (հիմնադրի մոդելը).
+1. **Մեկ թվային pool** primitives-ում (`Number/<n>`. 0 1 2 4 6 8 10 12 14 16 20 22 24
+   28 32 40 48 56 999)։ Radius/height/padding/gap/border — բոլորը սրանից alias-ով։
+   Մեր `space/*`, `radius/*`, `size/<n>` primitives-ը վերանում են։
+2. **Կոմպոնենտ-scoped semantic նույն կաղապարով.** `Colors/<Component>/
+   {Background, Content, Icon, Border}[-<State>]` + `Dimensions/{Height, Padding,
+   Gap, Radius}/<Component>/…`։ Օրինակ. `action/bet` → `button/bet/background`,
+   `action/on-bet` → `button/bet/content`, `surface/input` → `field/background`,
+   `border/focus` → `field/border-focus`։
+3. **State = suffix.** `-Pressed`, `-Selected`, `-Focus`, `-Error`, `-Hover`.
+   Default-ը suffix չունի, **Disabled-ը գույն չունի** — մեկ `Opacity/Disabled`։
+4. Anchor-ները չեն շարժվում, ամեն ընթացիկ `--rd-*` ու `--ui-*` անուն մնում ա CSS
+   alias — ֆրոնտին հասնող արժեքային փոփոխություն 0։
+
+Հարցերը (պատասխանիր էստեղ, համաձայնությունը dev.md-ում ա ֆիքսվում).
+
+**1. CSS անվանակարգ.** Առաջարկում եմ `--rd-<component>[-<variant>]-<slot>[-<state>]`,
+slot-երը կարճ բառարանով. `bg fg border glow top bottom h pad-x pad-y gap radius w`։
+Օրինակ. `--rd-button-bet-bg`, `--rd-button-bet-bg-pressed`, `--rd-button-bet-fg`,
+`--rd-field-border-focus`, `--rd-field-h-lg`, `--rd-segment-pad-track`։ State-ը
+ՎԵՐՋՈՒՄ (slot-ից հետո), ոչ մեջտեղում — քեզ որ կարգն ա հարմար կոդում կարդալու
+ու grep անելու համար։ Հապավել (`bg/fg`), թե լրիվ (`background/content`)։
+Հին `--rd-action-bet`-ը alias ա մնում — ինչքան ժամանակով, երբ ես պատրաստ
+legacy alias-ները հանել (T-0010-ը ինչ վիճակում ա)։
+
+**2. Սպառման ձևը.** Հիմա tokens.css-ի `:root`-ն ա (DOM UI)։ Pixi-ի կողմն ինչպես
+ա գույն ստանում — getComputedStyle-ից parse, թե ուզում ես գեներատորը տա նաև
+JS/TS մոդուլ (`tokens.js`՝ resolved արժեքներով. `button.bet.bg = 0x2EC27E`,
+`field.h.lg = 48`, unitless թվեր)։ Եթե JS մոդուլ — ESM export-ի ձևը ինչպիսին
+լինի (nested object, flat const-ներ, `.d.ts` պետք ա)։
+
+**3. tokens.json ձևաչափ.** Հիմնադրինը W3C DTCG / Tokens Studio ա (`$value`,
+`$type`, alias `{Colors.Gray.100}`, set-երը collection+mode)։ Առաջարկում եմ
+գեներատորը ՀԱՎԵԼՅԱԼ գրի `tokens.dtcg.json` էդ ձևաչափով (Tokens Studio/Style
+Dictionary-ի համար), իսկ ընթացիկ flat `tokens.json`-ը (`primitives`,
+`semantic{ref,value}`, `figmaNames`) մնա kit-ի համար։ Դու tokens.json-ը որևէ տեղ
+սպառում ես բացի kit-ից — կարամ ձևը փոխեմ, թե երկուսն էլ պահենք։ DTCG-ի
+`$type`-ը թվերի համար `number` ա (Figma FLOAT) — Style Dictionary unit չի իմանա.
+CSS-ում px-ը գեներատորն ա ավելացնում, քեզ դա բավարար ա։
+
+**4. Number pool-ը կոդում.** CSS-ում `--eg-number-12: 12px` primitives + semantic
+`--rd-field-pad-x: var(--eg-number-16)`։ Հին `--eg-space-*`/`--eg-radius-*`-ը alias։
+Խնդիր ա, որ primitive-ի անունը «number» ա, ոչ «space» — կոդում ոչ ոք չպիտի
+primitive սպառի (կանոնն ա), բայց եթե սպառում ես՝ ասա, alias-ը կպահեմ։
+Opacity-ն 0–1 ա մնում CSS-ում (Figma-ում 0–100)։
+
+**5. State-երը ֆրոնտում.** Որ state-երն ես իրականում ունենալու. `pressed`
+(touch), `disabled`, `focus` (desktop keyboard), `selected` (segment/chip)։
+`hover`-ը մոբայլում չկա — token-ը գեներացնեմ, թե բաց թողնեմ մինչև desktop
+սպառող լինի։ Ու մեխանիզմը. `.pressed` class / `data-state="pressed"` /
+`:active` — ինչն ես նախընտրում, որ token-ի suffix-ը կոդի state-ի հետ 1:1 լինի։
+
+**6. Line height.** Հիմա `--rd-font-<style>-lh` px ա (Figma-ի պատճառով)։ CSS-ում
+unitless ratio-ն էլ կա primitive-ում (`--eg-lh-snug: 1.2`)։ Երկուսն էլ պահեմ,
+թե մեկը բավական ա։
+
+**7. Mode-եր (տեղեկության համար).** Fun Builder-ում Semantic-ը Desktop/Mobile
+mode ունի, բայց 285-ից 7 token ա տարբերվում — մեր «mode չկա, մինչև սպառող
+չկա» որոշումը մնում ա։ Եթե մի օր պետք լինի՝ `@media`-ով `:root` var-ի
+վերասահմանում ա լինելու, ոչ JS — առարկություն ունես, ասա։
+
+Պատասխանիր ինչ կարաս, մնացածին քո տարբերակն առաջարկի. համաձայնությունը
+ֆիքսում եմ ու փուլ 3-ը սկսում (gen-tokens v2.0 + Run Dady UI-ի Atoms/Molecules)։
