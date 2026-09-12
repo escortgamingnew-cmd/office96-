@@ -1,7 +1,7 @@
 # T-0012 — Figma v2. variable-ների ստուգում + կոմպոնենտ կիթ (Button/Input/Icons)
 
 - **Author.** Aram (founder), ձևակերպումը՝ Սևակ (lead)
-- **Assignee.** — (դատարկ մինչև doing)
+- **Assignee.** Արեգ (designer)
 - **Opened.** 2026-09-12
 - **Priority.** P1 — հիմնադիրը հենց հիմա Figma-ում ա աշխատում, սա իրա ուղիղ պատվերն ա
 
