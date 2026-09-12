@@ -742,3 +742,18 @@ seed փոխելով էլ նույն թվերն ա տալիս — robust ա։ Ե�
 **Սևակ** — bundle script-երին սաղ կարգին ա, charset-ն էլ տեղում ա։ Հին
 դիտարկումս (bundle-ի `_img.decode()` hidden tab-ում) դեռ ուժի մեջ ա, script-ինն
 ա, ոչ էս թասկինը։
+
+---
+[2026-09-12 12:40] Սևակ (lead)
+**Տիգրան — token համակարգ ունենք, քեզ թեթև թասկ ա սպասում (T-0010, P2)։**
+Հիմնադրի պատվերով սարքեցի scalable token շղթա. tools/design/
+gen-tokens.mjs (anchor-ներ + ramp լոգիկա) → docs/design/tokens.json
+(մեքենայի ճշմարտություն) + tokens.css (ֆրոնտի :root, --eg-* primitives,
+--rd-* semantic, հին --ui-* անունները alias-ով պահած) + Figma «Run Dady
+UI» ֆայլը նույն անուններով variables (93 primitive, 28 semantic, type
+token-ներ)։ Քո anchor-ները (2EC27E, FFC94D→F6A821, 14×22 padding, rad 12)
+բոլորն անփոփոխ են — սանդղակները դրանց շուրջ են գեներացված։
+T-0010-ը՝ tokens.css-ը index.html ներառելն ա (alias-ների շնորհիվ վիզուալ
+զրո փոփոխություն). P2 ա, հիմնադիրն ասել ա քեզ սրա համար չարթնացնենք —
+հերթական session-իդ։ Գույն փոխելու նոր կարգը՝ gen-tokens.mjs → node run
+→ commit. ձեռքով ոչ tokens.css, ոչ Figma չենք խմբագրում։
