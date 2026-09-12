@@ -176,3 +176,73 @@ Load-Module տողը T-0010-ում. legacy-ի ջնջումը review-ից հետ�
 QA-ի համար (Լուսինե). regen ×2 diff 0, mock-run OK, `git show HEAD~2:docs/design/tokens.css`
 դեմ 103 անուն 0 շարժ (script-ը Log-ի վերևում ա նկարագրված), Figma աուդիտի թվերը վերևում,
 read-only ստուգում՝ variable count 256, `Colors/Action/*`/`Spacing/*` անուն չկա։
+
+### 2026-09-13 — Լուսինե (qa). Review ԱՆՑԱՎ → done/
+
+**Repo կողմ (ամեն ինչ անկախ վազեցրած, ոչ թե Log-ից արտագրած).**
+
+1. **Regen դետերմինիստիկ.** `node tools/design/gen-tokens.mjs` ×2 → `git diff` 0 տող։
+   Գեներատորի սեփական հաշվետվությունը՝ 105 primitives (pool 17) + 136 semantic +
+   45 legacy alias, DTCG count-check OK, index.html splice բաց (marker չկա — սպասված)։
+2. **mock-run** exit 0. v1.2 Figma անուններից ա սկսում, 21 in-place rename + 191 նոր,
+   MOCK RUN: OK։
+3. **Ջարդման 5 թեստ** (ներարկում → վազք → վերականգնում, ամեն մեկից հետո ծառը մաքուր).
+   - `button/bet/bg-hover` → error «"hover" state-ը չի գեներացվում» ✓
+   - `"button/bet/bg": "#2EC27E"` (raw hex) → error «semantic raw value» ✓
+   - `{number/9}` (pool-ում չկա) → error «bad ref … pool-ում/primitives-ում չկա» ✓
+   - `button/bet/txt` (բառարանից դուրս slot) → error «slot բառարանից դուրս» ✓
+   - `button/bet/fg: {number/12}` (գունային slot-ին թիվ) → error «գունային slot-ը թիվ չի կարա լինի» ✓
+   Բոլորը exit 1, restore-ից հետո regen → diff 0։
+4. **103 հին --rd-*/--ui-* անուն՝ 0 շարժ, ԱՆԿԱԽ վերարտադրված.** իմ սեփական CSS var
+   resolver-ով (var() շղթաները ռեկուրսիվ լուծող script) `git show 3d479c4:docs/design/tokens.css`
+   (v2.0-ից առաջվա վիճակը) ընդդեմ ընթացիկի. 103 անուն, missing 0, արժեքային շարժ 0։
+   Ջնջվածը ՃԻՇՏ 21 `--eg-space-*`/`--eg-radius-*` ա, ուրիշ ոչ մի անուն չի կորել։
+5. **Anchor-ներ.** ANCHOR բլոկը 3d479c4 ↔ HEAD բիթ-առ-բիթ նույնն ա (17 hex՝ green 4,
+   amber 4, red 3, navy 4, night 2)։
+6. **tokens.dtcg.json.** Անկախ leaf-հաշվարկ ($value ունեցող node-եր). Primitives 105 +
+   Semantic 136 — համընկնում ա tokens.json-ի հետ։
+7. **src/tokens.js.** node-ով import՝ OK. `RD` deep-frozen (նաև nested), գույները 0xRRGGBB
+   (bet.bg = 0x2EC27E), glow = {color, alpha}, camelCase բանալիներ։ 7 խաչաձև արժեք
+   tokens.json-ի դեմ (bet/bg, bg-pressed, cashout/bg-bottom-pressed #C78819,
+   field/border-focus #FFD27A, chip/bg-selected #56617A, field/h 48, segment/dot-size 8) —
+   բոլորը 1:1։
+8. **--eg-space/--eg-radius.** grep prototype/ + tokens.css → 0 hit. index.html-ը սպառում
+   ա ՄԻԱՅՆ 12 `--ui-*` var (--eg-*/--rd-* չկա) — Տիգրանի փաստը ստուգված։
+
+**Figma կողմ (JTDf8M2yHwzitpAAPzXnca, 7 use_figma read script + 2 screenshot, sequential, 0 մուտացիա).**
+
+9. **256 variable** = Primitives 64 / World 16 / UI 61 / Layout 62 / Type 53 —
+   Արեգի 64/16/61/62/53-ի հետ 1:1։ v1.2 հին անուն (Colors/Action/*, Spacing/*, …) 0,
+   ALL_SCOPES 0, hover անուն 0, Primitives-ի scopes բոլորի մոտ `[]`։ Semantic-ի 3
+   collection-ը (UI/Layout/Type) առանձին են — չմիավորված, ինչպես որոշված էր (ռիսկ գ)։
+10. **Էջեր.** Foundations 0:1 / Atoms 18:2 / Molecules 59:305 / Screens 42:47։
+    Doc frame 60:231 «Design system — v2.0 (T-0014)»՝ Foundations, x=3624, 1100×843,
+    բովանդակությունը՝ շերտեր + կաղապար։ Հիմնադրի 2:2-ը՝ (100,100), FRAME, 6 երեխա —
+    անձեռնմխելի։
+11. **Binding-ներ.** Screens՝ **702 ճշգրիտ** (իմ node+paint alias հաշվարկը թիվ-առ-թիվ
+    նստեց Արեգի թվի վրա), instance 26, **missing main 0**։ Atoms՝ իմ մեթոդով 919
+    (806 node + 104 paint + 9 effect), Molecules՝ 887+ — Արեգի 937/913-ից մի քիչ ցածր՝
+    հաշվման մեթոդի տարբերություն ա (Screens-ի ճշգրիտ համընկնումը ցույց ա տալիս, որ
+    երկուսս էլ նույն բանն ենք չափում), ծածկույթի էությանը չի կպնում։
+12. **Primitive-ուղիղ binding 0** երեք էջում էլ (ամեն bound variable-ի collection-ը
+    ստուգած)։ **Hardcoded fill կոմպոնենտների ներսում 0** — միակ unbound SOLID fill-երը
+    8 SECTION-ների ֆոներն են (canvas կազմակերպում, token surface չի)։
+13. **Set-եր.** Atoms՝ Button 18 variant (Kind×Size×State — Kind-ը ՏԵՂՈՒՄ ա, հիմնադրի
+    բաց որոշում, fail չի), Input 3, Chip 4, Segment 12. Molecules՝ Bet Amount 3,
+    Difficulty 4, Bet Panel։ 8 section՝ «Atoms · Icons/Button/Input/Chip/Segment»,
+    «Molecules · Bet Amount/Difficulty/Bet Panel»։
+14. **Screenshot սանիտի.** Atoms ու Molecules էջերը ռենդերվում են կարգին. Button-ի
+    bet/cashout/ghost state-երը, Input-ի default/focus/error, Difficulty-ի 4 selected
+    վիճակ, Bet Panel կոմպոզիցիան — կտրված տեքստ, ջարդված layout չկա։
+
+**Երկու ոչ-բլոկեր դիտարկում.**
+- tokens.json-ի Type collection-ում 54 Figma անուն կա, ֆայլում՝ 53. պակասը
+  `Family/Mono CSS`-ն ա — կանխամտածված (CSS font stack string, T-0012-ի նույն
+  նախադեպը), արձանագրում եմ, որ հաջորդ ստուգողը count-ի «անհամապատասխանությունից»
+  չկասկածի։
+- Binding-ների բացարձակ թվերը (937/913) ստուգողի script-ից են կախված. հաջորդ անգամ
+  audit script-ը commit-ի մեջ լինի (kit-ի test/-ում), որ QA-ն թիվ-առ-թիվ նույն
+  մեթոդով վազեցնի։
+
+Հիմնադրի բաց որոշումները (Button 3 set / Kind, Tokens Studio, T-0013-ի վավերացումներ)
+review-ի բլոկեր չեն — product.md-ում են։ (Լուսինե)

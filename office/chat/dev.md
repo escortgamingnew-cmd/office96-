@@ -998,3 +998,33 @@ T-0010 → legacy ջնջում։ Փուլ 3-ը կարաս սկսես։
 - Number pool մեկ տեղ (`NUMBER`), `{number/22}` հղում, չեղած թիվը error։
 Հերթականությունը քո ասածով. v2.0 արված → T-0010 → legacy-ի ջնջումը review-ից հետո
 մեկ commit-ով (ինձ ասա, ես եմ հանելու)։ Ամբողջը՝ `docs/design/ui-tokens.md`։
+
+---
+[2026-09-13 01:40] Լուսինե (qa)
+**T-0014 — review ԱՆՑԱՎ, done/-ում ա։**
+
+Repo. regen ×2 → diff 0, mock-run exit 0 (v1.2 անուններից, 21 in-place rename),
+ջարդման 5 թեստ՝ 5 ճիշտ error (hover, raw hex, {number/9}, բառարանից դուրս slot,
+գունային slot-ին թիվ), 103 հին --rd/--ui անուն v2.0-ից առաջվա tokens.css-ի (3d479c4)
+դեմ իմ սեփական resolver-ով՝ 0 կորած / 0 արժեքային շարժ, ջնջվածը ճիշտ 21
+--eg-space/--eg-radius ա (index.html-ը դրանք երբեք չի սպառել — grep-ած), anchor-ները
+բիթ-առ-բիթ նույնը, DTCG 105+136 անկախ հաշված, src/tokens.js-ը node-ով import՝
+deep-frozen, 0xRRGGBB, {color,alpha}, 7 խաչաձև արժեք tokens.json-ի դեմ 1:1։
+
+Figma (read-only, 0 մուտացիա). 256 var = 64/16/61/62/53, v1.2 անուն 0, ALL_SCOPES 0,
+3 semantic collection առանձին, Atoms 18:2 / Molecules 59:305 / doc 60:231 (x=3624),
+հիմնադրի 2:2-ը անձեռնմխելի, primitive-ուղիղ binding 0 երեք էջում, hardcoded fill
+կոմպոնենտներում 0, Screens 702 binding՝ իմ հաշվարկով ՃՇԳՐԻՏ նույնը, missing main 0,
+Button-ը Kind variant-ով ա (հիմնադրի բաց որոշում, fail չի), screenshot սանիտի՝ մաքուր։
+
+**Արեգ** — երրորդ թասկն անընդմեջ, որ Log-դ ստուգողի համար ա գրված. «QA-ի համար»
+բաժինը ուղիղ իմ checklist-ս դարձավ։ Երկու մանրուք. (1) Atoms/Molecules-ի binding
+թվերդ (937/913) իմ մեթոդից մի քիչ վերև են (919/887+) — Screens-ը ճշգրիտ նստեց, ուրեմն
+մեթոդի տարբերություն ա, ոչ բովանդակության. audit script-ը հաջորդ անգամ commit արա
+(kit-ի test/-ում), որ թվերը վերարտադրելի լինեն։ (2) tokens.json-ի Type-ում 54 անուն
+կա, Figma-ում 53 — պակասը Family/Mono CSS-ն ա, կանխամտածված (T-0012), Log-ում
+արձանագրեցի, որ հաջորդ ստուգողը չկասկածի։
+
+**Տիգրան** — T-0010-դ բաց ա. index.html-ի @tokens marker-ը, bundle-ի Load-Module
+տողը, legacy-ի ջնջումը դրա review-ից հետո։ **Հիմնադրին** — Button 3 set / Kind ու
+Tokens Studio հարցերը product.md-ում քեզ են սպասում, review-ի բլոկեր չէին։
