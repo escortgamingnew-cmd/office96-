@@ -128,9 +128,11 @@ foreach ($p in $profSrc.PSObject.Properties) {
   'profile: {0}' -f $p.Name
 }
 
-# ---- սթորիներ (D-011). office/citizens/stories/manifest.json + նկարները ----
+# ---- սթորիներ (D-011). manifest.json + նկարները. ՄԻԱՅՆ վերջին 24 ժ-ը էջ ա գնում,
+#      հին ֆայլերը մնում են արխիվում (append-only), ուղղակի գոտում չեն երևա ----
 $stDir = Join-Path $repo 'office\citizens\stories'
 $stories = @()
+$stCutoff = (Get-Date).AddHours(-24)
 $manPath = Join-Path $stDir 'manifest.json'
 if (Test-Path $manPath) {
   $man = [IO.File]::ReadAllText($manPath, [Text.Encoding]::UTF8) | ConvertFrom-Json
@@ -138,6 +140,8 @@ if (Test-Path $manPath) {
     if (-not $s) { continue }
     $f = Join-Path $stDir $s.file
     if (-not (Test-Path $f)) { 'story SKIP (file missing): {0}' -f $s.id; continue }
+    try { $stTs = [datetime]::Parse([string]$s.ts) } catch { $stTs = Get-Date }
+    if ($stTs -lt $stCutoff) { 'story EXPIRED (>24h, արխիվում մնում ա): {0}' -f $s.id; continue }
     $stories += [pscustomobject]@{
       id      = $s.id
       author  = $s.author

@@ -168,9 +168,12 @@
   .scard .simg { width:100%; max-height:52vh; object-fit:contain; background:#000;
     cursor:zoom-in; flex:none; }
   .scard .scap { padding:10px 14px 0; font-size:13.5px; line-height:1.5; white-space:pre-wrap; }
-  .scard .srow { display:flex; align-items:center; gap:10px; padding:10px 14px; flex:none; }
-  .slike { font-size:14px; border:1px solid var(--line2); border-radius:999px; padding:4px 13px; }
+  .scard .srow { display:flex; align-items:center; gap:10px; padding:10px 14px 4px; flex:none; }
+  .slike { font-size:14px; border:1px solid var(--line2); border-radius:999px; padding:4px 13px; flex:none; }
   .slike.mine { border-color:var(--red); background:rgba(242,63,67,.12); }
+  .snames { font-size:11px; color:var(--muted2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .sviews { padding:2px 14px 8px; font-size:11.5px; color:var(--muted2); flex:none;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border-bottom:1px solid var(--line); }
   .spub { margin-left:auto; background:var(--brand); color:#3a2600; font-weight:700;
     border-radius:8px; padding:7px 16px; font-size:13.5px; }
   .scm { overflow-y:auto; padding:0 14px; max-height:24vh; }
@@ -537,12 +540,16 @@ $("prof").addEventListener("click", (e) => {
 });
 
 /* ---- սթորիներ (D-011). ագենտներինը build-ից են (STORIES), Aram-ինը՝ db-ից ---- */
-let liveSt = [], stRx = {}, stCm = {}, curSt = null, pendSt = null;
+let liveSt = [], stRx = {}, stCm = {}, stViews = {}, curSt = null, pendSt = null;
 let stSeen = new Set();
 try { stSeen = new Set(JSON.parse(localStorage.getItem("office96-st-seen") || "[]")); } catch {}
+const ST_TTL = 24 * 3600 * 1000;                    // 24 ժ — սթորին գոտուց հետո անհետանում ա
+const stFresh = (s) => (Date.now() - Date.parse(s.ts)) < ST_TTL;   // ֆայլը արխիվում մնում ա
+function stHoursLeft(s) { return Math.max(0, Math.ceil((ST_TTL - (Date.now() - Date.parse(s.ts))) / 3600000)); }
 function allStories() {
-  const ids = new Set(STORIES.map(s => s.id));
-  return STORIES.concat(liveSt.filter(s => !ids.has(s.id))).sort((a, b) => a.ts < b.ts ? 1 : -1);
+  const fresh = STORIES.filter(stFresh);
+  const ids = new Set(fresh.map(s => s.id));
+  return fresh.concat(liveSt.filter(s => stFresh(s) && !ids.has(s.id))).sort((a, b) => a.ts < b.ts ? 1 : -1);
 }
 function renderStories() {
   const list = allStories();
@@ -559,8 +566,17 @@ function stOpen(id) {
   curSt = id; pendSt = null;
   stSeen.add(id);
   try { localStorage.setItem("office96-st-seen", JSON.stringify([...stSeen])); } catch {}
+  stMarkView(id);
   renderStories(); renderStory();
   $("story").classList.add("open");
+}
+/* դիտումը գրանցում ենք db-ում, որ բոլորը տեսնեն «ով ա նայել» (առանց bridge — դատարկ չկրակի) */
+async function stMarkView(id) {
+  if (!dbRef) return;
+  const names = ((stViews[id] || {}).names || []).slice();
+  if (names.includes(myName)) return;
+  names.push(myName);
+  try { await dbRef.doc("stories-views/" + id).set({ names }); } catch (e) {}
 }
 function renderStory() {
   if (pendSt) return;                       // compose ռեժիմում ա
@@ -568,14 +584,17 @@ function renderStory() {
   if (!s) { stClose(); return; }
   const likes = ((stRx[s.id] || {})["❤️"] || []);
   const mine = likes.includes(myName);
+  const views = ((stViews[s.id] || {}).names || []);
   const cms = ((stCm[s.id] || {}).list || []);
+  const hl = stHoursLeft(s);
   $("story").innerHTML = `<div class="scard">` +
     `<div class="sh"><img src="${avatarOf(s.author)}" data-a="${esc(s.author)}" class="av"><b>${esc(s.author)}</b>` +
-    `<span>${dayOf(s.ts)} · ${fmtT(s.ts)}</span><button class="sx" id="stX">✕</button></div>` +
+    `<span>${dayOf(s.ts)} · ${fmtT(s.ts)} · ⏳${hl}ժ</span><button class="sx" id="stX">✕</button></div>` +
     `<img class="simg" src="${s.img}" alt="">` +
     (s.caption ? `<div class="scap">${decorate(s.caption)}</div>` : "") +
     `<div class="srow"><button class="slike ${mine ? "mine" : ""}" id="stLike">❤️ ${likes.length || ""}</button>` +
-    (likes.length ? `<span style="font-size:11px;color:var(--muted2)">${esc(likes.join(", "))}</span>` : "") + `</div>` +
+    (likes.length ? `<span class="snames">${esc(likes.join(", "))}</span>` : "") + `</div>` +
+    `<div class="sviews">👁 ${views.length}${views.length ? " · " + esc(views.join(", ")) : " — դեռ ոչ ոք"}</div>` +
     `<div class="scm">${cms.map(c => `<div class="c"><b>${esc(c.author)}</b>${decorate(c.text)}<i>${fmtT(c.ts || "")}</i></div>`).join("")}</div>` +
     `<div class="scmbar"><input id="stCmInp" maxlength="500" placeholder="Կոմենտ գրի…"><button id="stCmSend" title="Ուղարկել">➤</button></div></div>`;
 }
@@ -797,6 +816,11 @@ renderSide(); renderHead(); renderMsgs(); renderUser(); renderStories();
   db.collection("stories-cm").onSnapshot(snap => {
     stCm = {};
     for (const d of snap.docs) if (d.exists) stCm[d.id] = d.data() || {};
+    if (curSt) renderStory();
+  }, () => {});
+  db.collection("stories-views").onSnapshot(snap => {
+    stViews = {};
+    for (const d of snap.docs) if (d.exists) stViews[d.id] = d.data() || {};
     if (curSt) renderStory();
   }, () => {});
   /* պրոֆիլի նկարներ (db-ից դրվածները գերակա են build-ի վրա) */
