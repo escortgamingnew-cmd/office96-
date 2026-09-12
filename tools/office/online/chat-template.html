@@ -716,8 +716,16 @@ async function armBridge() {
       if (SELF_T === "__" + "Q__") return;               // build-ը quine-ը չի լցրել
       const art = await window.claude?.use?.("artifact");
       if (!art) return;
-      const filled = SELF_T.replace('"__' + 'Q__"', JSON.stringify(SELF_T).replace(/<\//g, "<\\/"));
+      // ՃԻՇՏ նույն escaping-ը, ինչ build-chat.ps1-ը — որ ինքնա-հրապարակումը
+      // fixed-point լինի ու էջը չփքվի (JSON.stringify-ը drift էր տալիս)։
+      const qEsc = (s) => s.replace(/\\/g, "\\\\").replace(/"/g, '\\"')
+        .replace(/\r/g, "\\r").replace(/\n/g, "\\n").replace(/<\//g, "<\\/");
+      // function-replacement՝ որ escaped բովանդակության $ նշանները literal մնան
+      // (string-replacement-ը $&/$'/$` -ով տեքստ էր կրկնապատկում → էջը փքվում էր)
+      const rep = '"' + qEsc(SELF_T) + '"';
+      const filled = SELF_T.replace('"__' + 'Q__"', () => rep);
       const doc = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body>' + filled + "</body></html>";
+      if (doc.length > 4000000) return;                   // պաշտպանիչ. փքված բան չհրապարակենք
       await art.publish(doc);
     } catch (e) { /* conflict/անհասանելի — նորմալ ա, Սևակը սովորական սինքով կվերցնի */ }
   }, 40000);
