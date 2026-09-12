@@ -144,7 +144,8 @@ const semantic = {
   "size/icon": "{space/24}", "size/touch": "{space/48}",  /* touch target ≥44 — մոբայլ առաջինը */
   "stroke/hairline": "{space/1}", "stroke/control": "{space/2}",
   /* v1.2 — Bet պանել */
-  "pad/track": "{space/4}", "gap/segments": "{space/4}", "pad/segment-x": "{space/12}",
+  "pad/track": "{space/4}", "gap/segments": "{space/4}",
+  "pad/segment-x": "{space/8}",                         /* 390 պանել → 4 segment × 85px. կետ 8 + gap 8 + «Medium» 53 + 2×8 = 85 */
   "pad/chip-x": "{space/12}", "size/chip": "{space/40}", "gap/section": "{space/12}",
   "size/dot": "{space/8}",                              /* difficulty-ի գունավոր կետը segment-ում */
 };

@@ -167,7 +167,7 @@
   --rd-stroke-control: var(--eg-space-2);
   --rd-pad-track: var(--eg-space-4);
   --rd-gap-segments: var(--eg-space-4);
-  --rd-pad-segment-x: var(--eg-space-12);
+  --rd-pad-segment-x: var(--eg-space-8);
   --rd-pad-chip-x: var(--eg-space-12);
   --rd-size-chip: var(--eg-space-40);
   --rd-gap-section: var(--eg-space-12);
