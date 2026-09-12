@@ -13,6 +13,8 @@ $map = [ordered]@{
   'dm-tigran' = 'dm\tigran.md'
   'dm-anania' = 'dm\anania.md'
   'dm-lusine' = 'dm\lusine.md'
+  'dm-areg'   = 'dm\areg.md'
+  'dm-hasmik' = 'dm\hasmik.md'
   'decisions' = 'decisions.md'
 }
 
@@ -87,7 +89,7 @@ function AvatarB64($file) {
 }
 # բանալին՝ հեղինակի անվան ՍԿԻԶԲԸ (startsWith match էջում)
 $avMap = [ordered]@{}
-$avFiles = [ordered]@{ 'Սևակ'='sevak.png'; 'Անանիա'='anania.png'; 'Տիգրան'='tigran.png'; 'Լուսինե'='lusine.png' }
+$avFiles = [ordered]@{ 'Սևակ'='sevak.png'; 'Անանիա'='anania.png'; 'Տիգրան'='tigran.png'; 'Լուսինե'='lusine.png'; 'Արեգ'='areg.png'; 'Հասմիկ'='hasmik.png' }
 foreach ($k in $avFiles.Keys) {
   $f = Join-Path $avDir $avFiles[$k]
   if (Test-Path $f) { $avMap[$k] = AvatarB64 $f; 'avatar: {0}' -f $k }
