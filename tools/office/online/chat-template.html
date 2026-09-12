@@ -110,6 +110,30 @@
   #picker button { font-size:21px; padding:6px 8px; border-radius:8px; }
   #picker button:hover { background:var(--bg-active); }
 
+  /* ---- նկարներ + lightbox ---- */
+  .att { display:block; max-width:min(420px, 88%); max-height:340px; border-radius:10px;
+    margin-top:6px; cursor:zoom-in; border:1px solid var(--line2); }
+  .m .av { cursor:zoom-in; }
+  #lb { position:fixed; inset:0; z-index:50; background:rgba(0,0,0,.82); display:none;
+    align-items:center; justify-content:center; cursor:zoom-out; padding:24px; }
+  #lb.open { display:flex; }
+  #lb img { max-width:96vw; max-height:92vh; border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,.6); }
+  #attBar { display:none; align-items:center; gap:10px; padding:8px 4px 0; }
+  #attBar.show { display:flex; }
+  #attBar img { height:56px; border-radius:8px; border:1px solid var(--line2); }
+  #attBar button { color:var(--muted); font-size:15px; padding:4px 8px; }
+  #attach { flex:none; padding:11px 6px 11px 14px; font-size:18px; color:var(--muted); }
+  #attach:hover { color:var(--brand); }
+
+  /* ---- mention-ներ ---- */
+  .mn { color:var(--brand); background:rgba(255,210,122,.12); border-radius:4px; padding:0 3px; font-weight:600; }
+  #mnPop { position:fixed; z-index:30; background:var(--bg-deep); border:1px solid var(--line2);
+    border-radius:10px; padding:4px; display:none; flex-direction:column; min-width:180px;
+    box-shadow:0 8px 26px rgba(0,0,0,.5); }
+  #mnPop.open { display:flex; }
+  #mnPop button { text-align:left; padding:7px 10px; border-radius:7px; font-size:13.5px; }
+  #mnPop button:hover, #mnPop button.sel { background:var(--bg-active); }
+
   #compose { flex:none; padding:0 16px calc(16px + env(safe-area-inset-bottom)); }
   #cbar { display:flex; align-items:flex-end; background:var(--bg-input); border-radius:10px; }
   #inp { flex:1; background:none; border:none; color:var(--text); resize:none;
@@ -153,7 +177,9 @@
   <div id="err"></div>
   <div id="msgs"></div>
   <div id="compose">
+    <div id="attBar"><img id="attPrev" alt=""><span id="attInfo" style="font-size:11px;color:var(--muted)"></span><button id="attX" title="Հանել">✕</button></div>
     <div id="cbar">
+      <button id="attach" title="Նկար կցել">📎</button>
       <textarea id="inp" rows="1"></textarea>
       <button id="send" title="Ուղարկել (Ctrl+Enter)">➤</button>
     </div>
@@ -161,6 +187,9 @@
   </div>
 </div>
 <div id="picker"></div>
+<div id="lb"><img id="lbImg" alt=""></div>
+<div id="mnPop"></div>
+<input id="attFile" type="file" accept="image/*" style="display:none">
 
 <script>
 "use strict";
@@ -179,10 +208,14 @@ const CHANNELS = [
 ];
 const ARCHIVE = __ARCHIVE_JSON__;
 const AVATARS = __AVATARS_JSON__;
+const PEOPLE = ["Aram", "Սևակ", "Տիգրան", "Անանիա", "Լուսինե", "Արեգ", "Հասմիկ"];
+const SELF_T = "__Q__";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const linkify = (s) => esc(s).replace(/https?:\/\/[^\s<]+/g, u => `<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
+const decorate = (s) => { let h = linkify(s); for (const p of PEOPLE) h = h.split("@" + p).join(`<span class="mn">@${p}</span>`); return h; };
+const safeImg = (v) => typeof v === "string" && v.startsWith("data:image/") && v.length < 400000 ? v : null;
 const roleOf = (a) => a.includes("Aram") ? "founder" : (a.match(/\(([^)]+)\)/) || [,""])[1].trim().split(",")[0].trim();
 
 /* SVG շրջանակ-ավատար նրանց, ում նկարը չկա (Aram-ի ոսկե «A»-ն ներառյալ) */
@@ -267,7 +300,9 @@ function renderMsgs() {
     const grouped = prev && prev.author === m.author &&
       (Date.parse(m.ts) - Date.parse(prev.ts)) < 7 * 60000 && prev.src === m.src;
     const role = roleOf(m.author);
-    const tx = `<div class="tx ${isJumbo(m.text) ? "jumbo" : ""}">${linkify(m.text)}</div>`;
+    const img = safeImg(m.img);
+    const tx = `<div class="tx ${isJumbo(m.text) ? "jumbo" : ""}">${decorate(m.text)}</div>` +
+      (img ? `<img class="att" src="${img}" alt="" loading="lazy">` : "");
     if (grouped) {
       html += `<div class="m"><div class="avgap"></div><div class="body">${tx}${rxRowHtml(m)}</div></div>`;
     } else {
@@ -346,21 +381,123 @@ const closeSide = () => { $("side").classList.remove("open"); $("shade").classLi
 $("burger").addEventListener("click", () => { $("side").classList.add("open"); $("shade").classList.add("open"); });
 $("shade").addEventListener("click", closeSide);
 
+/* ---- նկար կցելը. downscale → data URI (բազայի doc-ը ≤256KB ա) ---- */
+let pendingImg = null;
+const attBar = $("attBar");
+$("attach").addEventListener("click", () => $("attFile").click());
+$("attX").addEventListener("click", () => { pendingImg = null; attBar.classList.remove("show"); $("attFile").value = ""; });
+$("attFile").addEventListener("change", () => {
+  const f = $("attFile").files[0];
+  if (!f) return;
+  const img = new Image();
+  img.onload = () => {
+    const tryEnc = (maxDim, q) => {
+      const k = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      return c.toDataURL("image/jpeg", q);
+    };
+    let d = tryEnc(1000, 0.8);
+    if (d.length > 230000) d = tryEnc(760, 0.7);
+    if (d.length > 230000) d = tryEnc(560, 0.6);
+    if (d.length > 230000) { sendErr("Նկարը շատ մեծ ա — չկարողացա սեղմել բավարար չափի։"); return; }
+    pendingImg = d;
+    $("attPrev").src = d; $("attInfo").textContent = Math.round(d.length / 1024) + " KB";
+    attBar.classList.add("show");
+  };
+  img.onerror = () => sendErr("Նկարը չբացվեց — PNG/JPG/WebP փորձի։");
+  img.src = URL.createObjectURL(f);
+});
+
+/* ---- lightbox. նկար/ավատար → մեծացնել ---- */
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  if (t.classList && (t.classList.contains("att") || (t.classList.contains("av") && t.src))) {
+    $("lbImg").src = t.src; $("lb").classList.add("open");
+  } else if (t.id === "lb" || t.id === "lbImg") $("lb").classList.remove("open");
+});
+addEventListener("keydown", e => { if (e.key === "Escape") $("lb").classList.remove("open"); });
+
+/* ---- @mention typeahead ---- */
+const inp = $("inp"), mnPop = $("mnPop");
+let mnSel = 0, mnList = [];
+function mnClose() { mnPop.classList.remove("open"); mnList = []; }
+function mnApply(name) {
+  const v = inp.value, pos = inp.selectionStart;
+  const head = v.slice(0, pos).replace(/@[\p{L}A-Za-z]*$/u, "@" + name + " ");
+  inp.value = head + v.slice(pos);
+  const np = head.length;
+  inp.setSelectionRange(np, np); inp.focus(); mnClose();
+}
+function mnCheck() {
+  const pos = inp.selectionStart;
+  const mword = /@([\p{L}A-Za-z]*)$/u.exec(inp.value.slice(0, pos));
+  if (!mword) { mnClose(); return; }
+  const q = mword[1].toLowerCase();
+  mnList = PEOPLE.filter(p => p.toLowerCase().startsWith(q));
+  if (!mnList.length) { mnClose(); return; }
+  mnSel = 0;
+  mnPop.innerHTML = mnList.map((p, i) =>
+    `<button class="${i === 0 ? "sel" : ""}" data-n="${p}"><img src="${avatarOf(p)}" style="width:18px;height:18px;border-radius:50%;vertical-align:-4px;margin-right:7px">@${p}</button>`).join("");
+  mnPop.querySelectorAll("button").forEach(b => b.addEventListener("mousedown", ev => { ev.preventDefault(); mnApply(b.dataset.n); }));
+  const r = inp.getBoundingClientRect();
+  mnPop.style.left = r.left + "px";
+  mnPop.classList.add("open");
+  mnPop.style.top = Math.max(8, r.top - mnPop.offsetHeight - 8) + "px";
+}
+inp.addEventListener("input", () => { inp.style.height = "auto"; inp.style.height = Math.min(160, inp.scrollHeight) + "px"; mnCheck(); });
+inp.addEventListener("blur", () => setTimeout(mnClose, 150));
+inp.addEventListener("keydown", e => {
+  if (mnPop.classList.contains("open")) {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      mnSel = (mnSel + (e.key === "ArrowDown" ? 1 : mnList.length - 1)) % mnList.length;
+      mnPop.querySelectorAll("button").forEach((b, i) => b.classList.toggle("sel", i === mnSel));
+      return;
+    }
+    if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); mnApply(mnList[mnSel]); return; }
+    if (e.key === "Escape") { mnClose(); return; }
+  }
+  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) send();
+});
+
+/* ---- «արթնացնող կամուրջը». նոր գրառումից 40վ հետո էջը իրան վերահրապարակում ա,
+   ինչը Սևակի session-ին artifact-changed ազդանշան ա տալիս → ինքը արթնանում,
+   սինքում ու պատասխանողներին ա հասցնում։ Quine-ը՝ SELF_T-ի մեջ։ ---- */
+let bridgeTO = 0;
+async function armBridge() {
+  clearTimeout(bridgeTO);
+  bridgeTO = setTimeout(async () => {
+    try {
+      if (SELF_T === "__" + "Q__") return;               // build-ը quine-ը չի լցրել
+      const art = await window.claude?.use?.("artifact");
+      if (!art) return;
+      const filled = SELF_T.replace('"__' + 'Q__"', JSON.stringify(SELF_T).replace(/<\//g, "<\\/"));
+      const doc = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body>' + filled + "</body></html>";
+      await art.publish(doc);
+    } catch (e) { /* conflict/անհասանելի — նորմալ ա, Սևակը սովորական սինքով կվերցնի */ }
+  }, 40000);
+}
+
 /* ---- գրելը ---- */
-const inp = $("inp");
-inp.addEventListener("input", () => { inp.style.height = "auto"; inp.style.height = Math.min(160, inp.scrollHeight) + "px"; });
-inp.addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) send(); });
 $("send").addEventListener("click", send);
 async function send() {
   const text = inp.value.trim();
-  if (!text) return;
+  if (!text && !pendingImg) return;
   if (!dbRef) { sendErr("Կապը բազայի հետ չկա — գրառումը չուղարկվեց։ Թարմացրու էջը։"); return; }
   $("send").disabled = true;
   try {
     const now = new Date();
     const ts = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 19);
-    await dbRef.collection("channels/" + cur + "/messages").add({ author: myName, ts, text, src: "web" });
+    const doc = { author: myName, ts, text, src: "web" };
+    if (pendingImg) doc.img = pendingImg;
+    const mns = PEOPLE.filter(p => text.includes("@" + p));
+    if (mns.length) doc.mentions = mns;
+    await dbRef.collection("channels/" + cur + "/messages").add(doc);
     inp.value = ""; inp.style.height = "auto";
+    pendingImg = null; attBar.classList.remove("show"); $("attFile").value = "";
+    armBridge();
   } catch (e) {
     sendErr(e && e.code === "quota_exceeded" ? "Բազան լցվել ա — ասա Սևակին, կմաքրի արխիվ տանելով։" : "Չստացվեց ուղարկել (" + (e && e.code || "սխալ") + ")։ Փորձի նորից։");
   }
@@ -380,7 +517,7 @@ renderSide(); renderHead(); renderMsgs(); renderUser();
     db.collection("channels/" + c.id + "/messages").orderBy("ts").limit(500).onSnapshot(snap => {
       live[c.id] = snap.docs.filter(d => d.exists).map(d => {
         const b = d.data() || {};
-        return { id: d.id, author: String(b.author || "անանուն"), ts: String(b.ts || ""), text: String(b.text || ""), src: b.src === "synced" ? "archive" : "web" };
+        return { id: d.id, author: String(b.author || "անանուն"), ts: String(b.ts || ""), text: String(b.text || ""), img: safeImg(b.img), src: b.src === "synced" ? "archive" : "web" };
       });
       unread[c.id] = live[c.id].filter(m => m.src === "web").length;
       renderSide();

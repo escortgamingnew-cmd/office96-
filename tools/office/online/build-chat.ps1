@@ -103,5 +103,12 @@ foreach ($ph in '__ARCHIVE_JSON__','__AVATARS_JSON__') {
   if (-not $tpl.Contains($ph)) { throw "placeholder missing: $ph" }
 }
 $tpl = $tpl.Replace('__ARCHIVE_JSON__', $json).Replace('__AVATARS_JSON__', $avJson)
+# ---- «արթնացնող կամուրջի» quine-ը. SELF_T-ի մեջ դնում ենք ֆրագմենտի placeholder-ով
+#      տարբերակը, որ էջը կարողանա ինքն իրան վերահրապարակել (artifact capability) ----
+$qMark = '"__' + 'Q__"'
+if ($tpl.Contains($qMark)) {
+  $esc = $tpl.Replace('\', '\\').Replace('"', '\"').Replace("`r", '\r').Replace("`n", '\n').Replace('</', '<\/')
+  $tpl = $tpl.Replace($qMark, '"' + $esc + '"')
+}
 [IO.File]::WriteAllText($out, $tpl, (New-Object Text.UTF8Encoding($false)))
 "written: $out ($([math]::Round((Get-Item $out).Length/1KB)) KB)"
