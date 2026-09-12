@@ -84,3 +84,49 @@ Variables պանել). նկարագրությունը ստորև՝ «Ռեֆեր�
   լինկեր։ Դիզայնի վերջնական խոսքը հիմնադրինն ա (D-002)։
 
 ## Log
+
+- [2026-09-12] Սևակ. բացվեց հիմնադրի ուղիղ պատվերից (երկու սքրինշոթ), approved։
+- [2026-09-12] Արեգ. վերցրի, doing։ Ledger-ը (scratchpad figma-ds-state.json) հին
+  էր՝ phase2. Figma-ի իրական «before»-ը կարդացի MCP-ով. Primitives 54 (միայն
+  գույն, LADDER-ով), World 16/2 մոդ, UI 37, Layout 31 (14 hidden space + 17
+  semantic), Type 53 (23 hidden + 30 font/*)։
+- [2026-09-12] Արեգ. **Փուլ 1 — gen-tokens v1.2** (commit 360bc37, ce0e066).
+  - *Ramp v2.* Հին LADDER-ը մեկ բազայից սպիտակ/սև խառնուրդ էր + override —
+    դրանից navy/500 == navy/600 կրկնություն կար։ Նորը. anchor-ները ֆիքսված
+    կետեր են, մնացած stop-երը երկու հարևան anchor-ի ԱՐԱՆՔՈՒՄ են
+    ինտերպոլացվում, ծայրերից դուրս՝ վիրտուալ 0=#FFFFFF / 1000=#000000,
+    լուսավոր կողմում ease t^1.5 (ռեֆերենսի Gray 50–300-ի պես բաց. night/100
+    #F4F5F5 ≈ ref #EDEFF3, night/300 #C8C9CB ≈ ref #BDC3CC)։ night = մեր Gray,
+    0…900 (11 stop), մյուսները 50…900 (10)։ Off-grid anchor-ները (red/450,
+    navy/550, navy/650) մնում են՝ կոդի արժեքներ են։ Anchor-ներից ոչ մեկը
+    չի փոխվել (ANCHOR աղյուսակը ֆայլի վերևում)։ Կողմնակի. amber/400 ու
+    amber/600 (cashout pressed) non-anchor են ու փոքր-ինչ շարժվեցին
+    (#F8BD5B→#FBB937, #CA8A1B→#C78819) — հիմա ramp-ի ՄԵՋ են, ոչ դրանից դուրս։
+  - *Alpha primitives.* alpha/white/{12,35,50}, alpha/night/{92,55},
+    alpha/green/{8,16,35}, alpha/amber/45 — միայն իրական սպառողներով։
+    Semantic-ը հիմա 100% alias ա (գեներատորը raw string semantic-ը
+    ՍԽԱԼ ա գցում)։ CSS-ում --rd-* անունների բազմությունը անփոփոխ,
+    արժեքները՝ նույն rgba-ն var(--eg-alpha-*)-ով։ --ui-* alias-ները տեղում։
+  - *Figma անուններ purpose-ով.* token-ի բանալին (text/primary) = CSS
+    անունն ա, tokens.json-ում նոր `figmaNames` քարտեզ (Colors/Global/
+    {Frame,Shape,Text,Border,Icon}/…, Colors/{Action,State,Surface,
+    Difficulty}/…, Padding/…, Gap/…, Size/…, Stroke/…, Radius/…, Font/<Style>/
+    …, hidden՝ Colors/<Family>/<stop>, Spacing/n, Font Size/n, Weight/…,
+    Tracking/…, Line Height/…)։ Kit-ը (kit.src.js) lookup ա անում Figma
+    անունով, fallback՝ հին բանալի → վերանվանում ա ՏԵՂՈՒՄ (ID-ն նույնը →
+    binding-ները չեն կոտրվում)։ Mock-ում assertion. հին անուն չմնա, UI-ի
+    ոչ մի COLOR raw չլինի։
+  - *Bet պանելի token-ներ.* surface/segment (navy/700), surface/segment-
+    selected (navy/500), difficulty/{easy,medium,hard,expert} = green/300,
+    amber/200, amber/500, red/500 (heat սանդղակ), pad/track, gap/segments,
+    pad/segment-x, pad/chip-x, size/chip (40), gap/section, size/dot,
+    radius/inner (8 = control 12 − track pad 4, concentric)։
+  - Արդյունք. 109 primitive + 92 semantic, mock-run OK։
+- [2026-09-12] Արեգ. **Փուլ 2 — Figma sync MCP-ով** (4 sequential կանչ, մեկ
+  collection = մեկ կանչ, kit-ի phaseVariables-ի նույն կոդով). Primitives 64
+  (54 վերանվանված, 10 նոր), Layout 38 (31 վերանվանված, 7 նոր), Type 53 (53
+  վերանվանված), UI 43 (37 վերանվանված, 6 նոր)։ Audit «after». legacy անուն 0,
+  UI-ում raw COLOR 0 (բոլորը alias), primitives scopes [] + hidden, ALL_SCOPES
+  0, code syntax 100%, Components էջում 572 binding / 0 hardcoded / 0 կախված,
+  6 style × 5 binding։ Հիմնադրի 2:2-ը render-ով նույնն ա (արժեքները չեն
+  փոխվել, binding-ները ID-ով են)։

@@ -81,7 +81,8 @@ const color = {
   },
 };
 const space  = { 1: 1, 2: 2, 4: 4, 6: 6, 8: 8, 10: 10, 12: 12, 14: 14, 16: 16, 20: 20, 22: 22, 24: 24, 32: 32, 40: 40, 48: 48 };
-const radius = { sm: 6, md: 10, control: 12, chip: 16, pill: 999 };
+const radius = { sm: 6, md: 10, control: 12, chip: 16, pill: 999,
+                 inner: 8 /* control(12) − track pad(4). segment-ը track-ի մեջ, chip-ը դաշտի մեջ՝ concentric */ };
 const type = {
   family: { mono: "Roboto Mono", sans: "Inter", armenian: "Noto Sans Armenian",
             "mono-css": "ui-monospace, Menlo, Consolas, monospace" },
@@ -145,6 +146,7 @@ const semantic = {
   /* v1.2 — Bet պանել */
   "pad/track": "{space/4}", "gap/segments": "{space/4}", "pad/segment-x": "{space/12}",
   "pad/chip-x": "{space/12}", "size/chip": "{space/40}", "gap/section": "{space/12}",
+  "size/dot": "{space/8}",                              /* difficulty-ի գունավոր կետը segment-ում */
 };
 /* font/<style>/… — text style-երի semantic շերտը */
 for (const [name, s] of Object.entries(textStyles)) {

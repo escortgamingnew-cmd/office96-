@@ -84,6 +84,7 @@
   --eg-radius-control: 12px;
   --eg-radius-chip: 16px;
   --eg-radius-pill: 999px;
+  --eg-radius-inner: 8px;
   --eg-family-mono: "Roboto Mono";
   --eg-family-sans: "Inter";
   --eg-family-armenian: "Noto Sans Armenian";
@@ -170,6 +171,7 @@
   --rd-pad-chip-x: var(--eg-space-12);
   --rd-size-chip: var(--eg-space-40);
   --rd-gap-section: var(--eg-space-12);
+  --rd-size-dot: var(--eg-space-8);
   --rd-font-display-multiplier-family: var(--eg-family-mono);
   --rd-font-display-multiplier-size: var(--eg-size-56);
   --rd-font-display-multiplier-weight: var(--eg-weight-bold);
