@@ -145,3 +145,39 @@ Figma-ում նոր token ես մտցնում՝ գեներատորին էլ ես
   Components էջ (Button 19:92, Input 20:22, Icons 18:40) + Foundations «Components
   — v1» 21:2 + Variables panel (primitives hidden, World 2 մոդ)։ mock-run-ը
   դեռ անցնում ա։ Դիզայնի վավերացումը հիմնադրինն ա (on-bet = night/900)։
+- [2026-09-12 23:15] Լուսինե (qa). **Review ԱՆՑԱՎ → done/։** Ինչ ստուգեցի ու ոնց.
+  - **Repo.** `node tools/design/gen-tokens.mjs` մաքուր tree-ի վրա —
+    tokens.json/tokens.css/figma-kit/code.js դետերմինիստիկ վերագեներացվում են,
+    git diff դատարկ։ `figma-kit/test/mock-run.mjs`՝ OK, exit 0 (291 binding,
+    108 bound paint, 9 effect — Log-ի թվերի հետ 1:1)։ tokens.css-ում
+    `--rd-font-*-lh` = 56/24/19/17/14/17 px ✓։ Հին `--ui-*` alias-ները անվնաս
+    են. index.html-ի օգտագործած բոլոր 11 անունները ծածկված են (`--ui-spd`-ն
+    tokens-ից չի, լոկալ անիմացիայի փոփոխական ա index.html:10-ում)։
+  - **Figma (MCP, read-only).** Primitives՝ 0 ALL_SCOPES, hidden, scopes []
+    (radius-ը CORNER_RADIUS, ինչպես գրված ա), code syntax `var(--eg-*)`։
+    Semantic՝ 0 ALL_SCOPES, բոլորը `var(--rd-*)`։ Հաշվարկը ճշտեցի
+    անուն-առ-անուն diff-ով. Figma 175 var (ոչ-World) = գեներատորի 176 −
+    `family/mono-css` (CSS string, Figma-ում կիրառելի չի) → 96 primitive +
+    79 semantic, ճիշտ ինչպես Log-ում։ 6 text style × 5 binding
+    (family/size/weight/tracking/lh), lineHeight-ը PIXELS ✓։
+  - **Կոմպոնենտներ.** Button 19:92՝ COMPONENT_SET, 18 variant
+    (Kind×Size×State), props Label / Show icon / Icon (INSTANCE_SWAP) ✓;
+    fill-երի ամբողջ սկան՝ 36 bound paint, **0 hardcoded** (Cashout-ի gradient
+    stop-երը ներառյալ՝ բոլորը variable-bound)։ Input 20:22՝ 3 state
+    (Default/Focus/Error) + 5 prop ✓։ Icons 18:40՝ 7 կոմպոնենտ
+    (Plus/Minus/Close/ChevronDown/Replay/History/Settings) ✓։ World՝ 2 մոդ
+    (Proto / Deep night), world-night/* 7-ը hidden + «Deprecated → Deep night»
+    նկարագրով ✓ — Log-ի սահմանափակումների ցուցակը ազնիվ ա (doc-ը իրոք
+    անգլերեն ա, world-night-ը իրոք դեռ կա)։
+  - **Screenshot 19:92.** Bet-ի տեքստը մուգ ա (ոչ սպիտակ), Cashout-ը իսկական
+    2-stop սաթե gradient, Ghost-ը կանաչ եզրագիծ + կանաչ տեքստ, Disabled
+    սյունը 0.4 opacity՝ խամրած ✓։
+  - **Հիմնադրի 2:2-ը** անձեռնմխելի ա — x=100, y=100, հին swatch/type
+    կառուցվածքով, world-night swatch-երը (2:117, 2:121, 2:125) տեղում են։
+    «Components — v1» 21:2-ը x=1224՝ աջից, չեն հատվում ✓։
+  - Մանր նիտ, ֆիքս չի պահանջում. Log-ի «68 alias»-ը իմ հաշվով 62 ա
+    (UI 26 + Layout 12 + Type 24); ոչ-alias 17-ի բացատրությունը ճիշտ ա
+    (11 rgba/opacity + 6 lh px)։
+  - **ԴԻԶԱՅՆԻ վավերացումը հիմնադրինն ա (D-002) ու դեռ սպասվող** — on-bet =
+    night/900 կոնտրաստի ընտրությունը ու lh px որոշումը Արամը պիտի հաստատի։
+    QA-ն փակում ա ֆունկցիոնալ կողմը, ոչ դիզայնը։
