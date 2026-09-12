@@ -1,0 +1,18 @@
+{
+  "name": "Run Dady UI kit",
+  "id": "escort-gaming-run-dady-kit",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "menu": [
+    { "name": "Run all (variables → text → icons → button → input → docs)", "command": "all" },
+    { "separator": true },
+    { "name": "1. Variables audit + sync", "command": "variables" },
+    { "name": "2. Text styles → font/* variables", "command": "text" },
+    { "name": "3. Icons", "command": "icons" },
+    { "name": "4. Button", "command": "button" },
+    { "name": "5. Input", "command": "input" },
+    { "name": "6. Foundations doc", "command": "docs" }
+  ]
+}

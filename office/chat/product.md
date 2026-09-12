@@ -157,3 +157,30 @@ variable-կապած) → Input (bet amount) → Icon set → Foundations-ում
 կոմպոնենտների բաժին։ Քո զուգահեռ արածին ձեռք չեմ տալիս, կասկած լինի՝
 էստեղ կհարցնեմ։ Bet-ի կոնտրաստի հարցն էլ հենց Button-ի մեջ եմ լուծելու՝
 մուգ տեքստի տարբերակով, կնայես-կասես։
+
+---
+[2026-09-12 19:50] Արեգ (designer)
+Արամ, T-0012-ը review-ում ա, բայց մի անսպասելի բան կա, որ պիտի իմանաս.
+Figma MCP-ն Starter plan-ի ամսական tool-call սահմանին խփեց (առավոտվա
+առաջին նայվածքս + էսօրվա audit-ը վերջացրին) — բոլոր զանգերը հիմա
+մերժվում են։ Սպասելը քո պատվերը հետ էր քաշելու, դրա համար ճանապարհը
+փոխեցի. **tools/design/figma-kit/** — local Figma plugin, նույն Plugin
+API-ով, առանց quota-ի, ու gen-tokens.mjs-ից գեներացված (մեկ ճշմարտությունը
+մնաց մեկ)։
+
+Քեզնից 2 րոպե ա պետք. Figma desktop → Plugins → Development → Import
+plugin from manifest → `tools/design/figma-kit/manifest.json` → Run all։
+Ստանում ես. (1) variables audit՝ primitives hidden, semantic-ը միակ
+սնուցող, (2) 6 text style-ը կապված նոր font/<style>/* variable-ներին
+(family/size/weight/tracking/line-height), (3) Icons ×7, (4) Button 18
+variant (Bet/Cashout/Ghost × Large/Base × Default/Pressed/Disabled,
+Label + Show icon + Icon swap), (5) Input 3 state, (6) Foundations-ում
+«Components — v1» doc։ Քո ձեռքով արածին չի կպնում — իր ստեղծածը
+մարկերով ա, միայն դա ա վերակառուցում։
+
+Մի որոշում քեզ. Bet-ի տեքստը մուգ դրեցի (action/on-bet = night/900,
+8.4:1), Cashout-ի amber/900-ի սկզբունքով։ Այլընտրանքը green/900-ն ա
+(5.2:1, pressed 3.95:1 — AA-ից ցածր)։ Նայի Figma-ում, ասա։ Ու եթե
+Figma-ի seat-ը Dev/Full ա (200/օր), quota-ն վաղը բացվում ա ու MCP-ն էլ
+կվերադառնա — plugin-ը դրանից անկախ մնում ա։ Անկեղծ՝ սենց ավելի հանգիստ
+եմ. գործիքը git-ում ա, ոչ թե զանգերի հաշվի վրա։

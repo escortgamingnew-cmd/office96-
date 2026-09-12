@@ -78,6 +78,37 @@ night-ը `world-night/*` խումբ ա, ոչ մոդ. alpha ունեցող semant
 | border/subtle | white @12% | — |
 | brand/accent | amber/200 | — |
 
+### v1.1 — կոմպոնենտային token-ներ (T-0012, Արեգ, 2026-09-12)
+
+| Token | → Primitive | Ինչու |
+|---|---|---|
+| action/on-bet | night/900 | Bet կոճակի տեքստ. սպիտակը green/500-ի վրա 2.3:1 էր, մուգը՝ 8.4:1 (pressed՝ 6.3:1)։ Այլընտրանք՝ green/900 (5.2:1 / 3.95:1) — հիմնադրի որոշումն ա |
+| action/cashout-pressed-top/-bottom | amber/400 / amber/600 | Cashout սեղմած |
+| action/ghost | green/500 @8% | «Keep Running» — index.html `.lost #hold` |
+| action/ghost-pressed | green/500 @16% | — |
+| action/ghost-border | green/500 | — |
+| action/on-ghost | green/300 | — |
+| text/placeholder | white @35% | Input դատարկ |
+| icon/primary, icon/secondary | white, white @50% | Icon set stroke |
+| surface/input | navy/700 | Input դաշտի ֆոն |
+| border/focus | amber/200 | Input focus (2px) |
+| border/error | red/400 | Input error (2px) |
+| opacity/disabled | 0.4 | Disabled՝ ամբողջ կոճակի opacity |
+| pad/input-y, pad/input-x | space/12, space/16 | — |
+| gap/icon | space/8 | icon↔label |
+| size/icon | space/24 | icon grid |
+| size/touch | space/48 | Touch target ≥44 — մոբայլ առաջինը |
+| stroke/hairline, stroke/control | space/1, space/2 | border-ներ |
+
+**font/\<style\>/\*** — text style-երի semantic շերտը. ամեն style ՄԻԱՅՆ
+`font/<style>/{family,size,weight,tracking,lh}`-ից ա սնվում, դրանք էլ՝ Type
+primitives-ից (family/size/weight/tracking/lh)։ Primitive-ից ուղիղ ոչ մի style
+չի սնվում (հիմնադրի կանոնը, 09-12)։ Line-height սանդղակ՝ lh/tight 100%,
+lh/snug 120%, lh/base 140% (CSS-ում unitless 1 / 1.2 / 1.4)։
+
+**Figma-ն ինչպես ա ստանում.** `tools/design/figma-kit/` plugin-ը (գեներացվում ա
+gen-tokens.mjs-ից) — README-ն էնտեղ։ MCP-ի Starter quota-ից անկախ ա։
+
 ## Չափեր
 
 radius/control = 12 (--ui-rad), radius/chip = 16, radius/pill = 999.
@@ -88,11 +119,11 @@ space/xs 6, space/sm 8, space/md 10, space/lg 16.
 Կոդում՝ `ui-monospace, Menlo, monospace` (համակարգային մոնո)։
 Figma-ում ներկայացուցիչը՝ **Roboto Mono** (ամենամոտ լայն հասանելին)։
 
-| Style | Չափ/քաշ | Letter-spacing | Օգտագործում |
-|---|---|---|---|
-| Display/Multiplier | 56 Bold | −2 | 1.00x ցուցիչը |
-| Amount | 20 Bold | .5 | bet գումարը |
-| Button/Large | 16 SemiBold | .5 | Run! Daddy |
-| Button/Base | 14 SemiBold | .5 | Place Bet, cashout |
-| Pill | 12 Bold | .2 | պատմության pill-եր |
-| Label/Caps | 12 Regular | 2 | state (UPPERCASE) |
+| Style | Չափ/քաշ | Letter-spacing | Line-height | Օգտագործում |
+|---|---|---|---|---|
+| Display/Multiplier | 56 Bold | −2 | 100% | 1.00x ցուցիչը |
+| Amount | 20 Bold | .5 | 120% | bet գումարը |
+| Button/Large | 16 SemiBold | .5 | 120% | Run! Daddy |
+| Button/Base | 14 SemiBold | .5 | 120% | Place Bet, cashout |
+| Pill | 12 Bold | .2 | 120% | պատմության pill-եր |
+| Label/Caps | 12 Regular | 2 | 140% | state (UPPERCASE) |
