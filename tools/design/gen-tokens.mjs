@@ -53,7 +53,9 @@ const type = {
   size:   { 10: 10, 11: 11, 12: 12, 14: 14, 16: 16, 20: 20, 28: 28, 40: 40, 56: 56 },
   weight: { regular: 400, medium: 500, semibold: 600, bold: 700 },
   tracking: { tight: -2, base: 0.2, button: 0.5, caps: 2 },
-  /* line-height՝ տոկոսով (Figma PERCENT), CSS-ում՝ unitless (1.2) */
+  /* line-height հարաբերակցություն (%)։ CSS primitives՝ unitless (1.2)։ font/<style>/lh semantic-ը
+   * px ա (size × ratio) — Figma-ում variable-ին կապված lineHeight-ը ՄԻՇՏ px ա մեկնաբանվում,
+   * PERCENT binding չկա (T-0012, իրական վազքով ստուգված) */
   lh: { tight: 100, snug: 120, base: 140 },
 };
 
@@ -109,7 +111,8 @@ for (const [name, s] of Object.entries(textStyles)) {
   semantic[`font/${k}/size`] = `{size/${s.size}}`;
   semantic[`font/${k}/weight`] = `{weight/${s.weight}}`;
   semantic[`font/${k}/tracking`] = `{tracking/${s.tracking}}`;
-  semantic[`font/${k}/lh`] = `{lh/${s.lh}}`;
+  /* px, ոչ alias. lh/<ratio> primitive-ը մնում ա որպես ratio-ի աղբյուր (CSS unitless) */
+  semantic[`font/${k}/lh`] = Math.round(s.size * type.lh[s.lh] / 100);
 }
 
 /* ---------- resolve + emit ---------- */
@@ -142,7 +145,8 @@ for (const [k, v] of Object.entries(flat))
   css += `  --eg-${cssName(k)}: ${k.startsWith("family") ? `"${v}"` : unit(k, v)};\n`;
 css += "\n";
 for (const [k, { ref, value }] of Object.entries(tokens.semantic)) {
-  const val = typeof ref === "string" && ref.startsWith("{") ? `var(--eg-${cssName(ref.slice(1, -1))})` : value;
+  const val = typeof ref === "string" && ref.startsWith("{") ? `var(--eg-${cssName(ref.slice(1, -1))})`
+    : k.endsWith("/lh") ? `${value}px` : value;
   css += `  --rd-${cssName(k)}: ${val};\n`;
 }
 css += `

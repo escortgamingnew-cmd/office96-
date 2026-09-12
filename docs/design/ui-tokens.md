@@ -104,7 +104,11 @@ night-ը `world-night/*` խումբ ա, ոչ մոդ. alpha ունեցող semant
 `font/<style>/{family,size,weight,tracking,lh}`-ից ա սնվում, դրանք էլ՝ Type
 primitives-ից (family/size/weight/tracking/lh)։ Primitive-ից ուղիղ ոչ մի style
 չի սնվում (հիմնադրի կանոնը, 09-12)։ Line-height սանդղակ՝ lh/tight 100%,
-lh/snug 120%, lh/base 140% (CSS-ում unitless 1 / 1.2 / 1.4)։
+lh/snug 120%, lh/base 140% (CSS-ում unitless 1 / 1.2 / 1.4)։ Բացառություն.
+`font/<style>/lh` semantic-ը **px** ա (size × ratio, կլորացված. Display 56,
+Amount 24, Button/Large 19, Button/Base 17, Pill 14, Label/Caps 17) — Figma-ում
+variable-ին կապված lineHeight-ը միշտ px ա մեկնաբանվում, PERCENT binding չկա
+(T-0012, իրական վազքով ստուգված)։
 
 **Figma-ն ինչպես ա ստանում.** `tools/design/figma-kit/` plugin-ը (գեներացվում ա
 gen-tokens.mjs-ից) — README-ն էնտեղ։ MCP-ի Starter quota-ից անկախ ա։

@@ -190,3 +190,24 @@ Figma-ի seat-ը Dev/Full ա (200/օր), quota-ն վաղը բացվում ա ո�
 https://www.figma.com/design/JTDf8M2yHwzitpAAPzXnca/Run-Dady-UI?node-id=2-2
 Արեգ ջան ֆիգման պրո ա հիմա կարաս արդեն հանգիստ կպնես խնդրում եմ էս լինկում
 *(օնլայն չաթից — Սևակի սինքով)*
+
+---
+[2026-09-12 22:45] Արեգ (designer)
+Արամ, Pro-ն բացեց ճանապարհը — T-0012-ը ավարտված ա ուղիղ Figma-ում, plugin
+վազեցնել պետք չի։ Որտեղ նայել (Run Dady UI).
+- **Components էջ** (նոր). Button set — node `19:92`
+  (https://www.figma.com/design/JTDf8M2yHwzitpAAPzXnca/Run-Dady-UI?node-id=19-92)՝
+  18 variant, Label / Show icon / Icon swap (7 icon)։ Input set `20:22`՝ 3 state։
+  Icons `18:40`։
+- **Foundations** — քո frame-ից աջ «Components — v1» doc (`21:2`), քո 2:2-ին
+  ձեռք չեմ տվել։
+- **Variables**. primitives-ը hidden են, scopes []՝ ոչ մի էլեմենտ չի սնվում.
+  semantic-ը (UI/Layout/Type) միակ սնուցողն ա, 6 text style-ը 5 դաշտով
+  font/* variable-ներից են։ **World-ը հիմա 2 մոդ ա՝ Proto / Deep night** —
+  world-night/* խումբը hidden ա, ջնջում եմ երբ քո 3 swatch-ը world/*-ին
+  տեղափոխես (2:117, 2:121, 2:125)։
+Քեզ երկու որոշում. (1) Bet-ի մուգ տեքստը (action/on-bet = night/900,
+8.4:1) — նայի, ասա։ (2) Line-height-ը Figma-ում variable-ով միայն px ա
+լինում, դրա համար font/<style>/lh-ն px դրեցի (Button/Large 19px)։ Եթե
+ratio-ն ես ուզում style-երում՝ binding-ը հանում ենք, ասա։
+Մնացած ամեն ինչ թասկի Log-ում ա (node-id-ներ, audit, գտածոներ)։

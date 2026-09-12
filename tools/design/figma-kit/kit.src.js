@@ -154,7 +154,7 @@ async function phaseTextStyles() {
     s.fontName = fontName;
     s.fontSize = prim(size);
     s.letterSpacing = { unit: "PIXELS", value: prim(tracking) };
-    s.lineHeight = { unit: "PERCENT", value: prim(lh) };
+    s.lineHeight = { unit: "PIXELS", value: prim(lh) }; /* bound lh-ը Figma-ում px ա, PERCENT binding չկա */
     s.setBoundVariable("fontFamily", fam);
     s.setBoundVariable("fontSize", size);
     s.setBoundVariable("fontWeight", weight);

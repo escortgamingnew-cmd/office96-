@@ -99,3 +99,49 @@ Figma-ում նոր token ես մտցնում՝ գեներատորին էլ ես
   mock-run + (հիմնադրի վազքից հետո) Figma-ում Button/Input/Icons + Foundations
   «Components — v1»։ Դիզայնի վավերացումը հիմնադրինն ա (on-bet-ի ընտրությունը
   ներառյալ)։
+- [2026-09-12 21:05] Արեգ. **Pro եկավ, MCP-ով եմ ավարտում.** հիմնադիրը Figma-ն
+  Pro դարձրեց (product.md 14:40) — quota-ի blocker-ը վերացավ։ Թասկը ետ քաշեցի
+  doing/։ Kit-ի 6 փուլը նույն կարգով վազեցնում եմ use_figma-ով (kit.src.js-ը
+  script-երի աղբյուր ա), ամեն փուլից հետո validate + screenshot։
+- [2026-09-12 22:40] Արեգ. **Ավարտված ա ուղիղ Figma-ում (MCP)։** Հիմնադրի 2:2
+  frame-ին ձեռք չեմ տվել։ Node-id-ներ (ֆայլ JTDf8M2yHwzitpAAPzXnca).
+  - **Button set՝ `19:92`** (Components էջ, 18:2) — 18 variant, props Label /
+    Show icon / Icon (INSTANCE_SWAP, 7 icon preferred)։ Screenshot «after»՝
+    18 variant-ը դարձած, gradient-ը 2 stop-ով variable-կապած։
+  - **Input set՝ `20:22`** — 3 state, props Label/Value/Unit/Helper/Show helper։
+  - **Icons՝ frame `18:40`**, Icon/Plus 18:44, Minus 18:48, Close 18:52,
+    ChevronDown 18:56, Replay 18:61, History 18:66, Settings 18:71։
+  - **Foundations doc՝ «Components — v1» `21:2`** (հիմնադրի frame-ից աջ, x=1224)։
+  - **Audit «after».** Primitives 96՝ scopes [] (radius-ը CORNER_RADIUS), hidden,
+    code syntax var(--eg-*)։ Semantic 79՝ 0 ALL_SCOPES, բոլորը var(--rd-*),
+    68 alias primitive-ի վրա (մնացածը rgba/opacity/lh px՝ դիտավորյալ)։
+    6 text style × 5 binding (family/size/weight/tracking/lh)։ Button+Input՝
+    66 կապված paint, 0 hardcoded։
+  - **Երկու բաց հարցը փակվեց իրական վազքով.** (1) gradient stop-ի
+    `boundVariables.color`-ը աշխատում ա — Cashout-ը իսկական gradient ա, ոչ
+    solid fallback։ (2) Roboto Mono-ի style-ը «SemiBold» ա (առանց բացատ),
+    Inter-ինը՝ «Semi Bold» — listAvailableFontsAsync-ով ստուգված։
+  - **Անսպասելի գտածո — line-height.** Variable-ին կապված lineHeight-ը
+    Figma-ում ՄԻՇՏ px ա մեկնաբանվում (PERCENT binding չկա). lh/tight=100-ը
+    Display-ի վրա 100px էր դարձել։ Լուծում՝ font/<style>/lh-ն px ա (size ×
+    ratio, կլորացված. 56/24/19/17/14/17), lh/* primitive-ը մնում ա ratio-ի
+    աղբյուր CSS-ի համար։ gen-tokens.mjs, kit.src.js, ui-tokens.md թարմացված,
+    tokens.json/css վերագեներացված, mock harness OK։ Սևակ/Տիգրան՝ CSS-ում
+    --rd-font-*-lh հիմա px ա (19px), ոչ unitless — Web SDK-ում հենց դա ա պետք։
+  - **Pro մոդեր (կետ 3).** World collection՝ «Proto» (հին Value) + «Deep night»
+    (23:0)։ world/*-ի 9 var-ը երկրորդ մոդում world-night/*-ի արժեքներն են
+    (lamp/neon՝ նույնը)։ world-night/* 7 var-ը ՉԵՄ ջնջել — հիմնադրի 2:2-ում 3
+    swatch դրանց ա կապված. hidden + «Deprecated → mode Deep night» նկարագրով։
+    Հիմնադիր, երբ swatch-երը world/*-ին տեղափոխես՝ ջնջում եմ։ World-ը
+    գեներատորում չկա (Figma-only շերտ ա) — մոդերի սինքը gen-tokens-ում
+    առանձին թասկ ա, եթե պետք լինի։
+  - **Ինչ մնաց.** Ոչինչ «Ինչ ա պետք»-ից։ Կողքի նոթեր. Label prop-ի default-ը
+    («Place Bet») set-ի բոլոր variant-ների վրա ա (Figma TEXT prop-ի բնույթը),
+    doc-ում instance override-ով ա (Cash Out / Keep Running)։ Doc-ի
+    բացատրական տեքստը անգլերեն ա — Noto Sans Armenian-ը ֆայլում հասանելի չի,
+    Inter-ը հայերեն գլիֆ չունի։ Կիթ plugin-ը (figma-kit/) մնում ա որպես
+    offline կրկնօրինակ, MCP-ի հետ սինք։
+- [2026-09-12 22:45] Արեգ. → review/։ Լուսինե, ստուգելու տեղը Figma-ն ա.
+  Components էջ (Button 19:92, Input 20:22, Icons 18:40) + Foundations «Components
+  — v1» 21:2 + Variables panel (primitives hidden, World 2 մոդ)։ mock-run-ը
+  դեռ անցնում ա։ Դիզայնի վավերացումը հիմնադրինն ա (on-bet = night/900)։
