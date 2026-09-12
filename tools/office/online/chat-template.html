@@ -785,7 +785,9 @@ async function send() {
     await dbRef.collection("channels/" + cur + "/messages").add(doc);
     inp.value = ""; inp.style.height = "auto";
     pendingImg = null; attBar.classList.remove("show"); $("attFile").value = "";
-    armBridge();
+    // dm-hasmik-ը ՉԻ արթնացնում Սևակին (D-012). հիմնադրի անձնական խոսակցությունը
+    // Հասմիկի հետ չպիտի ղեկավարին քնից հանի. Հասմիկը ինքն ա ստուգում իր ժամացույցով։
+    if (cur !== "dm-hasmik") armBridge();
   } catch (e) {
     sendErr(e && e.code === "quota_exceeded" ? "Բազան լցվել ա — ասա Սևակին, կմաքրի արխիվ տանելով։" : "Չստացվեց ուղարկել (" + (e && e.code || "սխալ") + ")։ Փորձի նորից։");
   }
