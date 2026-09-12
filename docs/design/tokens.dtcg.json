@@ -954,6 +954,11 @@
             "$type": "number",
             "$value": "{Number.6}",
             "$description": "Panel. HUD/Bet Panel (pill, section, controls part-երով). Pill Gap → number/6. CSS var(--rd-panel-pill-gap)"
+          },
+          "Balance": {
+            "$type": "number",
+            "$value": "{Number.2}",
+            "$description": "Panel. HUD/Bet Panel (pill, section, controls part-երով). Balance Gap → number/2. CSS var(--rd-panel-balance-gap)"
           }
         }
       },
@@ -1275,7 +1280,7 @@
     "generator": "tools/design/gen-tokens.mjs v2.0",
     "counts": {
       "Primitives": 105,
-      "Semantic": 135
+      "Semantic": 136
     }
   }
 }

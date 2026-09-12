@@ -181,6 +181,7 @@ const semantic = {
   "panel/bg": "{alpha/night/92}", "panel/pill/bg": "{alpha/night/55}",
   "panel/pad": "{number/16}", "panel/radius": "{number/16}",
   "panel/section/gap": "{number/12}", "panel/controls/gap": "{number/8}", "panel/pill/gap": "{number/6}",
+  "panel/balance/gap": "{number/2}",                    /* HUD balance՝ label ↔ գումար (Screens/Mobile header) */
 
   /* Global — կոմպոնենտից դուրս սպառողներ (ազատ տեքստ, HUD-ի հաշվիչ, doc frame-եր) */
   "text/primary": "{white}", "text/secondary": "{alpha/white/50}", "text/placeholder": "{alpha/white/35}",

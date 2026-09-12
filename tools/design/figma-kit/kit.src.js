@@ -161,11 +161,19 @@ async function componentsPage() {
   await figma.setCurrentPageAsync(p);
   return p;
 }
-/* մեր մարկերով նույնանուն node-ը ջնջում ենք (idempotent), ուրիշինը՝ ոչ */
+/* մեր մարկերով նույնանուն node-ը ջնջում ենք (idempotent), ուրիշինը՝ ոչ. v2.0՝ set-երը «Atoms · <Name>»
+ * section-ների մեջ են (T-0014), դրա համար էջի ու section-ների երեխաներն էլ ենք նայում */
+const topLevel = (page) => page.children.flatMap((n) => (n.type === "SECTION" ? [...n.children] : [n]));
 function removeMine(page, name) {
-  for (const n of [...page.children]) if (n.name === name && n.getPluginData(KIT)) { n.remove(); log(`~ ${name} վերակառուցվում ա`); }
+  for (const n of topLevel(page)) if (n.name === name && n.getPluginData(KIT)) { n.remove(); log(`~ ${name} վերակառուցվում ա`); }
 }
 function nextX(page) { let x = 0; for (const n of page.children) x = Math.max(x, n.x + n.width); return x + 160; }
+/* նոր set-ը դնում ենք իր section-ի մեջ, եթե կա («Atoms · Button»), թե չէ՝ էջի աջ եզրին */
+function place(page, name, node) {
+  const sec = page.children.find((n) => n.type === "SECTION" && n.name === `Atoms · ${name}`);
+  if (sec) { sec.appendChild(node); node.x = 80; node.y = 80; sec.resizeWithoutConstraints(node.width + 160, node.height + 160); }
+  else { node.x = nextX(page); node.y = 0; }
+}
 
 /* ---------- ՓՈՒԼ 3. icons (24 grid, 2px stroke, INSTANCE_SWAP-ի համար) ---------- */
 const ICON_SVG = {
@@ -186,8 +194,8 @@ async function phaseIcons() {
   const wrap = mark(figma.createFrame());
   wrap.name = "Icons"; wrap.layoutMode = "HORIZONTAL"; wrap.itemSpacing = 24; wrap.paddingTop = wrap.paddingBottom = wrap.paddingLeft = wrap.paddingRight = 24;
   wrap.primaryAxisSizingMode = "AUTO"; wrap.counterAxisSizingMode = "AUTO"; wrap.fills = [];
-  wrap.x = nextX(page); wrap.y = 0;
   page.appendChild(wrap);
+  place(page, "Icons", wrap);
   for (const [name, body] of Object.entries(ICON_SVG)) {
     const svg = figma.createNodeFromSvg(`<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${body}</g></svg>`);
     const comp = mark(figma.createComponent());
@@ -204,7 +212,7 @@ async function phaseIcons() {
 }
 async function loadIcons() {
   const page = await componentsPage();
-  for (const c of page.findAllWithCriteria({ types: ["COMPONENT"] })) if (c.name.startsWith("Icon/")) ICONS[c.name.slice(5)] = c;
+  for (const c of page.findAllWithCriteria({ types: ["COMPONENT"] })) if (c.name.startsWith("Icon/") && !ICONS[c.name.slice(5)]) ICONS[c.name.slice(5)] = c;
   if (!ICONS.Replay) await phaseIcons();
 }
 async function loadStyles() {
@@ -276,7 +284,7 @@ async function phaseButton() {
     ch.y = 40 + (KINDS.indexOf(p.Kind) * SIZES.length + SIZES.indexOf(p.Size)) * rowH;
   }
   cs.resizeWithoutConstraints(40 + STATES.length * colW, 40 + KINDS.length * SIZES.length * rowH);
-  cs.x = nextX(page); cs.y = 0;
+  place(page, "Button", cs);
   /* properties */
   const labelKey = cs.addComponentProperty("Label", "TEXT", "Place Bet");
   const showKey = cs.addComponentProperty("Show icon", "BOOLEAN", false);
@@ -333,7 +341,7 @@ async function phaseInput() {
   cs.description = "Atom. Bet amount դաշտ։ Token-ները՝ Colors/Field/* (Border / Border-Focus / Border-Error, Label/Helper/Placeholder part-եր), Dimensions/*/Field/*։ Touch target ≥48 (Height/Field)։";
   cs.children.forEach((ch, i) => { ch.x = 40 + i * 300; ch.y = 40; });
   cs.resizeWithoutConstraints(40 + INPUT_STATES.length * 300, 40 + cs.children[0].height + 40);
-  cs.x = nextX(page); cs.y = 0;
+  place(page, "Input", cs);
   const keys = { label: cs.addComponentProperty("Label", "TEXT", "BET AMOUNT"), value: cs.addComponentProperty("Value", "TEXT", "1.00"), unit: cs.addComponentProperty("Unit", "TEXT", "USD"), helper: cs.addComponentProperty("Helper", "TEXT", "Min 0.10 · Max 1,000.00") };
   const showHelper = cs.addComponentProperty("Show helper", "BOOLEAN", true);
   for (const ch of cs.children) {

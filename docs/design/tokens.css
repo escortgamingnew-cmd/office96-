@@ -184,6 +184,7 @@
   --rd-panel-section-gap: var(--eg-number-12);
   --rd-panel-controls-gap: var(--eg-number-8);
   --rd-panel-pill-gap: var(--eg-number-6);
+  --rd-panel-balance-gap: var(--eg-number-2);
   --rd-text-primary: var(--eg-white);
   --rd-text-secondary: var(--eg-alpha-white-50);
   --rd-text-placeholder: var(--eg-alpha-white-35);
