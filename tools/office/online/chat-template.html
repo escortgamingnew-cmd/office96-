@@ -125,6 +125,63 @@
   #attach { flex:none; padding:11px 6px 11px 14px; font-size:18px; color:var(--muted); }
   #attach:hover { color:var(--brand); }
 
+  /* ---- պրոֆիլ քարտ ---- */
+  #prof { position:fixed; inset:0; z-index:60; background:rgba(0,0,0,.7); display:none;
+    align-items:center; justify-content:center; padding:20px; }
+  #prof.open { display:flex; }
+  .pcard { background:var(--bg-side); border:1px solid var(--line2); border-radius:16px;
+    width:min(400px, 94vw); max-height:92vh; overflow-y:auto; box-shadow:0 24px 70px rgba(0,0,0,.6); }
+  .pcard .big { width:100%; aspect-ratio:1; object-fit:cover; border-radius:16px 16px 0 0;
+    cursor:zoom-in; display:block; background:var(--bg-deep); }
+  .pcard .pb { padding:14px 18px 18px; }
+  .pcard h3 { color:var(--head); font-size:19px; }
+  .pcard .pr { font:700 11px var(--mono); letter-spacing:.06em; text-transform:uppercase;
+    color:var(--brand); margin:3px 0 10px; }
+  .pcard p { font-size:13.5px; line-height:1.55; color:var(--text); white-space:pre-wrap; }
+
+  /* ---- սթորիներ ---- */
+  #stbar { flex:none; display:flex; gap:12px; padding:10px 16px 6px; overflow-x:auto;
+    border-bottom:1px solid var(--line); }
+  .stc { flex:none; width:58px; display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .stc img, .stc .plus { width:52px; height:52px; border-radius:50%; }
+  .stc img { border:2.5px solid var(--brand); padding:2px; object-fit:cover; }
+  .stc.seen img { border-color:var(--line2); }
+  .stc .plus { border:2px dashed var(--line2); display:flex; align-items:center;
+    justify-content:center; font-size:24px; color:var(--muted); }
+  .stc:hover .plus { color:var(--brand); border-color:var(--brand); }
+  .stc span { font-size:10px; color:var(--muted); max-width:58px; overflow:hidden;
+    text-overflow:ellipsis; white-space:nowrap; }
+  #story { position:fixed; inset:0; z-index:55; background:rgba(0,0,0,.85); display:none;
+    align-items:center; justify-content:center; padding:14px; }
+  #story.open { display:flex; }
+  .scard { background:var(--bg-deep); border-radius:14px; width:min(430px, 96vw);
+    max-height:94vh; display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:0 24px 70px rgba(0,0,0,.6); }
+  .scard .sh { display:flex; align-items:center; gap:9px; padding:10px 12px; flex:none; }
+  .scard .sh img { width:32px; height:32px; border-radius:50%; }
+  .scard .sh b { font-size:13.5px; color:var(--head); }
+  .scard .sh span { font-size:11px; color:var(--muted2); }
+  .scard .sx { margin-left:auto; color:var(--muted); font-size:17px; padding:4px 8px; }
+  .scard .simg { width:100%; max-height:52vh; object-fit:contain; background:#000;
+    cursor:zoom-in; flex:none; }
+  .scard .scap { padding:10px 14px 0; font-size:13.5px; line-height:1.5; white-space:pre-wrap; }
+  .scard .srow { display:flex; align-items:center; gap:10px; padding:10px 14px; flex:none; }
+  .slike { font-size:14px; border:1px solid var(--line2); border-radius:999px; padding:4px 13px; }
+  .slike.mine { border-color:var(--red); background:rgba(242,63,67,.12); }
+  .spub { margin-left:auto; background:var(--brand); color:#3a2600; font-weight:700;
+    border-radius:8px; padding:7px 16px; font-size:13.5px; }
+  .scm { overflow-y:auto; padding:0 14px; max-height:24vh; }
+  .scm .c { font-size:12.5px; margin-bottom:7px; line-height:1.45; }
+  .scm .c b { color:var(--head); margin-right:5px; }
+  .scm .c i { color:var(--muted2); font-style:normal; font-size:10.5px; margin-left:5px; }
+  .scmbar { display:flex; padding:10px 12px; gap:8px; flex:none; }
+  .scmbar input { flex:1; background:var(--bg-input); border:1px solid var(--line2);
+    border-radius:8px; color:var(--text); padding:8px 10px;
+    font:400 13px "Noto Sans Armenian",sans-serif; }
+  .scmbar input:focus { outline:none; border-color:var(--brand); }
+  .scmbar button { color:var(--muted); font-size:17px; padding:4px 8px; }
+  .scmbar button:hover { color:var(--brand); }
+
   /* ---- mention-ներ ---- */
   .mn { color:var(--brand); background:rgba(255,210,122,.12); border-radius:4px; padding:0 3px; font-weight:600; }
   #mnPop { position:fixed; z-index:30; background:var(--bg-deep); border:1px solid var(--line2);
@@ -175,6 +232,7 @@
     <span class="sep"></span><span id="topic"></span>
   </div>
   <div id="err"></div>
+  <div id="stbar"></div>
   <div id="msgs"></div>
   <div id="compose">
     <div id="attBar"><img id="attPrev" alt=""><span id="attInfo" style="font-size:11px;color:var(--muted)"></span><button id="attX" title="Հանել">✕</button></div>
@@ -189,7 +247,10 @@
 <div id="picker"></div>
 <div id="lb"><img id="lbImg" alt=""></div>
 <div id="mnPop"></div>
+<div id="prof"></div>
+<div id="story"></div>
 <input id="attFile" type="file" accept="image/*" style="display:none">
+<input id="stFile" type="file" accept="image/*" style="display:none">
 
 <script>
 "use strict";
@@ -208,6 +269,8 @@ const CHANNELS = [
 ];
 const ARCHIVE = __ARCHIVE_JSON__;
 const AVATARS = __AVATARS_JSON__;
+const PROFILES = __PROFILES_JSON__;
+const STORIES = __STORIES_JSON__;
 const PEOPLE = ["Aram", "Սևակ", "Տիգրան", "Անանիա", "Լուսինե", "Արեգ", "Հասմիկ"];
 const SELF_T = "__Q__";
 
@@ -306,7 +369,7 @@ function renderMsgs() {
     if (grouped) {
       html += `<div class="m"><div class="avgap"></div><div class="body">${tx}${rxRowHtml(m)}</div></div>`;
     } else {
-      html += `<div class="m first"><img class="av" src="${avatarOf(m.author)}" alt="" loading="lazy">` +
+      html += `<div class="m first"><img class="av" src="${avatarOf(m.author)}" data-a="${esc(m.author)}" alt="" loading="lazy">` +
         `<div class="body"><div class="mh"><span class="au ${esc(role)}">${esc(m.author)}</span>` +
         `<span class="ts">${dayOf(m.ts)} · ${fmtT(m.ts)}</span>` +
         (m.src === "web" ? `<span class="new">ՆՈՐ</span>` : "") +
@@ -362,7 +425,7 @@ function sendErr(msg) { const e = $("err"); e.textContent = msg; e.style.display
 /* ---- ինքնություն (սարքին կպած հարմարություն) ---- */
 let myName = "Aram (founder)";
 try { myName = localStorage.getItem("office96-name") || myName; } catch {}
-function renderUser() { $("myName").textContent = myName; $("myAv").src = avatarOf(myName); }
+function renderUser() { $("myName").textContent = myName; $("myAv").src = avatarOf(myName); $("myAv").dataset.a = myName; }
 $("editName").addEventListener("click", () => {
   const meta = document.querySelector("#userbar .meta");
   meta.innerHTML = `<input id="nameInp" maxlength="40" value="${esc(myName)}">`;
@@ -410,14 +473,161 @@ $("attFile").addEventListener("change", () => {
   img.src = URL.createObjectURL(f);
 });
 
-/* ---- lightbox. նկար/ավատար → մեծացնել ---- */
+/* ---- lightbox (կցված նկար) + պրոֆիլ քարտ (ավատար) ---- */
 document.addEventListener("click", (e) => {
   const t = e.target;
-  if (t.classList && (t.classList.contains("att") || (t.classList.contains("av") && t.src))) {
+  if (t.classList && t.classList.contains("att")) {
     $("lbImg").src = t.src; $("lb").classList.add("open");
+  } else if (t.classList && t.classList.contains("av") && t.dataset.a) {
+    profOpen(t.dataset.a);
   } else if (t.id === "lb" || t.id === "lbImg") $("lb").classList.remove("open");
 });
-addEventListener("keydown", e => { if (e.key === "Escape") $("lb").classList.remove("open"); });
+addEventListener("keydown", e => {
+  if (e.key === "Escape") { $("lb").classList.remove("open"); $("prof").classList.remove("open"); stClose(); }
+});
+
+/* ---- պրոֆիլ քարտ. սեղմում ես ավատարին → նախ մեծ նկարն ու կենսագրությունը ---- */
+function profKey(author) { for (const k in PROFILES) if (author.startsWith(k)) return k; return null; }
+function profOpen(author) {
+  const k = profKey(author);
+  const p = k ? PROFILES[k] : null;
+  const img = (p && p.big) || avatarOf(author);
+  const role = (p && p.role) || roleOf(author) || "";
+  const bio = (p && p.bio) || "Կենսագրությունը դեռ գրված չի։";
+  $("prof").innerHTML = `<div class="pcard"><img class="big" src="${img}" alt="">` +
+    `<div class="pb"><h3>${esc(k || author)}</h3><div class="pr">${esc(role)}</div><p>${esc(bio)}</p></div></div>`;
+  $("prof").classList.add("open");
+}
+$("prof").addEventListener("click", (e) => {
+  if (e.target.classList && e.target.classList.contains("big")) {
+    $("lbImg").src = e.target.src; $("lb").classList.add("open"); return;
+  }
+  if (e.target.id === "prof") $("prof").classList.remove("open");
+});
+
+/* ---- սթորիներ (D-011). ագենտներինը build-ից են (STORIES), Aram-ինը՝ db-ից ---- */
+let liveSt = [], stRx = {}, stCm = {}, curSt = null, pendSt = null;
+let stSeen = new Set();
+try { stSeen = new Set(JSON.parse(localStorage.getItem("office96-st-seen") || "[]")); } catch {}
+function allStories() {
+  const ids = new Set(STORIES.map(s => s.id));
+  return STORIES.concat(liveSt.filter(s => !ids.has(s.id))).sort((a, b) => a.ts < b.ts ? 1 : -1);
+}
+function renderStories() {
+  const list = allStories();
+  let html = `<button class="stc" id="stAdd" title="Սթորի գցել"><span class="plus">+</span><span>Սթորի</span></button>`;
+  for (const s of list) {
+    html += `<button class="stc ${stSeen.has(s.id) ? "seen" : ""}" data-s="${esc(s.id)}">` +
+      `<img src="${avatarOf(s.author)}" alt=""><span>${esc(s.author.split(" ")[0])}</span></button>`;
+  }
+  $("stbar").innerHTML = html;
+}
+function stById(id) { return allStories().find(s => s.id === id); }
+function stClose() { curSt = null; pendSt = null; $("story").classList.remove("open"); }
+function stOpen(id) {
+  curSt = id; pendSt = null;
+  stSeen.add(id);
+  try { localStorage.setItem("office96-st-seen", JSON.stringify([...stSeen])); } catch {}
+  renderStories(); renderStory();
+  $("story").classList.add("open");
+}
+function renderStory() {
+  if (pendSt) return;                       // compose ռեժիմում ա
+  const s = curSt && stById(curSt);
+  if (!s) { stClose(); return; }
+  const likes = ((stRx[s.id] || {})["❤️"] || []);
+  const mine = likes.includes(myName);
+  const cms = ((stCm[s.id] || {}).list || []);
+  $("story").innerHTML = `<div class="scard">` +
+    `<div class="sh"><img src="${avatarOf(s.author)}" data-a="${esc(s.author)}" class="av"><b>${esc(s.author)}</b>` +
+    `<span>${dayOf(s.ts)} · ${fmtT(s.ts)}</span><button class="sx" id="stX">✕</button></div>` +
+    `<img class="simg" src="${s.img}" alt="">` +
+    (s.caption ? `<div class="scap">${decorate(s.caption)}</div>` : "") +
+    `<div class="srow"><button class="slike ${mine ? "mine" : ""}" id="stLike">❤️ ${likes.length || ""}</button>` +
+    (likes.length ? `<span style="font-size:11px;color:var(--muted2)">${esc(likes.join(", "))}</span>` : "") + `</div>` +
+    `<div class="scm">${cms.map(c => `<div class="c"><b>${esc(c.author)}</b>${decorate(c.text)}<i>${fmtT(c.ts || "")}</i></div>`).join("")}</div>` +
+    `<div class="scmbar"><input id="stCmInp" maxlength="500" placeholder="Կոմենտ գրի…"><button id="stCmSend" title="Ուղարկել">➤</button></div></div>`;
+}
+async function stLike() {
+  if (!dbRef || !curSt) return;
+  const cur0 = ((stRx[curSt] || {})["❤️"] || []).slice();
+  const i = cur0.indexOf(myName);
+  if (i >= 0) cur0.splice(i, 1); else cur0.push(myName);
+  try { await dbRef.doc("stories-rx/" + curSt).set(cur0.length ? { "❤️": cur0 } : {}); armBridge(); }
+  catch (e) { sendErr("Սրտիկը չպահվեց (" + (e && e.code || "սխալ") + ")։"); }
+}
+async function stComment() {
+  const inp = $("stCmInp");
+  const text = inp && inp.value.trim();
+  if (!dbRef || !curSt || !text) return;
+  const now = new Date();
+  const ts = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 19);
+  const list = (((stCm[curSt] || {}).list) || []).concat([{ author: myName, ts, text }]);
+  try { await dbRef.doc("stories-cm/" + curSt).set({ list }); inp.value = ""; armBridge(); }
+  catch (e) { sendErr("Կոմենտը չպահվեց (" + (e && e.code || "սխալ") + ")։"); }
+}
+function stCompose(dataUrl) {
+  pendSt = dataUrl; curSt = null;
+  $("story").innerHTML = `<div class="scard">` +
+    `<div class="sh"><img src="${avatarOf(myName)}"><b>${esc(myName)}</b><span>նոր սթորի</span><button class="sx" id="stX">✕</button></div>` +
+    `<img class="simg" src="${dataUrl}" alt="">` +
+    `<div class="scmbar"><input id="stCap" maxlength="300" placeholder="Ինչ ա կատարվում… (ոչ պարտադիր)"></div>` +
+    `<div class="srow"><span style="font-size:11px;color:var(--muted2)">${Math.round(dataUrl.length / 1024)} KB</span>` +
+    `<button class="spub" id="stPub">Հրապարակել</button></div></div>`;
+  $("story").classList.add("open");
+}
+async function stPublish() {
+  if (!dbRef) { sendErr("Կապը բազայի հետ չկա — սթորին չհրապարակվեց։"); return; }
+  const cap = ($("stCap") && $("stCap").value.trim()) || "";
+  const now = new Date();
+  const ts = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 19);
+  try {
+    await dbRef.collection("stories").add({ author: myName, ts, caption: cap, img: pendSt, src: "web" });
+    stClose(); armBridge();
+  } catch (e) {
+    sendErr(e && e.code === "quota_exceeded" ? "Բազան լցվել ա — ասա Սևակին։" : "Չստացվեց (" + (e && e.code || "սխալ") + ")։");
+  }
+}
+$("stbar").addEventListener("click", (e) => {
+  if (e.target.closest("#stAdd")) { $("stFile").click(); return; }
+  const c = e.target.closest(".stc[data-s]");
+  if (c) stOpen(c.dataset.s);
+});
+$("story").addEventListener("click", (e) => {
+  const t = e.target;
+  if (t.id === "story") { stClose(); return; }
+  if (t.id === "stX" || t.closest && t.closest("#stX")) { stClose(); return; }
+  if (t.id === "stLike") { stLike(); return; }
+  if (t.id === "stCmSend") { stComment(); return; }
+  if (t.id === "stPub") { stPublish(); return; }
+  if (t.classList && t.classList.contains("simg")) { $("lbImg").src = t.src; $("lb").classList.add("open"); }
+});
+$("story").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && e.target.id === "stCmInp") stComment();
+  if (e.key === "Enter" && e.target.id === "stCap") stPublish();
+});
+$("stFile").addEventListener("change", () => {
+  const f = $("stFile").files[0];
+  $("stFile").value = "";
+  if (!f) return;
+  const img = new Image();
+  img.onload = () => {
+    const tryEnc = (maxDim, q) => {
+      const k = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      return c.toDataURL("image/jpeg", q);
+    };
+    let d = tryEnc(1000, 0.8);
+    if (d.length > 230000) d = tryEnc(760, 0.7);
+    if (d.length > 230000) d = tryEnc(560, 0.6);
+    if (d.length > 230000) { sendErr("Նկարը շատ մեծ ա — չկարողացա սեղմել բավարար չափի։"); return; }
+    stCompose(d);
+  };
+  img.onerror = () => sendErr("Նկարը չբացվեց — PNG/JPG/WebP փորձի։");
+  img.src = URL.createObjectURL(f);
+});
 
 /* ---- @mention typeahead ---- */
 const inp = $("inp"), mnPop = $("mnPop");
@@ -505,7 +715,7 @@ async function send() {
 }
 
 /* ---- առաջին նկարումը (արխիվն աշխատում ա նույնիսկ առանց db) ---- */
-renderSide(); renderHead(); renderMsgs(); renderUser();
+renderSide(); renderHead(); renderMsgs(); renderUser(); renderStories();
 
 /* ---- live db ---- */
 (async () => {
@@ -529,5 +739,24 @@ renderSide(); renderHead(); renderMsgs(); renderUser();
       if (c.id === cur) renderMsgs();
     }, () => {});
   }
+  /* սթորիներ. հոսքը, սրտիկները, կոմենտները */
+  db.collection("stories").orderBy("ts").limit(200).onSnapshot(snap => {
+    liveSt = snap.docs.filter(d => d.exists).map(d => {
+      const b = d.data() || {};
+      return { id: d.id, author: String(b.author || "անանուն"), ts: String(b.ts || ""),
+        caption: String(b.caption || ""), img: safeImg(b.img), src: "web" };
+    }).filter(s => s.img);
+    renderStories(); if (curSt) renderStory();
+  }, () => {});
+  db.collection("stories-rx").onSnapshot(snap => {
+    stRx = {};
+    for (const d of snap.docs) if (d.exists) stRx[d.id] = d.data() || {};
+    if (curSt) renderStory();
+  }, () => {});
+  db.collection("stories-cm").onSnapshot(snap => {
+    stCm = {};
+    for (const d of snap.docs) if (d.exists) stCm[d.id] = d.data() || {};
+    if (curSt) renderStory();
+  }, () => {});
 })();
 </script>

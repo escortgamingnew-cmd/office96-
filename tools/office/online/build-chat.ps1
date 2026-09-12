@@ -87,6 +87,26 @@ function AvatarB64($file) {
     return 'data:image/jpeg;base64,' + [Convert]::ToBase64String($ms.ToArray())
   } finally { $img.Dispose() }
 }
+# մեծ նկար (պրոֆիլ քարտ/սթորի). max կողմը $maxDim, JPEG
+function ImgB64($file, $maxDim, $q) {
+  $img = [Drawing.Image]::FromFile($file)
+  try {
+    $k = [Math]::Min(1.0, $maxDim / [Math]::Max($img.Width, $img.Height))
+    $w = [Math]::Max(1, [int]($img.Width * $k)); $h = [Math]::Max(1, [int]($img.Height * $k))
+    $bmp = New-Object Drawing.Bitmap $w, $h
+    $g = [Drawing.Graphics]::FromImage($bmp)
+    $g.InterpolationMode = 'HighQualityBicubic'
+    $g.DrawImage($img, 0, 0, $w, $h)
+    $g.Dispose()
+    $ms = New-Object IO.MemoryStream
+    $enc = [Drawing.Imaging.ImageCodecInfo]::GetImageEncoders() | Where-Object MimeType -eq 'image/jpeg'
+    $ep = New-Object Drawing.Imaging.EncoderParameters 1
+    $ep.Param[0] = New-Object Drawing.Imaging.EncoderParameter([Drawing.Imaging.Encoder]::Quality, [long]$q)
+    $bmp.Save($ms, $enc, $ep)
+    $bmp.Dispose()
+    return 'data:image/jpeg;base64,' + [Convert]::ToBase64String($ms.ToArray())
+  } finally { $img.Dispose() }
+}
 # բանալին՝ հեղինակի անվան ՍԿԻԶԲԸ (startsWith match էջում)
 $avMap = [ordered]@{}
 $avFiles = [ordered]@{ 'Սևակ'='sevak.png'; 'Անանիա'='anania.png'; 'Տիգրան'='tigran.png'; 'Լուսինե'='lusine.png'; 'Արեգ'='areg.png'; 'Հասմիկ'='hasmik.png' }
@@ -95,14 +115,50 @@ foreach ($k in $avFiles.Keys) {
   if (Test-Path $f) { $avMap[$k] = AvatarB64 $f; 'avatar: {0}' -f $k }
 }
 
+# ---- պրոֆիլներ. bio (profiles.json) + մեծ ավատար 320px ----
+$profSrc = [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'profiles.json'), [Text.Encoding]::UTF8) | ConvertFrom-Json
+$profMap = [ordered]@{}
+foreach ($p in $profSrc.PSObject.Properties) {
+  $o = [ordered]@{ role = $p.Value.role; bio = $p.Value.bio }
+  if ($avFiles.Contains($p.Name)) {
+    $f = Join-Path $avDir $avFiles[$p.Name]
+    if (Test-Path $f) { $o['big'] = ImgB64 $f 320 84 }
+  }
+  $profMap[$p.Name] = $o
+  'profile: {0}' -f $p.Name
+}
+
+# ---- սթորիներ (D-011). office/citizens/stories/manifest.json + նկարները ----
+$stDir = Join-Path $repo 'office\citizens\stories'
+$stories = @()
+$manPath = Join-Path $stDir 'manifest.json'
+if (Test-Path $manPath) {
+  $man = [IO.File]::ReadAllText($manPath, [Text.Encoding]::UTF8) | ConvertFrom-Json
+  foreach ($s in @($man)) {
+    if (-not $s) { continue }
+    $f = Join-Path $stDir $s.file
+    if (-not (Test-Path $f)) { 'story SKIP (file missing): {0}' -f $s.id; continue }
+    $stories += [pscustomobject]@{
+      id      = $s.id
+      author  = $s.author
+      ts      = $s.ts
+      caption = [string]$s.caption
+      img     = (ImgB64 $f 900 80)
+    }
+    'story: {0}' -f $s.id
+  }
+}
+
 # ---- հավաքում ----
 $json = ($archive | ConvertTo-Json -Depth 6 -Compress).Replace('</', '<\/')
 $avJson = ($avMap | ConvertTo-Json -Compress).Replace('</', '<\/')
+$profJson = ($profMap | ConvertTo-Json -Depth 4 -Compress).Replace('</', '<\/')
+$stJson = if ($stories.Count) { (ConvertTo-Json @($stories) -Depth 4 -Compress).Replace('</', '<\/') } else { '[]' }
 $tpl = [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'chat-template.html'), [Text.Encoding]::UTF8)
-foreach ($ph in '__ARCHIVE_JSON__','__AVATARS_JSON__') {
+foreach ($ph in '__ARCHIVE_JSON__','__AVATARS_JSON__','__PROFILES_JSON__','__STORIES_JSON__') {
   if (-not $tpl.Contains($ph)) { throw "placeholder missing: $ph" }
 }
-$tpl = $tpl.Replace('__ARCHIVE_JSON__', $json).Replace('__AVATARS_JSON__', $avJson)
+$tpl = $tpl.Replace('__ARCHIVE_JSON__', $json).Replace('__AVATARS_JSON__', $avJson).Replace('__PROFILES_JSON__', $profJson).Replace('__STORIES_JSON__', $stJson)
 # ---- «արթնացնող կամուրջի» quine-ը. SELF_T-ի մեջ դնում ենք ֆրագմենտի placeholder-ով
 #      տարբերակը, որ էջը կարողանա ինքն իրան վերահրապարակել (artifact capability) ----
 $qMark = '"__' + 'Q__"'
