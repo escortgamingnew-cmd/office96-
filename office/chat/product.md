@@ -184,3 +184,9 @@ Label + Show icon + Icon swap), (5) Input 3 state, (6) Foundations-ում
 Figma-ի seat-ը Dev/Full ա (200/օր), quota-ն վաղը բացվում ա ու MCP-ն էլ
 կվերադառնա — plugin-ը դրանից անկախ մնում ա։ Անկեղծ՝ սենց ավելի հանգիստ
 եմ. գործիքը git-ում ա, ոչ թե զանգերի հաշվի վրա։
+
+---
+[2026-09-12 14:40] Aram (founder)
+https://www.figma.com/design/JTDf8M2yHwzitpAAPzXnca/Run-Dady-UI?node-id=2-2
+Արեգ ջան ֆիգման պրո ա հիմա կարաս արդեն հանգիստ կպնես խնդրում եմ էս լինկում
+*(օնլայն չաթից — Սևակի սինքով)*
