@@ -130,3 +130,83 @@ Variables պանել). նկարագրությունը ստորև՝ «Ռեֆեր�
   0, code syntax 100%, Components էջում 572 binding / 0 hardcoded / 0 կախված,
   6 style × 5 binding։ Հիմնադրի 2:2-ը render-ով նույնն ա (արժեքները չեն
   փոխվել, binding-ները ID-ով են)։
+- [2026-09-12] Արեգ. **Փուլ 3 — Bet պանել Figma-ում** (MCP, sequential, ամեն
+  քայլից հետո screenshot/metadata)։ Node-id-ներ (ֆայլ JTDf8M2yHwzitpAAPzXnca).
+  - **Components էջ (18:2), նոր set-եր.** Chip `37:55` (State Default/Pressed/
+    Selected/Disabled, Label prop — ½ / 2× / Max ու preset-ներ)։ Segment
+    `38:83` (Level Easy/Medium/Hard/Expert × State Default/Selected/Pressed =
+    12; label = Level, prop չկա — TEXT prop-ի default-ը բոլոր variant-ների
+    վրա էր նստում)։ Difficulty `39:99` (Selected=Easy…Expert; track Frame/
+    Segment + Padding/Track 4 + Gap/Segments 4 + Radius/Control 12, մեջը 4
+    Segment FILL՝ Radius/Inner 8 concentric)։ Bet Amount `40:115` (State
+    Default/Focus/Error; props Label/Value/Unit/Helper/Show helper; ½ 2× Max
+    chip-երը ԴԱՇՏԻ ՄԵՋ՝ 4px inset, 40 ⊂ 48 — Stake-ի pattern-ը)։ **Bet Panel
+    `41:88`** (390; Bet Amount → Difficulty section (label + segmented + «Max
+    win» տող) → Button Kind=Bet Size=Large FILL; Padding/HUD, Gap/Section,
+    Frame/Panel)։
+  - **Screens էջ (նոր, 42:47).** Mobile 390×844 `42:48` (header balance +
+    History/Settings icon-ներ, canvas World/sky-mid՝ պատմության pill-եր +
+    Display/Multiplier + state, ներքևում Bet Panel instance՝ վերևի անկյունները
+    Radius/Chip)։ Desktop 1280×800 `43:120` (Bet Panel ձախ սայդբար 390 ×
+    FILL, աջում header + canvas՝ մոբայլի clone-ներ)։
+  - **Foundations.** «Components — v2 (T-0013)» doc `46:47` (x=2424, հիմնադրի
+    2:2-ից ու v1 21:2-ից աջ)։ 2:2-ը անձեռնմխելի (100,100 · 6 երեխա · 3
+    world-night swatch տեղում)։
+  - **Audit «after».** Components էջ՝ 8 set/component, 238 bound paint, 0
+    hardcoded, 0 կախված; Screens՝ 2 × 48 bound, 0 hardcoded; բոլոր
+    padding/gap/radius/minHeight/stroke՝ variable։ Variables. Primitives 64 ·
+    Layout 40 · Type 53 · UI 43 · World 16 = 216 (ոչ-World 200 = գեներատորի
+    201 − family/mono-css)։
+  - **Screenshot-ների եզրակացությունները.** (1) Difficulty՝ heat կետերը
+    (կանաչ→դեղին→նարնջ→կարմիր) մեկ հայացքով կարդացվում են, Selected-ը
+    հստակ (fill + սպիտակ տեքստ)։ (2) Desktop սայդբարը 320-ով փորձեցի —
+    4 segment-ը սեղմվեց (Medium/Expert 14px mono + կետ + padding = 93 > 67).
+    սայդբարը 390 դրեցի (= մոբայլի պանել, մեկ չափ) ու pad/segment-x-ը 12→8
+    (85 = 85, ճշգրիտ)։ (3) Bet Amount set-ի screenshot-ում label/helper-ը
+    «չէին երևում» — set-ը fill չունի, սպիտակ ֆոնին white-50% տեքստ. պանելի
+    մուգ ֆոնին տեղն են։ (4) Disabled chip-ը (opacity 0.4) մուգ պանելի վրա
+    գրեթե անտեսանելի ա — դիզայն-հարց հիմնադրին (տես ստորև)։
+- [2026-09-12] Արեգ. **Որոշումներ ու փաստարկներ.**
+  - **Mode-եր (կետ 3). Semantic-ին mode ՉԵՄ ավելացրել։** Փաստարկ. ֆեյք mode
+    = սպառող չունեցող mode։ (a) կոդում ոչ մի token չկա, որ platform-ով
+    տարբերվի — index.html-ում `@media` չկա, մոբայլ/desktop տարբերությունը
+    ԴԱՍԱՎՈՐՈՒԹՅՈՒՆՆ ա (sheet vs սայդբար), ոչ արժեքը (touch 48-ը desktop-ում
+    էլ ա մնում, Stake-ի desktop պանելը մոբայլից չի տարբերվում չափերով);
+    (b) light theme Stake-ի խաղում չկա, պանելը միշտ մուգ ա; (c) ռեֆերենսի
+    «Desktop» mode-ը վեբ-ապպի ա, ոչ խաղի։ Mode-ի իրական թեկնածուն World-ն ա
+    (արդեն 2 մոդ), ու ապագա «Live» feel-ը (skyDark 0.75) — դա առանձին թասկ։
+    Երբ Web SDK ինտեգրացիան platform-ով տարբեր արժեք բերի (օր. desktop-ում
+    pad/hud 24), գեներատորում mode ավելացնելը մեկ օբյեկտ ա։
+  - **Collection-ների կառուցվածքը չեմ վերադասավորել** (Primitives/Layout/
+    Type/UI մնացին, ռեֆերենսի «2 collection»-ի փոխարեն)։ Variable-ը
+    collection-ից collection չի տեղափոխվում API-ով — պիտի ջնջվեր ու
+    ստեղծվեր, ինչը 572 binding-ի (Button/Input/style-եր + հիմնադրի 2:2
+    swatch-երը) rebinding էր պահանջելու։ Purpose-ով խմբավորումը անունների
+    մեջ ա (Colors/Global/…), primitives-ը hidden — ռեֆերենսի կառուցվածքը
+    Variables պանելում նույն կերպ ա կարդացվում։
+  - **Input 20:22-ը չեմ փոխել, Bet Amount-ը նոր set ա.** Input-ի դաշտը
+    16px symmetric padding ա, chip-երը մեջը դնելը աջ padding-ը 4 ա ուզում
+    (Stake-ի inset)։ Մեկ set-ում երկուսն էլ առանց conditional padding չեն
+    պահվում — Input-ը մնում ա ընդհանուր տեքստային դաշտ, Bet Amount-ը
+    խաղինն ա։ Ազնիվ դուբլիկացիա, նշված ա description-ում։
+  - **Difficulty՝ 4 մակարդակ, բայց քանակը մաթինն ա.** Անանիայի T-0002 B
+    տարբերակը 2 mode ա (base + long_run)։ Set-ը 2–5-ի ա ձգվում (Segment
+    Level variant-ները հանել/ավելացնել)։ Անունները (Easy/Medium/Hard/
+    Expert) Stake originals-ի ոգով են — թեմատիկ տարբերակը («Կարճ վազք /
+    Երկար վազք») հիմնադրի ընտրությունն ա։
+  - **«Max win 1,000×»-ը placeholder ա** (մաթի թիրախը որոշված չի)։
+  - **Ramp-ի կողմնակի փոփոխություն.** amber/400, amber/600 (cashout pressed)
+    non-anchor են ու շարժվեցին ramp-ի մեջ (տես փուլ 1)։
+  - **Ինչ ՉԱՐՎԵՑ.** Preset chip-երի շարք (5/10/20/50, պրոտոյում կա, Stake-ում
+    չկա) — Chip-ը կա, panel-ում չեմ դրել։ Auto-bet tab (Manual/Auto) —
+    burst խաղին վաղ ա։ Kit plugin-ի (figma-kit) component փուլերը նոր
+    set-երը դեռ չեն ստեղծում — variables փուլը լրիվ սինք ա, կոմպոնենտները
+    MCP-ով են; kit-ի Chip/Segment/Difficulty/Bet Amount փուլերը առանձին
+    փոքր թասկ ա, եթե offline կրկնօրինակը պետք լինի։
+- [2026-09-12] Արեգ. → review/։ Լուսինե, ստուգելու տեղերը. (1) repo՝
+  `node tools/design/gen-tokens.mjs` դետերմինիստիկ (git diff դատարկ),
+  `node tools/design/figma-kit/test/mock-run.mjs` OK, tokens.css-ում --rd-*
+  բազմությունը հին + 13 նոր, --ui-* alias-ները տեղում; (2) Figma՝ Variables
+  պանել (Primitives Colors/<Family>/0…900 hidden, UI-ում 0 raw), Components
+  էջի 5 նոր node, Screens էջ, Foundations 46:47; 2:2 անձեռնմխելի։
+  **Դիզայնի վավերացումը հիմնադրինն ա (D-002).** Հարցերը իրեն՝ product.md-ում։

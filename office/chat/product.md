@@ -228,3 +228,58 @@ ratio-ն ես ուզում style-երում՝ binding-ը հանում ենք, ա
 
 Սքրինշոթների մանրամասն նկարագրությունը թասկի մեջ ա։ Արեգ, T-0012-դ
 QA-ն անցավ (437e0fe), հիմա էս մեկն ա քո սեղանին — արթնացնում եմ։
+
+---
+[2026-09-12 16:40] Արեգ (designer)
+Արամ, T-0013-ը review-ում ա — երկու մասն էլ Figma-ում են, «վրայից անցնելու»
+համար պատրաստ։ Որտեղ նայել (Run Dady UI).
+
+**1. Token համակարգը ատոմիկ ա դարձել** (Variables պանել).
+- Primitives՝ ամեն ընտանիք ամբողջական ramp. `Colors/Green|Amber|Red|Navy`
+  50…900, `Colors/Night` 0…900 (11 stop, ռեֆերենսի Gray-ի պես, 0=#FFFFFF),
+  + `Colors/Alpha/*`։ Ramp-ը կառուցված ա անչորների ՇՈՒՐՋԸ — կոդի ոչ մի
+  գույն չի փոխվել։ Բոլորը hidden, scopes [] — ոչ մի էլեմենտ չի սնվում։
+- Semantic՝ purpose խմբերով, ռեֆերենսիդ ոճով. `Colors/Global/{Frame, Shape,
+  Text, Border, Icon}` + մեր խաղային `Colors/{Action, State, Surface,
+  Difficulty}`, `Padding/Gap/Size/Stroke/Radius`, `Font/<Style>/*`։ 100%
+  alias — UI-ում 0 raw արժեք (glow/panel/pill-ի rgba-ները հիմա Alpha
+  primitive-ների alias են)։
+- Մեկ ճշմարտությունը մնաց gen-tokens.mjs-ը. CSS անունները (--rd-*/--ui-*)
+  չեն փոխվել, Figma-ի անունը նույն token-ի «մարդկային» անունն ա։
+  Variable-ները վերանվանվել են ՏԵՂՈՒՄ — քո 2:2-ի binding-ները ողջ են, ձեռք
+  չեմ տվել։
+
+**2. Bet պանելը՝ Stake-ի դասավորությամբ.**
+- Bet Panel `41:88` —
+  https://www.figma.com/design/JTDf8M2yHwzitpAAPzXnca/Run-Dady-UI?node-id=41-88
+  (Bet Amount → Difficulty → Place Bet)
+- Screens էջ. Mobile 390×844 `42:48` —
+  https://www.figma.com/design/JTDf8M2yHwzitpAAPzXnca/Run-Dady-UI?node-id=42-48
+  · Desktop 1280×800 `43:120` —
+  https://www.figma.com/design/JTDf8M2yHwzitpAAPzXnca/Run-Dady-UI?node-id=43-120
+- Ատոմները (Components էջ). Difficulty `39:99` —
+  https://www.figma.com/design/JTDf8M2yHwzitpAAPzXnca/Run-Dady-UI?node-id=39-99
+  · Segment `38:83` · Bet Amount `40:115` —
+  https://www.figma.com/design/JTDf8M2yHwzitpAAPzXnca/Run-Dady-UI?node-id=40-115
+  · Chip `37:55`։ Doc՝ Foundations «Components — v2» `46:47`։
+- Ամեն ինչ auto-layout ա, անունները հստակ, 0 hardcoded fill/padding/radius —
+  քո խմբագրելու համար մաքուր ա։
+
+**Քեզնից 5 որոշում** (ես իմ տարբերակն եմ դրել, դու դզում ես).
+1. **Difficulty-ի քանակն ու անունները.** 4 եմ դրել (Easy/Medium/Hard/Expert,
+   heat կետերով կանաչ→կարմիր)։ Անանիայի մաթ առաջարկը 2 mode ա (base +
+   long_run) — set-ը 2–5-ի ա ձգվում։ Թեմատիկ անուննե՞ր («Կարճ վազք / Երկար
+   վազք»), թե Stake-ի Easy…Expert-ը։
+2. **Desktop սայդբարի լայնությունը** 390 եմ դրել (= մոբայլի պանել, մեկ չափ).
+   320-ում 4 segment-ը չէր տեղավորվում։ Եթե 320 ես ուզում՝ dropdown ա
+   դառնում կամ 2 մակարդակ։
+3. **Disabled chip-ը** opacity 0.4-ով մուգ պանելի վրա գրեթե չի երևում —
+   թողնե՞նք (Stake-ը նույնն ա անում), թե՞ Text/Placeholder + flat fill։
+4. **Mode-եր.** Semantic-ին mode ՉԵՄ ավելացրել — կոդում platform-ով
+   տարբերվող token չկա, light theme չկա. ֆեյք mode չսարքեցի։ Փաստարկը
+   ամբողջական՝ թասկի Log-ում։ Համաձայն չես՝ ասա, գեներատորում մեկ օբյեկտ ա։
+5. Հինը դեռ բաց ա՝ Bet-ի մուգ տեքստը (Action/Bet/On = night/900) ու lh px։
+
+Կողքի նոթ. Input `20:22`-ը մնաց ընդհանուր դաշտ, Bet Amount-ը նոր set ա
+(½/2×/Max դաշտի մեջ 4px inset ա ուզում, Input-ի 16-ը՝ ոչ)։ «Max win 1,000×»-ը
+placeholder ա՝ մաթի թիրախը որոշվելուն պես փոխվում ա։
