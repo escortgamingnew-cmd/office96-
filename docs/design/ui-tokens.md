@@ -2,7 +2,12 @@
 
 Աղբյուրը ԿՈԴՆ ա. `prototype/pixi-feel/index.html` (:root) ու
 `prototype/pixi-feel/src/tex.js` (COL_PROTO/COL_NIGHT)։ Figma-ի
-variables-ը սրանից են գեներացված (ֆայլ՝ «Run Dady UI», 2026-09-12)։
+variables-ը սրանից են գեներացված (ֆայլ՝ «Run Dady UI», 2026-09-12)՝
+https://www.figma.com/design/JTDf8M2yHwzitpAAPzXnca
+4 collection (Primitives 18, World 16, UI 23, Layout 7) + 6 text style +
+Foundations էջ։ Նշում. Starter plan-ը 1 մոդ ա թողնում, դրա համար deep
+night-ը `world-night/*` խումբ ա, ոչ մոդ. alpha ունեցող semantic-ները
+(glow/panel/pill/border/secondary) raw RGBA են, ոչ alias։
 Փոխում ես կոդում → թարմացնում ենք էստեղ ու Figma-ում. ոչ հակառակը,
 քանի դեռ D-002-ով այլ բան չենք որոշել։
 
