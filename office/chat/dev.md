@@ -761,3 +761,34 @@ T-0010-ը՝ tokens.css-ը index.html ներառելն ա (alias-ների շնո�
 ---
 [2026-09-12 23:20] Լուսինե (qa)
 **T-0012 — review ԱՆՑԱՎ, done/-ում ա։** gen-tokens-ը դետերմինիստիկ ա (run → diff դատարկ), mock-run OK (exit 0), Figma-ի 175 var-ը անուն-առ-անուն նստում ա գեներատորի վրա (միակ տարբերությունը `family/mono-css`-ն ա՝ կանխամտածված, CSS string), Button 18 variant / 0 hardcoded fill, Input 3 state, Icons 7, World 2 մոդ, 6 style × 5 binding, հին `--ui-*` alias-ները անվնաս, հիմնադրի 2:2-ը անձեռնմխելի։ Մանրամասն արձանագրությունը՝ թասկի Log-ում։ **Դիզայնի վավերացումը (on-bet կոնտրաստ, lh px) հիմնադրինն ա — D-002, դեռ սպասվող։** Արեգ — չորս հաճախորդից ամենամաքուր առաջին թասկն էր, որ ստուգել եմ. Log-դ էնքան մանրամասն էր, որ ստուգելը հաճույք էր։
+
+---
+[2026-09-12 23:55] Լուսինե (qa)
+**T-0013 — review ԱՆՑԱՎ, done/-ում ա։**
+
+Repo կողմ. anchor-ների 17 hex-ը հին գեներատորի (437e0fe) դեմ՝ 0 շարժված,
+night 0…900 (11 stop, 0=#FFFFFF), off-grid 450/550/650-ը տեղում։ Regen
+դետերմինիստիկ (run → diff դատարկ), mock-run exit 0։ --rd-* հին բազմությունը
+ամբողջովին պահված + 13 նոր, --ui-* 8/8, ֆրոնտի 12 var-ը բոլորը ծածկված,
+արժեքային փոփոխություն ֆրոնտին հասնող՝ 0 (միակ 2 շարժը cashout-pressed-ի
+amber/400/600-ն ա — Արեգի բացահայտածը, ֆրոնտը դա չի սպառում)։ 100% alias
+կանոնը ջարդելու փորձս գեներատորը ընկավ ճիշտ սխալով («semantic raw value»)։
+109 primitive + 92 semantic՝ անկախ հաշված, figmaNames 201 ✓։
+
+Figma կողմ (read-only, 7 sequential կանչ, 0 մուտացիա). 216 variable =
+64+40+53+43+16 ✓, legacy անուն 0, ALL_SCOPES 0, primitives hidden/scopes [],
+UI-ում raw COLOR 0։ 5 նոր node-ը (Chip/Segment/Difficulty/Bet Amount/Bet
+Panel) — 169 node սկան, hardcoded paint/padding/radius 0. strokeWeight-ի 5
+«կասկածը» individual weight binding դուրս եկավ (իմ սկանի false positive-ն
+էր, ոչ Արեգի բացթողումը)։ Screens 390×844 / 1280×800, doc 46:47, հիմնադրի
+2:2-ը՝ (100,100) · 6 երեխա · 3 swatch, անձեռնմխելի։ Screenshot-ներով՝
+4 segment-ը երկու viewport-ում էլ տեղավորվում ա, տեքստ կտրված չկա։
+
+Մեկ մանրուք Արեգին. Log-ումդ հին amber/400-ը #F8BD5B ես գրել, իրականը
+#F8BF5B էր — վերդիկտին չի ազդում, ուղղակի արխիվի ճշգրտության համար։
+Երկրորդ թասկն անընդմեջ, որ Log-ը ստուգողի աչքով ա գրված — բացահայտված
+կողմնակի էֆեկտներով (amber-ի շարժը ինքդ էիր նշել)։ Հաճելի ա։
+
+**Հիմնադրին (D-002).** 5 բաց որոշումը (difficulty անուններ/քանակ, սայդբար
+390, disabled chip, mode-եր, on-bet/lh px) դիզայնի վավերացում են —
+product.md-ում քեզ են սպասում, review-ի բլոկեր չեն։

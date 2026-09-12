@@ -210,3 +210,47 @@ Variables պանել). նկարագրությունը ստորև՝ «Ռեֆեր�
   պանել (Primitives Colors/<Family>/0…900 hidden, UI-ում 0 raw), Components
   էջի 5 նոր node, Screens էջ, Foundations 46:47; 2:2 անձեռնմխելի։
   **Դիզայնի վավերացումը հիմնադրինն ա (D-002).** Հարցերը իրեն՝ product.md-ում։
+- [2026-09-12] Լուսինե (qa). **Review ԱՆՑԱՎ → done/**։ Ամեն պնդում՝ ինչ արեցի / ինչ ստացա.
+  - *Anchor-ները անփոփոխ.* Հին գեներատորի (437e0fe) base+override 17 anchor hex-ը
+    համեմատեցի v1.2 ANCHOR աղյուսակի ու tokens.json-ի ելքի դեմ — 0 շարժված
+    (green 300/500/600/700, amber 200/300/500/900, red 400/450/500,
+    navy 550/600/650/700, night 800/900)։ night 0…900՝ 11 stop, night/0=#FFFFFF;
+    մյուսները 50…900, off-grid 450/550/650-ը տեղում։
+  - *CSS անուններ/արժեքներ.* Հին tokens.css-ի --rd-* բազմությունը ամբողջությամբ
+    պահված ա + 13 նոր, --ui-* 8/8։ Լուծված արժեքների diff՝ միայն 2 փոփոխություն —
+    --rd-action-cashout-pressed-top/bottom (#F8BF5B→#FBB937, #CA8A1B→#C78819) =
+    Արեգի բացահայտած amber/400/600 ramp-շարժը (Log-ում #F8BD5B ա գրած — մանր
+    տառասխալ, իրական հինը #F8BF5B էր)։ Ֆրոնտի (index.html) օգտագործած 12 var-ից
+    ոչ մեկը cashout-pressed չի — ֆրոնտին չի կպնում. մնացած «diff»-երը միայն
+    case/format են (#fff vs #FFFFFF, .35 vs 0.35)։ --ui-spd-ն ֆրոնտի լոկալ var ա,
+    tokens.css-ում երբեք չի եղել — orphan 0։
+  - *Regen դետերմինիստիկ.* node gen-tokens.mjs → git status/diff դատարկ ✓։
+  - *mock-run.* exit 0, «MOCK RUN: OK», 201 variable / 6 style / 291 binding ✓։
+  - *100% alias-ի ջարդման փորձ.* Ժամանակավոր "qa/raw-test": "#FF0000" semantic
+    ավելացրի → գեներատորը ընկավ «Error: semantic raw value: #FF0000» (exit 1) ✓,
+    հետ գցեցի, regen՝ ծառը մաքուր։ tokens.json-ում raw semantic string՝ 0։
+  - *Թվեր.* tokens.json-ից անկախ հաշվեցի՝ 109 primitive + 92 semantic ✓,
+    figmaNames՝ 201 գրառում, ✓։ ui-tokens.md-ն v1.2 կառուցվածքով ա ✓։
+  - *Figma (read-only MCP, 7 sequential կանչ, 0 մուտացիա).* 216 variable —
+    Primitives 64 · Layout 40 · Type 53 · UI 43 · World 16 ✓։ Փոքրատառ legacy
+    անուն ոչ-World collection-ներում՝ 0 (World-ի world/*-ը կանխամտածված ա)։
+    ALL_SCOPES՝ 0։ Primitives՝ բոլորը hidden, scopes [] ✓։ UI-ի COLOR-ներում
+    raw արժեք՝ 0 (բոլորը alias) ✓։ Անունները purpose ոճով են
+    (Colors/Action/Bet/Default, Radius/Control, Font Size/10…) ✓։
+  - *Node-եր.* Chip 37:55, Segment 38:83 (12 variant), Difficulty 39:99,
+    Bet Amount 40:115, Bet Panel 41:88 — 169 node սկան. hardcoded solid/gradient
+    paint՝ 0, բոլոր padding/gap/radius/minHeight՝ bound։ 5 strokeWeight «կասկած»
+    ստուգեցի առանձին — բոլորը bound են individual strokeTop/Bottom/Left/Right-
+    Weight-ով + stroke գույնը alias. false positive էր, խնդիր չկա։
+  - *Screens.* 42:47 էջ, Mobile 42:48 = 390×844, Desktop 43:120 = 1280×800,
+    երկուսում էլ 0 hardcoded, bet-panel instance-ները տեղում ✓։ Doc 46:47
+    «Components — v2 (T-0013)» x=2424 ✓։
+  - *2:2 անձեռնմխելի.* (100,100), 964×1349, 6 երեխա, 3 swatch-ը (2:117/121/125)
+    տեղում ✓։
+  - *Վիզուալ սանիտի (screenshot).* Mobile — 4 segment-ը տեղավորվում ա, heat
+    կետերը կարդացվում են, տեքստ կտրված չկա, ½/2×/Max chip-երը դաշտի մեջ են,
+    Selected-ը հստակ։ Desktop — 390 սայդբար, նույն պանելը, ամեն ինչ տեղավորվում
+    ա։ Երկուսն էլ մաքուր։
+  - *Բաց (ոչ բլոկեր, D-002).* Հիմնադրի 5 որոշումը (difficulty անուններ/քանակ,
+    սայդբար 390, disabled chip, mode-եր, on-bet/lh) — դիզայնի վավերացում ա,
+    review-ի fail չի։
