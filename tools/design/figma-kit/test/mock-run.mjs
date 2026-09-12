@@ -50,13 +50,16 @@ function mkVar(name, col, type, value) {
   if (value !== undefined) v.setValueForMode(col.modes[0].modeId, value);
   col.variableIds.push(v.id); variables.push(v); return v;
 }
+/* սկզբնական անունները v1.2-ի Figma անուններն են (T-0013-ից հետո ֆայլի իրական վիճակը) — v2.0 kit-ը
+ * պիտի դրանք prev անունով գտնի ու ՏԵՂՈՒՄ վերանվանի, ոչ թե կրկնակի ստեղծի */
 const P = mkCol("Primitives", "Value"), W = mkCol("World", "Value"), UI = mkCol("UI", "Night"), LAY = mkCol("Layout", "Value"), TY = mkCol("Type", "Value");
 const col = { r: 0, g: 0, b: 0, a: 1 };
-for (const n of ["green/300", "green/500", "green/600", "green/700", "amber/200", "amber/300", "amber/500", "amber/900", "red/400", "red/450", "red/500", "navy/550", "navy/600", "navy/650", "navy/700", "night/800", "night/900", "white", "green/50", "green/100"]) mkVar(n, P, "COLOR", col);
+for (const n of ["Green/300", "Green/500", "Green/600", "Green/700", "Amber/200", "Amber/300", "Amber/500", "Amber/900", "Red/400", "Red/450", "Red/500", "Navy/550", "Navy/600", "Navy/650", "Navy/700", "Night/800", "Night/900", "White", "Green/50", "Green/100", "Alpha/Green/35"]) mkVar("Colors/" + n, P, "COLOR", col);
 mkVar("world/sky-top", W, "COLOR", col);
-for (const n of ["action/bet", "action/bet-pressed", "action/bet-glow", "action/cashout-top", "action/cashout-bottom", "action/cashout-glow", "action/on-cashout", "text/primary", "text/secondary", "surface/panel", "border/subtle", "brand/accent"]) mkVar(n, UI, "COLOR", col);
-for (const [n, v] of [["radius/control", 12], ["radius/chip", 16], ["radius/pill", 999], ["space/6", 6], ["space/8", 8], ["space/16", 16], ["pad/button-y", 14]]) mkVar(n, LAY, "FLOAT", v);
-mkVar("family/mono", TY, "STRING", "Roboto Mono"); for (const [n, v] of [["size/14", 14], ["weight/bold", 700], ["tracking/button", 0.5]]) mkVar(n, TY, "FLOAT", v);
+for (const n of ["Colors/Action/Bet/Default", "Colors/Action/Bet/Pressed", "Colors/Action/Bet/Glow", "Colors/Action/Cashout/Top", "Colors/Action/Cashout/Bottom", "Colors/Action/Cashout/Glow", "Colors/Action/Cashout/On", "Colors/Global/Text/Primary", "Colors/Global/Text/Secondary", "Colors/Global/Frame/Panel", "Colors/Global/Border/Subtle", "Colors/Global/Shape/Accent", "Colors/Global/Frame/Segment Selected"]) mkVar(n, UI, "COLOR", col);
+for (const [n, v] of [["Radius/Control", 12], ["Radius/Chip", 16], ["Radius/Pill", 999], ["Radius/Inner", 8], ["Spacing/6", 6], ["Spacing/8", 8], ["Spacing/12", 12], ["Spacing/16", 16], ["Padding/Button/Y", 14], ["Size/Chip", 40], ["Padding/Track", 4]]) mkVar(n, LAY, "FLOAT", v);
+mkVar("Family/Mono", TY, "STRING", "Roboto Mono"); for (const [n, v] of [["Font Size/14", 14], ["Weight/Bold", 700], ["Tracking/Button", 0.5]]) mkVar(n, TY, "FLOAT", v);
+const preIds = Object.fromEntries(variables.map((v) => [v.name, v.id])); /* in-place rename-ի ստուգման համար */
 for (const n of ["Display/Multiplier", "Amount", "Button/Large", "Button/Base", "Pill", "Label/Caps"]) styles.push(mkStyle(n));
 function mkStyle(name) { return { id: nid(), name, fontName: { family: "Roboto Mono", style: "Bold" }, fontSize: 14, boundVariables: {}, setBoundVariable(f, v) { if (!VALID_TEXT_FIELDS.has(f)) throw new Error(`bad text-style field ${f}`); if (!v) throw new Error("no var"); this.boundVariables[f] = v.id; calls.bound++; } }; }
 
@@ -109,11 +112,11 @@ await vm.runInContext(code + "\n;main;", ctx); /* main()-ը ֆայլում ա կ
 await new Promise((r) => setTimeout(r, 50));
 
 /* ---- assertions ---- */
-const comp = pages.find((p) => p.name === "Components");
+const comp = pages.find((p) => p.name === "Atoms");
 const report = comp && comp.children.find((n) => n.name === "Kit run report");
 console.log("\n--- report ---\n" + (report ? report.characters : "(չկա)"));
 const fail = (m) => { console.error("ASSERT FAIL:", m); process.exitCode = 1; };
-if (!comp) fail("Components էջ չկա");
+if (!comp) fail("Atoms էջ չկա");
 const sets = comp ? comp.findAllWithCriteria({ types: ["COMPONENT_SET"] }) : [];
 const btn = sets.find((s) => s.name === "Button"), inp = sets.find((s) => s.name === "Input");
 if (!btn || btn.children.length !== 18) fail("Button 18 variant չի");
@@ -124,10 +127,24 @@ if (icons.length !== 7) fail("Icons ≠ 7");
 for (const s of styles.slice(0, 6)) for (const f of ["fontFamily", "fontSize", "fontWeight", "letterSpacing", "lineHeight"]) if (!s.boundVariables[f]) fail(`${s.name} ${f} չկապված`);
 const prim = variables.filter((v) => v.variableCollectionId === P.id);
 if (prim.some((v) => v.scopes.length)) fail("primitive scopes ≠ []");
-const onBet = variables.find((v) => v.name === "Colors/Action/Bet/On"); if (!onBet || Object.values(onBet.valuesByMode)[0].type !== "VARIABLE_ALIAS") fail("Colors/Action/Bet/On alias չի");
-if (variables.some((v) => /^[a-z]+\/[a-z0-9-]+$/.test(v.name) && v.variableCollectionId !== W.id)) fail("հին (չվերանվանված) անուն մնաց՝ " + variables.filter((v) => /^[a-z]+\/[a-z0-9-]+$/.test(v.name) && v.variableCollectionId !== W.id).map((v) => v.name).join(","));
+const onBet = variables.find((v) => v.name === "Colors/Button/Bet/Content"); if (!onBet || Object.values(onBet.valuesByMode)[0].type !== "VARIABLE_ALIAS") fail("Colors/Button/Bet/Content alias չի");
+/* v2.0 միգրացիա. v1.2 անուն չպիտի մնա, ID-ն պիտի նույնը լինի (in-place rename, ոչ կրկնակի) */
+const TOK = JSON.parse(readFileSync(join(D, "..", "..", "..", "..", "docs", "design", "tokens.json"), "utf8"));
+const oldNames = new Set(Object.values(TOK.figma.prev));
+const stale = variables.filter((v) => oldNames.has(v.name) && v.variableCollectionId !== W.id);
+if (stale.length) fail("հին (v1.2, չվերանվանված) անուն մնաց՝ " + stale.map((v) => v.name).join(","));
+if (variables.some((v) => /^[a-z]+\/[a-z0-9-]+$/.test(v.name) && v.variableCollectionId !== W.id)) fail("v1.1 հում բանալի մնաց");
+for (const [nw, old] of Object.entries(TOK.figma.prev)) if (preIds[old]) { const v = variables.find((x) => x.name === nw); if (!v || v.id !== preIds[old]) fail(`${old} → ${nw} rename-ը ID չպահեց`); }
+for (const n of ["Number/12", "Dimensions/Global/Radius/Lg", "Dimensions/Radius/Button/Button", "Colors/Segment/Background-Selected", "Colors/Chip/Background-Selected"]) if (!variables.find((v) => v.name === n)) fail(`${n} չկա`);
 const semRaw = variables.filter((v) => [UI.id, LAY.id, TY.id].includes(v.variableCollectionId) && v.resolvedType === "COLOR" && Object.values(v.valuesByMode)[0].type !== "VARIABLE_ALIAS");
 if (semRaw.length) fail("semantic raw color (alias չի)՝ " + semRaw.map((v) => v.name).join(","));
+const layRaw = variables.filter((v) => v.variableCollectionId === LAY.id && !v.name.startsWith("Number/") && Object.values(v.valuesByMode)[0].type !== "VARIABLE_ALIAS");
+if (layRaw.length) fail("Layout semantic-ը Number pool-ի alias չի՝ " + layRaw.map((v) => v.name).join(","));
+const numVis = variables.filter((v) => v.name.startsWith("Number/") && (v.scopes.length || !v.hiddenFromPublishing));
+if (numVis.length) fail("Number pool-ը hidden/scopes [] չի");
+if (variables.some((v) => v.scopes.includes("ALL_SCOPES") && v.variableCollectionId !== W.id)) fail("ALL_SCOPES մնաց");
+const noDesc = variables.filter((v) => [UI.id, LAY.id, TY.id].includes(v.variableCollectionId) && !v.hiddenFromPublishing && !v.description);
+if (noDesc.length) fail("semantic առանց description՝ " + noDesc.length);
 const hard = btn ? btn.findAll((n) => Array.isArray(n.fills) && n.fills.some((p) => p.type === "SOLID" && !p.boundVariables)) : [];
 if (hard.length) fail(`hardcoded SOLID fill՝ ${hard.map((n) => n.name).join(",")}`);
 const doc = pages[0].children.find((n) => n.name === "Components — v1"); if (!doc) fail("Foundations doc չկա");

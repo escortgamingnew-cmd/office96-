@@ -6,12 +6,15 @@
  *  - Ամեն ստեղծած node ստանում ա pluginData('rdkit') մարկեր. կրկնակի վազքը ջնջում ա ՄԻԱՅՆ
  *    մարկերով node-երը ու վերակառուցում — հիմնադրի ձեռքով արածին ձեռք չի տալիս։
  *  - Variables/text styles-ը չեն ջնջվում. գտնվում են անունով, թարմացվում են տեղում։
- *  - Primitives (գույն, space, type սանդղակներ) → scopes [] (hidden, ոչ մի էլեմենտ չի սնվում)։
- *    Semantic (UI, font/*, pad/gap/size/stroke) → միակ սպառվող շերտը։
+ *  - Primitives (գույն, number pool, type սանդղակներ) → scopes [] (hidden, ոչ մի էլեմենտ չի սնվում)։
+ *    Semantic (կոմպոնենտ-scoped, v2.0 T-0014) → միակ սպառվող շերտը։ Collection/scopes/css/անուն —
+ *    ամեն ինչ TOKENS.figma-ից ա (գեներատորը որոշում ա, kit-ը կիրառում ա)։
+ *  - v2.0. կոմպոնենտները Atoms էջին են (Icons, Button, Input, Chip, Segment). Molecules-ը (Bet Amount,
+ *    Difficulty, Bet Panel) MCP-ով են սարքված — kit-ի backlog (README)։
  */
 
 const KIT = "rdkit";
-const PAGE_COMPONENTS = "Components";
+const PAGE_COMPONENTS = "Atoms";
 const LOG = [];
 const log = (s) => LOG.push(s);
 
@@ -28,45 +31,19 @@ const solid = (v) => figma.variables.setBoundVariableForPaint({ type: "SOLID", c
 const bindAll = (node, fields, v) => fields.forEach((f) => node.setBoundVariable(f, v));
 const bindRadius = (node, v) => bindAll(node, ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius"], v);
 
-/* collection-ի ընտրությունը token-ի անունից */
-function collectionFor(name, value, semantic) {
-  if (!semantic) {
-    if (isColor(value)) return "Primitives";
-    if (/^(space|radius)\//.test(name)) return "Layout";
-    return "Type";
-  }
-  if (name.startsWith("font/")) return "Type";
-  if (/^(pad|gap|size|stroke)\//.test(name)) return "Layout";
-  return "UI";
-}
-function scopesFor(name, semantic) {
-  if (!semantic) return name.startsWith("radius/") ? ["CORNER_RADIUS"] : []; /* primitives hidden. radius-ը արդեն semantic անուններով ա */
-  if (name.startsWith("font/")) {
-    const leaf = name.split("/").pop();
-    return { family: ["FONT_FAMILY"], size: ["FONT_SIZE"], weight: ["FONT_WEIGHT"], tracking: ["LETTER_SPACING"], lh: ["LINE_HEIGHT"] }[leaf];
-  }
-  if (/-glow$/.test(name)) return ["EFFECT_COLOR"];
-  if (/^action\/on-|^text\//.test(name)) return ["TEXT_FILL"];
-  if (name.startsWith("icon/")) return ["SHAPE_FILL", "STROKE_COLOR", "TEXT_FILL"];
-  if (/^border\/|ghost-border$/.test(name)) return ["STROKE_COLOR"];
-  if (name.startsWith("state/")) return ["TEXT_FILL", "STROKE_COLOR"];
-  if (name.startsWith("difficulty/")) return ["SHAPE_FILL", "STROKE_COLOR", "TEXT_FILL", "EFFECT_COLOR"]; /* segment-ի նշիչ + glow */
-  if (name === "brand/accent") return ["FRAME_FILL", "SHAPE_FILL", "TEXT_FILL"];
-  if (/^(action|surface)\//.test(name)) return ["FRAME_FILL", "SHAPE_FILL"];
-  if (/^(pad|gap)\//.test(name)) return ["GAP", "WIDTH_HEIGHT"];
-  if (name.startsWith("size/")) return ["WIDTH_HEIGHT"];
-  if (name.startsWith("stroke/")) return ["STROKE_FLOAT"];
-  if (name.startsWith("opacity/")) return ["OPACITY"];
-  return ["ALL_SCOPES"];
-}
-const cssVar = (name, semantic) => `var(--${semantic ? "rd" : "eg"}-${name.replace(/\//g, "-").toLowerCase()})`;
+/* collection / scopes / css syntax — գեներատորն ա որոշում (TOKENS.figma), kit-ը միայն կիրառում ա */
+const collectionFor = (key) => TOKENS.figma.collection[key] || (() => { throw new Error(`collection չկա՝ ${key}`); })();
+const scopesFor = (key) => TOKENS.figma.scopes[key] || [];
+const cssVar = (key) => TOKENS.figma.css[key];
 
 /* ---------- ՓՈՒԼ 1. variables audit + sync ---------- */
-/* v1.2. Figma-ում variable-ի անունը purpose-ով ա (TOKENS.figmaNames[key], օր. Colors/Global/Text/Primary),
- * token-ի բանալին (text/primary) = CSS անունն ա։ Lookup-ը նախ Figma անունով ա, հետո հին բանալիով
- * (միգրացիա. գտավ հին անունով → վերանվանում ա ՏԵՂՈՒՄ, ID-ն նույնը, binding-ները մնում են)։ */
+/* Figma-ում variable-ի անունը TOKENS.figma.name[key]-ն ա (v2.0՝ Colors/Button/Bet/Background),
+ * token-ի բանալին (button/bet/bg) = CSS անունն ա։ Lookup-ը՝ (1) v2.0 անուն, (2) v1.2 անուն
+ * (TOKENS.figma.prev — միգրացիա. գտավ հին անունով → վերանվանում ա ՏԵՂՈՒՄ, ID-ն նույնը, binding-ները
+ * մնում են), (3) հում բանալի (v1.1)։ */
 const V = {}; /* "Collection:figmaName" → Variable */
-const fig = (key) => (TOKENS.figmaNames && TOKENS.figmaNames[key]) || key;
+const fig = (key) => TOKENS.figma.name[key] || key;
+const prevFig = (key) => TOKENS.figma.prev[fig(key)];
 async function loadVars() {
   const cols = await figma.variables.getLocalVariableCollectionsAsync();
   const vars = await figma.variables.getLocalVariablesAsync();
@@ -76,7 +53,7 @@ async function loadVars() {
   }
   return cols;
 }
-const lookup = (col, key) => V[`${col}:${fig(key)}`] || V[`${col}:${key}`];
+const lookup = (col, key) => V[`${col}:${fig(key)}`] || (prevFig(key) && V[`${col}:${prevFig(key)}`]) || V[`${col}:${key}`];
 const getVar = (col, key) => {
   const v = lookup(col, key);
   if (!v) throw new Error(`variable չկա՝ ${col}/${fig(key)} — նախ վազեցրու «1. Variables audit + sync»`);
@@ -85,7 +62,7 @@ const getVar = (col, key) => {
 /* semantic ref "{green/500}" → primitive Variable */
 function refVar(ref) {
   const name = ref.slice(1, -1);
-  return getVar(collectionFor(name, TOKENS.primitives[name], false), name);
+  return getVar(collectionFor(name), name);
 }
 
 async function phaseVariables() {
@@ -108,25 +85,24 @@ async function phaseVariables() {
   };
   const typeOf = (v) => (isColor(v) ? "COLOR" : typeof v === "number" ? "FLOAT" : "STRING");
 
-  /* primitives — hidden/reference շերտ */
+  /* primitives — hidden/reference շերտ (գույն, Number pool, Type) */
   for (const [name, value] of Object.entries(TOKENS.primitives)) {
     if (name === "family/mono-css") continue; /* CSS-only fallback stack, Figma-ին պետք չի */
-    const col = collectionFor(name, value, false);
-    const [v, mode] = ensureVar(col, name, typeOf(value));
+    const [v, mode] = ensureVar(collectionFor(name), name, typeOf(value));
     v.setValueForMode(mode, isColor(value) ? parseColor(value) : value);
-    v.scopes = scopesFor(name, false);
-    v.hiddenFromPublishing = !name.startsWith("radius/");
-    v.setVariableCodeSyntax("WEB", cssVar(name, false));
+    v.scopes = scopesFor(name);
+    v.hiddenFromPublishing = true;
+    v.setVariableCodeSyntax("WEB", cssVar(name));
   }
-  /* semantic — միակ սպառվող շերտը. alias primitive-ի վրա, alpha-ները raw RGBA (Starter՝ 1 մոդ) */
-  for (const [name, { ref, value }] of Object.entries(TOKENS.semantic)) {
-    const col = collectionFor(name, value, true);
-    const [v, mode] = ensureVar(col, name, typeOf(value));
+  /* semantic — միակ սպառվող շերտը. 100% alias primitive-ի վրա (lh px ու opacity-ն թիվ են) */
+  for (const [name, { ref, value, description }] of Object.entries(TOKENS.semantic)) {
+    const [v, mode] = ensureVar(collectionFor(name), name, typeOf(value));
     if (typeof ref === "string" && ref.startsWith("{")) v.setValueForMode(mode, { type: "VARIABLE_ALIAS", id: refVar(ref).id });
     else v.setValueForMode(mode, isColor(value) ? parseColor(value) : value);
-    v.scopes = scopesFor(name, true);
+    v.scopes = scopesFor(name);
     v.hiddenFromPublishing = false;
-    v.setVariableCodeSyntax("WEB", cssVar(name, true));
+    v.description = description || "";
+    v.setVariableCodeSyntax("WEB", cssVar(name));
   }
   log(`variables: ${stat.created} նոր, ${stat.renamed} վերանվանված, ${stat.updated} թարմացված`);
   cols = await loadVars();
@@ -169,7 +145,7 @@ async function phaseTextStyles() {
     s.setBoundVariable("fontWeight", weight);
     s.setBoundVariable("letterSpacing", tracking);
     s.setBoundVariable("lineHeight", lh);
-    s.description = `font/${base.split("/")[1]}/* → Type primitives. CSS: ${cssVar(base + "-size", true)}…`;
+    s.description = `${base}/* → Type primitives. CSS: ${cssVar(base + "/size")}…`;
     TS[name] = s;
   }
   log(`text styles: ${Object.keys(TOKENS.textStyles).length} կապված font/* variable-ներին`);
@@ -260,25 +236,26 @@ async function phaseButton() {
     c.name = `Kind=${kind}, Size=${size}, State=${state}`;
     c.layoutMode = "HORIZONTAL"; c.primaryAxisAlignItems = "CENTER"; c.counterAxisAlignItems = "CENTER";
     c.primaryAxisSizingMode = "AUTO"; c.counterAxisSizingMode = "AUTO";
-    bindAll(c, ["paddingTop", "paddingBottom"], L("pad/button-y"));
-    bindAll(c, ["paddingLeft", "paddingRight"], L("pad/button-x"));
-    c.setBoundVariable("itemSpacing", L("gap/icon"));
-    c.setBoundVariable("minHeight", L("size/touch"));
-    bindRadius(c, L("radius/control"));
-    /* fill / stroke / glow ըստ kind × state */
-    const pressed = state === "Pressed", disabled = state === "Disabled";
-    if (kind === "Bet") { c.fills = [solid(U(pressed ? "action/bet-pressed" : "action/bet"))]; c.effects = disabled ? [] : [glow(U("action/bet-glow"), 8, 24)]; }
+    bindAll(c, ["paddingTop", "paddingBottom"], L("button/pad-y"));
+    bindAll(c, ["paddingLeft", "paddingRight"], L("button/pad-x"));
+    c.setBoundVariable("itemSpacing", L("button/gap"));
+    c.setBoundVariable("minHeight", L(size === "Large" ? "button/h-lg" : "button/h-md"));
+    bindRadius(c, L("button/radius"));
+    /* fill / stroke / glow ըստ variant × state (v2.0. button/<variant>/<slot>[-<state>]) */
+    const pressed = state === "Pressed", disabled = state === "Disabled", k = kind.toLowerCase();
+    if (kind === "Bet") { c.fills = [solid(U(pressed ? "button/bet/bg-pressed" : "button/bet/bg"))]; c.effects = disabled ? [] : [glow(U("button/bet/glow"), 8, 24)]; }
     if (kind === "Cashout") {
-      try { c.fills = [gradient(U(pressed ? "action/cashout-pressed-top" : "action/cashout-top"), U(pressed ? "action/cashout-pressed-bottom" : "action/cashout-bottom"))]; }
-      catch (e) { log(`! gradient stop binding չանցավ (${e.message}) — solid fallback`); c.fills = [solid(U(pressed ? "action/cashout-pressed-top" : "action/cashout-top"))]; }
-      c.effects = disabled ? [] : [glow(U("action/cashout-glow"), 6, 22)];
+      const sfx = pressed ? "-pressed" : "";
+      try { c.fills = [gradient(U(`button/cashout/bg-top${sfx}`), U(`button/cashout/bg-bottom${sfx}`))]; }
+      catch (e) { log(`! gradient stop binding չանցավ (${e.message}) — solid fallback`); c.fills = [solid(U(`button/cashout/bg-top${sfx}`))]; }
+      c.effects = disabled ? [] : [glow(U("button/cashout/glow"), 6, 22)];
     }
-    if (kind === "Ghost") { c.fills = [solid(U(pressed ? "action/ghost-pressed" : "action/ghost"))]; c.strokes = [solid(U("action/ghost-border"))]; c.strokeAlign = "INSIDE"; c.setBoundVariable("strokeWeight", L("stroke/control")); }
+    if (kind === "Ghost") { c.fills = [solid(U(pressed ? "button/ghost/bg-pressed" : "button/ghost/bg"))]; c.strokes = [solid(U("button/ghost/border"))]; c.strokeAlign = "INSIDE"; c.setBoundVariable("strokeWeight", L("stroke/control")); }
     if (disabled) c.setBoundVariable("opacity", U("opacity/disabled"));
     /* icon slot (default թաքնված) + label */
     const icon = ICONS.Replay.createInstance(); icon.name = "icon"; icon.visible = false;
     c.appendChild(icon); bindAll(icon, ["width", "height"], L("size/icon"));
-    const onVar = U({ Bet: "action/on-bet", Cashout: "action/on-cashout", Ghost: "action/on-ghost" }[kind]);
+    const onVar = U(`button/${k}/fg`);
     for (const vec of icon.findAll((n) => Array.isArray(n.strokes) && n.strokes.length > 0)) vec.strokes = [solid(onVar)];
     const label = figma.createText(); label.name = "label";
     c.appendChild(label);
@@ -290,7 +267,7 @@ async function phaseButton() {
   }
   const cs = mark(figma.combineAsVariants(comps, page));
   cs.name = "Button";
-  cs.description = "Bet (կանաչ, մուգ տեքստ 8.4:1) / Cashout (սաթե gradient) / Ghost («Keep Running»)։ Size = Button/Large | Button/Base։ Disabled = opacity/disabled։ Բոլոր fill/radius/padding/text-ը variable-կապած են։";
+  cs.description = "Atom. Bet (կանաչ, մուգ տեքստ 8.4:1) / Cashout (սաթե gradient) / Ghost («Keep Running»)։ Token-ները՝ Colors/Button/<Kind>/*, Dimensions/*/Button/*։ Size = Button/Large (Height Lg 48) | Button/Base (Md 40)։ Disabled = Opacity/Disabled։ Բոլոր fill/radius/padding/text-ը variable-կապած են։";
   /* grid. տող = Kind×Size, սյուն = State */
   const colW = 300, rowH = 110;
   for (const ch of cs.children) {
@@ -329,31 +306,31 @@ async function phaseInput() {
     c.resize(240, 10); /* resize-ը ՆԱԽ — հետո sizing mode-երը (resize-ը FIXED ա դարձնում) */
     c.layoutMode = "VERTICAL"; c.primaryAxisSizingMode = "AUTO"; c.counterAxisSizingMode = "FIXED";
     c.fills = [];
-    c.setBoundVariable("itemSpacing", L("gap/pills"));
+    c.setBoundVariable("itemSpacing", L("field/gap"));
     const label = figma.createText(); label.name = "label"; c.appendChild(label);
-    await label.setTextStyleIdAsync(TS["Label/Caps"].id); label.characters = "BET AMOUNT"; label.fills = [solid(U("text/secondary"))];
+    await label.setTextStyleIdAsync(TS["Label/Caps"].id); label.characters = "BET AMOUNT"; label.fills = [solid(U("field/label/fg"))];
     const field = figma.createFrame(); field.name = "field"; c.appendChild(field);
     field.layoutMode = "HORIZONTAL"; field.primaryAxisAlignItems = "SPACE_BETWEEN"; field.counterAxisAlignItems = "CENTER";
     field.primaryAxisSizingMode = "FIXED"; field.counterAxisSizingMode = "AUTO"; field.layoutSizingHorizontal = "FILL";
-    bindAll(field, ["paddingTop", "paddingBottom"], L("pad/input-y")); bindAll(field, ["paddingLeft", "paddingRight"], L("pad/input-x"));
-    field.setBoundVariable("minHeight", L("size/touch")); bindRadius(field, L("radius/control"));
-    field.fills = [solid(U("surface/input"))]; field.strokeAlign = "INSIDE";
-    const border = { Default: ["border/subtle", "stroke/hairline"], Focus: ["border/focus", "stroke/control"], Error: ["border/error", "stroke/control"] }[state];
+    bindAll(field, ["paddingTop", "paddingBottom"], L("field/pad-y")); bindAll(field, ["paddingLeft", "paddingRight"], L("field/pad-x"));
+    field.setBoundVariable("minHeight", L("field/h")); bindRadius(field, L("field/radius"));
+    field.fills = [solid(U("field/bg"))]; field.strokeAlign = "INSIDE";
+    const border = { Default: ["field/border", "stroke/hairline"], Focus: ["field/border-focus", "stroke/control"], Error: ["field/border-error", "stroke/control"] }[state];
     field.strokes = [solid(U(border[0]))]; field.setBoundVariable("strokeWeight", L(border[1]));
-    if (state === "Focus") field.effects = [glow(U("action/cashout-glow"), 0, 12)];
+    if (state === "Focus") field.effects = [glow(U("field/glow-focus"), 0, 12)];
     const value = figma.createText(); value.name = "value"; field.appendChild(value);
-    await value.setTextStyleIdAsync(TS["Amount"].id); value.characters = "1.00"; value.fills = [solid(U("text/primary"))];
+    await value.setTextStyleIdAsync(TS["Amount"].id); value.characters = "1.00"; value.fills = [solid(U("field/fg"))];
     const unit = figma.createText(); unit.name = "unit"; field.appendChild(unit);
-    await unit.setTextStyleIdAsync(TS["Label/Caps"].id); unit.characters = "USD"; unit.fills = [solid(U("text/secondary"))];
+    await unit.setTextStyleIdAsync(TS["Label/Caps"].id); unit.characters = "USD"; unit.fills = [solid(U("field/label/fg"))];
     const helper = figma.createText(); helper.name = "helper"; c.appendChild(helper);
     await helper.setTextStyleIdAsync(TS["Pill"].id);
     helper.characters = state === "Error" ? "Not enough balance" : "Min 0.10 · Max 1,000.00";
-    helper.fills = [solid(U(state === "Error" ? "state/loss" : "text/secondary"))];
+    helper.fills = [solid(U(state === "Error" ? "field/helper/fg-error" : "field/helper/fg"))];
     comps.push(c);
   }
   const cs = mark(figma.combineAsVariants(comps, page));
   cs.name = "Input";
-  cs.description = "Bet amount դաշտ։ Default (border/subtle 1px) / Focus (border/focus 2px + սաթե glow) / Error (border/error + state/loss helper)։ Touch target ≥48։";
+  cs.description = "Atom. Bet amount դաշտ։ Token-ները՝ Colors/Field/* (Border / Border-Focus / Border-Error, Label/Helper/Placeholder part-եր), Dimensions/*/Field/*։ Touch target ≥48 (Height/Field)։";
   cs.children.forEach((ch, i) => { ch.x = 40 + i * 300; ch.y = 40; });
   cs.resizeWithoutConstraints(40 + INPUT_STATES.length * 300, 40 + cs.children[0].height + 40);
   cs.x = nextX(page); cs.y = 0;
@@ -381,11 +358,11 @@ async function phaseDocs() {
   doc.resize(1100, 10);
   doc.layoutMode = "VERTICAL"; doc.itemSpacing = 32; doc.paddingTop = doc.paddingBottom = doc.paddingLeft = doc.paddingRight = 48;
   doc.primaryAxisSizingMode = "AUTO"; doc.counterAxisSizingMode = "FIXED";
-  doc.fills = [solid(U("surface/panel"))]; doc.cornerRadius = 16;
+  doc.fills = [solid(U("panel/bg"))]; doc.cornerRadius = 16;
   doc.x = nextX(page); doc.y = 0; page.appendChild(doc);
   const text = (chars, style, size, color) => { const t = figma.createText(); t.fontName = { family: "Inter", style }; t.fontSize = size; t.characters = chars; t.fills = [solid(U(color))]; doc.appendChild(t); t.layoutSizingHorizontal = "FILL"; t.textAutoResize = "HEIGHT"; return t; };
   text("Components — v1", "Bold", 32, "text/primary");
-  text("Semantic token-ներից սնվող կիթ (T-0012)։ Primitives → hidden. UI/Layout/Type semantic → միակ սպառվող շերտը. Text style-երը font/* variable-ներից են։ Աղբյուրը՝ tools/design/gen-tokens.mjs → figma-kit/code.js։", "Regular", 14, "text/secondary");
+  text("Semantic token-ներից սնվող կիթ (T-0012, v2.0 T-0014)։ Primitives → hidden. Կոմպոնենտ-scoped semantic (Colors/<Component>/<Slot>[-<State>], Dimensions/<Slot>/<Component>/…) → միակ սպառվող շերտը. Text style-երը Font/* variable-ներից են։ Աղբյուրը՝ tools/design/gen-tokens.mjs → figma-kit/code.js։", "Regular", 14, "text/secondary");
   const row = (title, nodes) => {
     text(title, "Bold", 18, "text/primary");
     const r = figma.createFrame(); r.name = title; r.layoutMode = "HORIZONTAL"; r.itemSpacing = 24; r.counterAxisAlignItems = "CENTER"; r.fills = []; r.primaryAxisSizingMode = "AUTO"; r.counterAxisSizingMode = "AUTO";
@@ -397,7 +374,7 @@ async function phaseDocs() {
   if (sets.Button) row("Button — Pressed / Disabled (Bet)", sets.Button.children.filter((c) => c.name.startsWith("Kind=Bet, Size=Large") && !c.name.endsWith("Default")));
   if (sets.Input) row("Input — Default / Focus / Error", sets.Input.children);
   if (icons.length) row("Icons — 24 grid, icon/primary", icons);
-  text("Կանոն. կոճակի տեքստը մուգ ա (action/on-bet, night/900) — սպիտակը green/500-ի վրա 2.3:1 էր, մոբայլում արևի տակ կորում ա։ Cashout-ը նույն սկզբունքն ա (amber/900)։ Touch target ≥48 (size/touch)։", "Regular", 13, "text/secondary");
+  text("Կանոն. կոճակի տեքստը մուգ ա (Colors/Button/Bet/Content = Night/900) — սպիտակը green/500-ի վրա 2.3:1 էր, մոբայլում արևի տակ կորում ա։ Cashout-ը նույն սկզբունքն ա (Amber/900)։ Touch target ≥48 (Height/Button/Lg)։", "Regular", 13, "text/secondary");
   log(`Foundations: «Components — v1» doc frame`);
 }
 

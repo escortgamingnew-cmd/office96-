@@ -1,0 +1,1281 @@
+{
+  "Primitives": {
+    "Colors": {
+      "Green": {
+        "50": {
+          "$type": "color",
+          "$value": "#F2FDF8"
+        },
+        "100": {
+          "$type": "color",
+          "$value": "#DAF8EA"
+        },
+        "200": {
+          "$type": "color",
+          "$value": "#95ECC3"
+        },
+        "300": {
+          "$type": "color",
+          "$value": "#3DDC91"
+        },
+        "400": {
+          "$type": "color",
+          "$value": "#36CF88"
+        },
+        "500": {
+          "$type": "color",
+          "$value": "#2EC27E"
+        },
+        "600": {
+          "$type": "color",
+          "$value": "#24A869"
+        },
+        "700": {
+          "$type": "color",
+          "$value": "#22B573"
+        },
+        "800": {
+          "$type": "color",
+          "$value": "#17794D"
+        },
+        "900": {
+          "$type": "color",
+          "$value": "#0B3C26"
+        }
+      },
+      "Amber": {
+        "50": {
+          "$type": "color",
+          "$value": "#FFF9EE"
+        },
+        "100": {
+          "$type": "color",
+          "$value": "#FFEFD0"
+        },
+        "200": {
+          "$type": "color",
+          "$value": "#FFD27A"
+        },
+        "300": {
+          "$type": "color",
+          "$value": "#FFC94D"
+        },
+        "400": {
+          "$type": "color",
+          "$value": "#FBB937"
+        },
+        "500": {
+          "$type": "color",
+          "$value": "#F6A821"
+        },
+        "600": {
+          "$type": "color",
+          "$value": "#C78819"
+        },
+        "700": {
+          "$type": "color",
+          "$value": "#986711"
+        },
+        "800": {
+          "$type": "color",
+          "$value": "#694708"
+        },
+        "900": {
+          "$type": "color",
+          "$value": "#3A2600"
+        }
+      },
+      "Red": {
+        "50": {
+          "$type": "color",
+          "$value": "#FFF8F8"
+        },
+        "100": {
+          "$type": "color",
+          "$value": "#FFEDED"
+        },
+        "200": {
+          "$type": "color",
+          "$value": "#FFCBCB"
+        },
+        "300": {
+          "$type": "color",
+          "$value": "#FF9F9F"
+        },
+        "400": {
+          "$type": "color",
+          "$value": "#FF6B6B"
+        },
+        "450": {
+          "$type": "color",
+          "$value": "#FF5D5D"
+        },
+        "500": {
+          "$type": "color",
+          "$value": "#FF4D4D"
+        },
+        "600": {
+          "$type": "color",
+          "$value": "#CC3E3E"
+        },
+        "700": {
+          "$type": "color",
+          "$value": "#992E2E"
+        },
+        "800": {
+          "$type": "color",
+          "$value": "#661F1F"
+        },
+        "900": {
+          "$type": "color",
+          "$value": "#330F0F"
+        }
+      },
+      "Navy": {
+        "50": {
+          "$type": "color",
+          "$value": "#FAFAFB"
+        },
+        "100": {
+          "$type": "color",
+          "$value": "#F0F1F3"
+        },
+        "200": {
+          "$type": "color",
+          "$value": "#D4D7DD"
+        },
+        "300": {
+          "$type": "color",
+          "$value": "#B0B6C1"
+        },
+        "400": {
+          "$type": "color",
+          "$value": "#868EA0"
+        },
+        "500": {
+          "$type": "color",
+          "$value": "#56617A"
+        },
+        "550": {
+          "$type": "color",
+          "$value": "#3C4966"
+        },
+        "600": {
+          "$type": "color",
+          "$value": "#33405E"
+        },
+        "650": {
+          "$type": "color",
+          "$value": "#2C374F"
+        },
+        "700": {
+          "$type": "color",
+          "$value": "#242F49"
+        },
+        "800": {
+          "$type": "color",
+          "$value": "#181F31"
+        },
+        "900": {
+          "$type": "color",
+          "$value": "#0C1018"
+        }
+      },
+      "Night": {
+        "0": {
+          "$type": "color",
+          "$value": "#FFFFFF"
+        },
+        "50": {
+          "$type": "color",
+          "$value": "#FBFBFB"
+        },
+        "100": {
+          "$type": "color",
+          "$value": "#F4F5F5"
+        },
+        "200": {
+          "$type": "color",
+          "$value": "#E1E2E3"
+        },
+        "300": {
+          "$type": "color",
+          "$value": "#C8C9CB"
+        },
+        "400": {
+          "$type": "color",
+          "$value": "#AAACAE"
+        },
+        "500": {
+          "$type": "color",
+          "$value": "#888A8E"
+        },
+        "600": {
+          "$type": "color",
+          "$value": "#62666B"
+        },
+        "700": {
+          "$type": "color",
+          "$value": "#3A3E44"
+        },
+        "800": {
+          "$type": "color",
+          "$value": "#0E131B"
+        },
+        "900": {
+          "$type": "color",
+          "$value": "#0A0E14"
+        }
+      },
+      "White": {
+        "$type": "color",
+        "$value": "#FFFFFF"
+      },
+      "Alpha": {
+        "White": {
+          "12": {
+            "$type": "color",
+            "$value": "#FFFFFF1F"
+          },
+          "35": {
+            "$type": "color",
+            "$value": "#FFFFFF59"
+          },
+          "50": {
+            "$type": "color",
+            "$value": "#FFFFFF80"
+          }
+        },
+        "Night": {
+          "55": {
+            "$type": "color",
+            "$value": "#0A0E148C"
+          },
+          "92": {
+            "$type": "color",
+            "$value": "#0E131BEB"
+          }
+        },
+        "Green": {
+          "8": {
+            "$type": "color",
+            "$value": "#2EC27E14"
+          },
+          "16": {
+            "$type": "color",
+            "$value": "#2EC27E29"
+          },
+          "35": {
+            "$type": "color",
+            "$value": "#2EC27E59"
+          }
+        },
+        "Amber": {
+          "45": {
+            "$type": "color",
+            "$value": "#F6A82173"
+          }
+        }
+      }
+    },
+    "Number": {
+      "0": {
+        "$type": "number",
+        "$value": 0
+      },
+      "1": {
+        "$type": "number",
+        "$value": 1
+      },
+      "2": {
+        "$type": "number",
+        "$value": 2
+      },
+      "4": {
+        "$type": "number",
+        "$value": 4
+      },
+      "6": {
+        "$type": "number",
+        "$value": 6
+      },
+      "8": {
+        "$type": "number",
+        "$value": 8
+      },
+      "10": {
+        "$type": "number",
+        "$value": 10
+      },
+      "12": {
+        "$type": "number",
+        "$value": 12
+      },
+      "14": {
+        "$type": "number",
+        "$value": 14
+      },
+      "16": {
+        "$type": "number",
+        "$value": 16
+      },
+      "20": {
+        "$type": "number",
+        "$value": 20
+      },
+      "22": {
+        "$type": "number",
+        "$value": 22
+      },
+      "24": {
+        "$type": "number",
+        "$value": 24
+      },
+      "32": {
+        "$type": "number",
+        "$value": 32
+      },
+      "40": {
+        "$type": "number",
+        "$value": 40
+      },
+      "48": {
+        "$type": "number",
+        "$value": 48
+      },
+      "999": {
+        "$type": "number",
+        "$value": 999
+      }
+    },
+    "Family": {
+      "Mono": {
+        "$type": "text",
+        "$value": "Roboto Mono"
+      },
+      "Sans": {
+        "$type": "text",
+        "$value": "Inter"
+      },
+      "Armenian": {
+        "$type": "text",
+        "$value": "Noto Sans Armenian"
+      },
+      "Mono CSS": {
+        "$type": "text",
+        "$value": "ui-monospace, Menlo, Consolas, monospace"
+      }
+    },
+    "Font Size": {
+      "10": {
+        "$type": "number",
+        "$value": 10
+      },
+      "11": {
+        "$type": "number",
+        "$value": 11
+      },
+      "12": {
+        "$type": "number",
+        "$value": 12
+      },
+      "14": {
+        "$type": "number",
+        "$value": 14
+      },
+      "16": {
+        "$type": "number",
+        "$value": 16
+      },
+      "20": {
+        "$type": "number",
+        "$value": 20
+      },
+      "28": {
+        "$type": "number",
+        "$value": 28
+      },
+      "40": {
+        "$type": "number",
+        "$value": 40
+      },
+      "56": {
+        "$type": "number",
+        "$value": 56
+      }
+    },
+    "Weight": {
+      "Regular": {
+        "$type": "number",
+        "$value": 400
+      },
+      "Medium": {
+        "$type": "number",
+        "$value": 500
+      },
+      "Semibold": {
+        "$type": "number",
+        "$value": 600
+      },
+      "Bold": {
+        "$type": "number",
+        "$value": 700
+      }
+    },
+    "Tracking": {
+      "Tight": {
+        "$type": "number",
+        "$value": -2
+      },
+      "Base": {
+        "$type": "number",
+        "$value": 0.2
+      },
+      "Button": {
+        "$type": "number",
+        "$value": 0.5
+      },
+      "Caps": {
+        "$type": "number",
+        "$value": 2
+      }
+    },
+    "Line Height": {
+      "Tight": {
+        "$type": "number",
+        "$value": 100
+      },
+      "Snug": {
+        "$type": "number",
+        "$value": 120
+      },
+      "Base": {
+        "$type": "number",
+        "$value": 140
+      }
+    }
+  },
+  "Semantic": {
+    "Colors": {
+      "Button": {
+        "Bet": {
+          "Background": {
+            "$type": "color",
+            "$value": "{Colors.Green.500}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Bet Background → green/500. CSS var(--rd-button-bet-bg)"
+          },
+          "Background-Pressed": {
+            "$type": "color",
+            "$value": "{Colors.Green.600}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Bet Background Pressed → green/600. CSS var(--rd-button-bet-bg-pressed)"
+          },
+          "Content": {
+            "$type": "color",
+            "$value": "{Colors.Night.900}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Bet Content → night/900. CSS var(--rd-button-bet-fg)"
+          },
+          "Glow": {
+            "$type": "color",
+            "$value": "{Colors.Alpha.Green.35}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Bet Glow → alpha/green/35. CSS var(--rd-button-bet-glow)"
+          }
+        },
+        "Cashout": {
+          "Background-Top": {
+            "$type": "color",
+            "$value": "{Colors.Amber.300}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Cashout Background Top → amber/300. CSS var(--rd-button-cashout-bg-top)"
+          },
+          "Background-Bottom": {
+            "$type": "color",
+            "$value": "{Colors.Amber.500}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Cashout Background Bottom → amber/500. CSS var(--rd-button-cashout-bg-bottom)"
+          },
+          "Background-Top-Pressed": {
+            "$type": "color",
+            "$value": "{Colors.Amber.400}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Cashout Background Top Pressed → amber/400. CSS var(--rd-button-cashout-bg-top-pressed)"
+          },
+          "Background-Bottom-Pressed": {
+            "$type": "color",
+            "$value": "{Colors.Amber.600}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Cashout Background Bottom Pressed → amber/600. CSS var(--rd-button-cashout-bg-bottom-pressed)"
+          },
+          "Content": {
+            "$type": "color",
+            "$value": "{Colors.Amber.900}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Cashout Content → amber/900. CSS var(--rd-button-cashout-fg)"
+          },
+          "Glow": {
+            "$type": "color",
+            "$value": "{Colors.Alpha.Amber.45}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Cashout Glow → alpha/amber/45. CSS var(--rd-button-cashout-glow)"
+          }
+        },
+        "Won": {
+          "Background-Top": {
+            "$type": "color",
+            "$value": "{Colors.Green.300}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Won Background Top → green/300. CSS var(--rd-button-won-bg-top)"
+          },
+          "Background-Bottom": {
+            "$type": "color",
+            "$value": "{Colors.Green.700}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Won Background Bottom → green/700. CSS var(--rd-button-won-bg-bottom)"
+          }
+        },
+        "Ghost": {
+          "Background": {
+            "$type": "color",
+            "$value": "{Colors.Alpha.Green.8}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Ghost Background → alpha/green/8. CSS var(--rd-button-ghost-bg)"
+          },
+          "Background-Pressed": {
+            "$type": "color",
+            "$value": "{Colors.Alpha.Green.16}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Ghost Background Pressed → alpha/green/16. CSS var(--rd-button-ghost-bg-pressed)"
+          },
+          "Border": {
+            "$type": "color",
+            "$value": "{Colors.Green.500}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Ghost Border → green/500. CSS var(--rd-button-ghost-border)"
+          },
+          "Content": {
+            "$type": "color",
+            "$value": "{Colors.Green.300}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Ghost Content → green/300. CSS var(--rd-button-ghost-fg)"
+          }
+        },
+        "Border-Focus": {
+          "$type": "color",
+          "$value": "{Colors.Amber.200}",
+          "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Border Focus → amber/200. CSS var(--rd-button-border-focus)"
+        }
+      },
+      "Field": {
+        "Background": {
+          "$type": "color",
+          "$value": "{Colors.Navy.700}",
+          "$description": "Field. bet amount դաշտ (label / placeholder / helper part-երով). Background → navy/700. CSS var(--rd-field-bg)"
+        },
+        "Content": {
+          "$type": "color",
+          "$value": "{Colors.White}",
+          "$description": "Field. bet amount դաշտ (label / placeholder / helper part-երով). Content → white. CSS var(--rd-field-fg)"
+        },
+        "Border": {
+          "$type": "color",
+          "$value": "{Colors.Alpha.White.12}",
+          "$description": "Field. bet amount դաշտ (label / placeholder / helper part-երով). Border → alpha/white/12. CSS var(--rd-field-border)"
+        },
+        "Border-Focus": {
+          "$type": "color",
+          "$value": "{Colors.Amber.200}",
+          "$description": "Field. bet amount դաշտ (label / placeholder / helper part-երով). Border Focus → amber/200. CSS var(--rd-field-border-focus)"
+        },
+        "Border-Error": {
+          "$type": "color",
+          "$value": "{Colors.Red.400}",
+          "$description": "Field. bet amount դաշտ (label / placeholder / helper part-երով). Border Error → red/400. CSS var(--rd-field-border-error)"
+        },
+        "Glow-Focus": {
+          "$type": "color",
+          "$value": "{Colors.Alpha.Amber.45}",
+          "$description": "Field. bet amount դաշտ (label / placeholder / helper part-երով). Glow Focus → alpha/amber/45. CSS var(--rd-field-glow-focus)"
+        },
+        "Label": {
+          "Content": {
+            "$type": "color",
+            "$value": "{Colors.Alpha.White.50}",
+            "$description": "Field. bet amount դաշտ (label / placeholder / helper part-երով). Label Content → alpha/white/50. CSS var(--rd-field-label-fg)"
+          }
+        },
+        "Placeholder": {
+          "Content": {
+            "$type": "color",
+            "$value": "{Colors.Alpha.White.35}",
+            "$description": "Field. bet amount դաշտ (label / placeholder / helper part-երով). Placeholder Content → alpha/white/35. CSS var(--rd-field-placeholder-fg)"
+          }
+        },
+        "Helper": {
+          "Content": {
+            "$type": "color",
+            "$value": "{Colors.Alpha.White.50}",
+            "$description": "Field. bet amount դաշտ (label / placeholder / helper part-երով). Helper Content → alpha/white/50. CSS var(--rd-field-helper-fg)"
+          },
+          "Content-Error": {
+            "$type": "color",
+            "$value": "{Colors.Red.400}",
+            "$description": "Field. bet amount դաշտ (label / placeholder / helper part-երով). Helper Content Error → red/400. CSS var(--rd-field-helper-fg-error)"
+          }
+        }
+      },
+      "Chip": {
+        "Background-Top": {
+          "$type": "color",
+          "$value": "{Colors.Navy.550}",
+          "$description": "Chip. ½ / 2× / Max preset-ներ դաշտի մեջ. Background Top → navy/550. CSS var(--rd-chip-bg-top)"
+        },
+        "Background-Bottom": {
+          "$type": "color",
+          "$value": "{Colors.Navy.650}",
+          "$description": "Chip. ½ / 2× / Max preset-ներ դաշտի մեջ. Background Bottom → navy/650. CSS var(--rd-chip-bg-bottom)"
+        },
+        "Background-Top-Pressed": {
+          "$type": "color",
+          "$value": "{Colors.Navy.600}",
+          "$description": "Chip. ½ / 2× / Max preset-ներ դաշտի մեջ. Background Top Pressed → navy/600. CSS var(--rd-chip-bg-top-pressed)"
+        },
+        "Background-Bottom-Pressed": {
+          "$type": "color",
+          "$value": "{Colors.Navy.700}",
+          "$description": "Chip. ½ / 2× / Max preset-ներ դաշտի մեջ. Background Bottom Pressed → navy/700. CSS var(--rd-chip-bg-bottom-pressed)"
+        },
+        "Background-Selected": {
+          "$type": "color",
+          "$value": "{Colors.Navy.500}",
+          "$description": "Chip. ½ / 2× / Max preset-ներ դաշտի մեջ. Background Selected → navy/500. CSS var(--rd-chip-bg-selected)"
+        },
+        "Border-Selected": {
+          "$type": "color",
+          "$value": "{Colors.Amber.200}",
+          "$description": "Chip. ½ / 2× / Max preset-ներ դաշտի մեջ. Border Selected → amber/200. CSS var(--rd-chip-border-selected)"
+        },
+        "Content": {
+          "$type": "color",
+          "$value": "{Colors.White}",
+          "$description": "Chip. ½ / 2× / Max preset-ներ դաշտի մեջ. Content → white. CSS var(--rd-chip-fg)"
+        }
+      },
+      "Bet Row": {
+        "Background-Top": {
+          "$type": "color",
+          "$value": "{Colors.Navy.600}",
+          "$description": "Bet Row. chip-երի շարքը դաշտի աջ մասում. Background Top → navy/600. CSS var(--rd-bet-row-bg-top)"
+        },
+        "Background-Bottom": {
+          "$type": "color",
+          "$value": "{Colors.Navy.700}",
+          "$description": "Bet Row. chip-երի շարքը դաշտի աջ մասում. Background Bottom → navy/700. CSS var(--rd-bet-row-bg-bottom)"
+        }
+      },
+      "Segment": {
+        "Background-Pressed": {
+          "$type": "color",
+          "$value": "{Colors.Navy.600}",
+          "$description": "Segment. difficulty ընտրիչի բջիջ (track = փոսը, dot = heat կետ). Background Pressed → navy/600. CSS var(--rd-segment-bg-pressed)"
+        },
+        "Background-Selected": {
+          "$type": "color",
+          "$value": "{Colors.Navy.500}",
+          "$description": "Segment. difficulty ընտրիչի բջիջ (track = փոսը, dot = heat կետ). Background Selected → navy/500. CSS var(--rd-segment-bg-selected)"
+        },
+        "Content": {
+          "$type": "color",
+          "$value": "{Colors.Alpha.White.50}",
+          "$description": "Segment. difficulty ընտրիչի բջիջ (track = փոսը, dot = heat կետ). Content → alpha/white/50. CSS var(--rd-segment-fg)"
+        },
+        "Content-Selected": {
+          "$type": "color",
+          "$value": "{Colors.White}",
+          "$description": "Segment. difficulty ընտրիչի բջիջ (track = փոսը, dot = heat կետ). Content Selected → white. CSS var(--rd-segment-fg-selected)"
+        },
+        "Track": {
+          "Background": {
+            "$type": "color",
+            "$value": "{Colors.Navy.700}",
+            "$description": "Segment. difficulty ընտրիչի բջիջ (track = փոսը, dot = heat կետ). Track Background → navy/700. CSS var(--rd-segment-track-bg)"
+          }
+        }
+      },
+      "Difficulty": {
+        "Easy": {
+          "Background": {
+            "$type": "color",
+            "$value": "{Colors.Green.300}",
+            "$description": "Difficulty heat. variant = մակարդակ. Easy Background → green/300. CSS var(--rd-difficulty-easy-bg)"
+          }
+        },
+        "Medium": {
+          "Background": {
+            "$type": "color",
+            "$value": "{Colors.Amber.200}",
+            "$description": "Difficulty heat. variant = մակարդակ. Medium Background → amber/200. CSS var(--rd-difficulty-medium-bg)"
+          }
+        },
+        "Hard": {
+          "Background": {
+            "$type": "color",
+            "$value": "{Colors.Amber.500}",
+            "$description": "Difficulty heat. variant = մակարդակ. Hard Background → amber/500. CSS var(--rd-difficulty-hard-bg)"
+          }
+        },
+        "Expert": {
+          "Background": {
+            "$type": "color",
+            "$value": "{Colors.Red.500}",
+            "$description": "Difficulty heat. variant = մակարդակ. Expert Background → red/500. CSS var(--rd-difficulty-expert-bg)"
+          }
+        }
+      },
+      "Panel": {
+        "Background": {
+          "$type": "color",
+          "$value": "{Colors.Alpha.Night.92}",
+          "$description": "Panel. HUD/Bet Panel (pill, section, controls part-երով). Background → alpha/night/92. CSS var(--rd-panel-bg)"
+        },
+        "Pill": {
+          "Background": {
+            "$type": "color",
+            "$value": "{Colors.Alpha.Night.55}",
+            "$description": "Panel. HUD/Bet Panel (pill, section, controls part-երով). Pill Background → alpha/night/55. CSS var(--rd-panel-pill-bg)"
+          }
+        }
+      },
+      "Global": {
+        "Text": {
+          "Primary": {
+            "$type": "color",
+            "$value": "{Colors.White}",
+            "$description": "Global տեքստ. Primary → white. CSS var(--rd-text-primary)"
+          },
+          "Secondary": {
+            "$type": "color",
+            "$value": "{Colors.Alpha.White.50}",
+            "$description": "Global տեքստ. Secondary → alpha/white/50. CSS var(--rd-text-secondary)"
+          },
+          "Placeholder": {
+            "$type": "color",
+            "$value": "{Colors.Alpha.White.35}",
+            "$description": "Global տեքստ. Placeholder → alpha/white/35. CSS var(--rd-text-placeholder)"
+          }
+        },
+        "Icon": {
+          "Primary": {
+            "$type": "color",
+            "$value": "{Colors.White}",
+            "$description": "Global icon. Primary → white. CSS var(--rd-icon-primary)"
+          },
+          "Secondary": {
+            "$type": "color",
+            "$value": "{Colors.Alpha.White.50}",
+            "$description": "Global icon. Secondary → alpha/white/50. CSS var(--rd-icon-secondary)"
+          }
+        },
+        "Stroke": {
+          "Subtle": {
+            "$type": "color",
+            "$value": "{Colors.Alpha.White.12}",
+            "$description": "Global stroke. Subtle → alpha/white/12. CSS var(--rd-border-subtle)"
+          },
+          "Focus": {
+            "$type": "color",
+            "$value": "{Colors.Amber.200}",
+            "$description": "Global stroke. Focus → amber/200. CSS var(--rd-border-focus)"
+          },
+          "Error": {
+            "$type": "color",
+            "$value": "{Colors.Red.400}",
+            "$description": "Global stroke. Error → red/400. CSS var(--rd-border-error)"
+          }
+        },
+        "Shape": {
+          "Accent": {
+            "$type": "color",
+            "$value": "{Colors.Amber.200}",
+            "$description": "Global shape/accent. Accent → amber/200. CSS var(--rd-shape-accent)"
+          }
+        },
+        "State": {
+          "Win": {
+            "$type": "color",
+            "$value": "{Colors.Green.300}",
+            "$description": "Round-ի ելքի գույն (win/loss/caught/crash). Win → green/300. CSS var(--rd-state-win)"
+          },
+          "Loss": {
+            "$type": "color",
+            "$value": "{Colors.Red.400}",
+            "$description": "Round-ի ելքի գույն (win/loss/caught/crash). Loss → red/400. CSS var(--rd-state-loss)"
+          },
+          "Caught": {
+            "$type": "color",
+            "$value": "{Colors.Red.450}",
+            "$description": "Round-ի ելքի գույն (win/loss/caught/crash). Caught → red/450. CSS var(--rd-state-caught)"
+          },
+          "Crash": {
+            "$type": "color",
+            "$value": "{Colors.Red.500}",
+            "$description": "Round-ի ելքի գույն (win/loss/caught/crash). Crash → red/500. CSS var(--rd-state-crash)"
+          }
+        }
+      }
+    },
+    "Dimensions": {
+      "Height": {
+        "Button": {
+          "Lg": {
+            "$type": "number",
+            "$value": "{Number.48}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Height Lg → number/48. CSS var(--rd-button-h-lg)"
+          },
+          "Md": {
+            "$type": "number",
+            "$value": "{Number.40}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Height Md → number/40. CSS var(--rd-button-h-md)"
+          }
+        },
+        "Field": {
+          "Field": {
+            "$type": "number",
+            "$value": "{Number.48}",
+            "$description": "Field. bet amount դաշտ (label / placeholder / helper part-երով). Height → number/48. CSS var(--rd-field-h)"
+          }
+        },
+        "Chip": {
+          "Chip": {
+            "$type": "number",
+            "$value": "{Number.40}",
+            "$description": "Chip. ½ / 2× / Max preset-ներ դաշտի մեջ. Height → number/40. CSS var(--rd-chip-h)"
+          }
+        },
+        "Segment": {
+          "Segment": {
+            "$type": "number",
+            "$value": "{Number.40}",
+            "$description": "Segment. difficulty ընտրիչի բջիջ (track = փոսը, dot = heat կետ). Height → number/40. CSS var(--rd-segment-h)"
+          }
+        }
+      },
+      "Padding": {
+        "Button": {
+          "X": {
+            "$type": "number",
+            "$value": "{Number.22}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Padding X → number/22. CSS var(--rd-button-pad-x)"
+          },
+          "Y": {
+            "$type": "number",
+            "$value": "{Number.14}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Padding Y → number/14. CSS var(--rd-button-pad-y)"
+          }
+        },
+        "Field": {
+          "X": {
+            "$type": "number",
+            "$value": "{Number.16}",
+            "$description": "Field. bet amount դաշտ (label / placeholder / helper part-երով). Padding X → number/16. CSS var(--rd-field-pad-x)"
+          },
+          "Y": {
+            "$type": "number",
+            "$value": "{Number.12}",
+            "$description": "Field. bet amount դաշտ (label / placeholder / helper part-երով). Padding Y → number/12. CSS var(--rd-field-pad-y)"
+          }
+        },
+        "Chip": {
+          "X": {
+            "$type": "number",
+            "$value": "{Number.12}",
+            "$description": "Chip. ½ / 2× / Max preset-ներ դաշտի մեջ. Padding X → number/12. CSS var(--rd-chip-pad-x)"
+          }
+        },
+        "Bet Row": {
+          "Bet Row": {
+            "$type": "number",
+            "$value": "{Number.4}",
+            "$description": "Bet Row. chip-երի շարքը դաշտի աջ մասում. Padding → number/4. CSS var(--rd-bet-row-pad)"
+          }
+        },
+        "Segment": {
+          "X": {
+            "$type": "number",
+            "$value": "{Number.8}",
+            "$description": "Segment. difficulty ընտրիչի բջիջ (track = փոսը, dot = heat կետ). Padding X → number/8. CSS var(--rd-segment-pad-x)"
+          },
+          "Track": {
+            "$type": "number",
+            "$value": "{Number.4}",
+            "$description": "Segment. difficulty ընտրիչի բջիջ (track = փոսը, dot = heat կետ). Track Padding → number/4. CSS var(--rd-segment-track-pad)"
+          }
+        },
+        "Panel": {
+          "Panel": {
+            "$type": "number",
+            "$value": "{Number.16}",
+            "$description": "Panel. HUD/Bet Panel (pill, section, controls part-երով). Padding → number/16. CSS var(--rd-panel-pad)"
+          }
+        }
+      },
+      "Gap": {
+        "Button": {
+          "Button": {
+            "$type": "number",
+            "$value": "{Number.8}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Gap → number/8. CSS var(--rd-button-gap)"
+          }
+        },
+        "Field": {
+          "Field": {
+            "$type": "number",
+            "$value": "{Number.6}",
+            "$description": "Field. bet amount դաշտ (label / placeholder / helper part-երով). Gap → number/6. CSS var(--rd-field-gap)"
+          }
+        },
+        "Bet Row": {
+          "Bet Row": {
+            "$type": "number",
+            "$value": "{Number.8}",
+            "$description": "Bet Row. chip-երի շարքը դաշտի աջ մասում. Gap → number/8. CSS var(--rd-bet-row-gap)"
+          }
+        },
+        "Segment": {
+          "Segment": {
+            "$type": "number",
+            "$value": "{Number.8}",
+            "$description": "Segment. difficulty ընտրիչի բջիջ (track = փոսը, dot = heat կետ). Gap → number/8. CSS var(--rd-segment-gap)"
+          },
+          "Track": {
+            "$type": "number",
+            "$value": "{Number.4}",
+            "$description": "Segment. difficulty ընտրիչի բջիջ (track = փոսը, dot = heat կետ). Track Gap → number/4. CSS var(--rd-segment-track-gap)"
+          }
+        },
+        "Panel": {
+          "Section": {
+            "$type": "number",
+            "$value": "{Number.12}",
+            "$description": "Panel. HUD/Bet Panel (pill, section, controls part-երով). Section Gap → number/12. CSS var(--rd-panel-section-gap)"
+          },
+          "Controls": {
+            "$type": "number",
+            "$value": "{Number.8}",
+            "$description": "Panel. HUD/Bet Panel (pill, section, controls part-երով). Controls Gap → number/8. CSS var(--rd-panel-controls-gap)"
+          },
+          "Pill": {
+            "$type": "number",
+            "$value": "{Number.6}",
+            "$description": "Panel. HUD/Bet Panel (pill, section, controls part-երով). Pill Gap → number/6. CSS var(--rd-panel-pill-gap)"
+          }
+        }
+      },
+      "Radius": {
+        "Button": {
+          "Button": {
+            "$type": "number",
+            "$value": "{Number.12}",
+            "$description": "Button. bet = Place Bet/Run (կանաչ), cashout = Cash Out (սաթե gradient), won = cashout-ի հաղթած վիճակ, ghost = Keep Running (#betmorph.lost). Radius → number/12. CSS var(--rd-button-radius)"
+          }
+        },
+        "Field": {
+          "Field": {
+            "$type": "number",
+            "$value": "{Number.12}",
+            "$description": "Field. bet amount դաշտ (label / placeholder / helper part-երով). Radius → number/12. CSS var(--rd-field-radius)"
+          }
+        },
+        "Chip": {
+          "Chip": {
+            "$type": "number",
+            "$value": "{Number.8}",
+            "$description": "Chip. ½ / 2× / Max preset-ներ դաշտի մեջ. Radius → number/8. CSS var(--rd-chip-radius)"
+          }
+        },
+        "Segment": {
+          "Segment": {
+            "$type": "number",
+            "$value": "{Number.8}",
+            "$description": "Segment. difficulty ընտրիչի բջիջ (track = փոսը, dot = heat կետ). Radius → number/8. CSS var(--rd-segment-radius)"
+          },
+          "Track": {
+            "$type": "number",
+            "$value": "{Number.12}",
+            "$description": "Segment. difficulty ընտրիչի բջիջ (track = փոսը, dot = heat կետ). Track Radius → number/12. CSS var(--rd-segment-track-radius)"
+          }
+        },
+        "Panel": {
+          "Panel": {
+            "$type": "number",
+            "$value": "{Number.16}",
+            "$description": "Panel. HUD/Bet Panel (pill, section, controls part-երով). Radius → number/16. CSS var(--rd-panel-radius)"
+          }
+        }
+      },
+      "Size": {
+        "Segment": {
+          "Dot": {
+            "$type": "number",
+            "$value": "{Number.8}",
+            "$description": "Segment. difficulty ընտրիչի բջիջ (track = փոսը, dot = heat կետ). Dot Size → number/8. CSS var(--rd-segment-dot-size)"
+          }
+        }
+      },
+      "Global": {
+        "Space": {
+          "Xs": {
+            "$type": "number",
+            "$value": "{Number.4}",
+            "$description": "Global spacing սանդղակ (t-shirt). Xs → number/4. CSS var(--rd-space-xs)"
+          },
+          "Sm": {
+            "$type": "number",
+            "$value": "{Number.8}",
+            "$description": "Global spacing սանդղակ (t-shirt). Sm → number/8. CSS var(--rd-space-sm)"
+          },
+          "Md": {
+            "$type": "number",
+            "$value": "{Number.12}",
+            "$description": "Global spacing սանդղակ (t-shirt). Md → number/12. CSS var(--rd-space-md)"
+          },
+          "Lg": {
+            "$type": "number",
+            "$value": "{Number.16}",
+            "$description": "Global spacing սանդղակ (t-shirt). Lg → number/16. CSS var(--rd-space-lg)"
+          },
+          "Xl": {
+            "$type": "number",
+            "$value": "{Number.24}",
+            "$description": "Global spacing սանդղակ (t-shirt). Xl → number/24. CSS var(--rd-space-xl)"
+          }
+        },
+        "Radius": {
+          "Xs": {
+            "$type": "number",
+            "$value": "{Number.6}",
+            "$description": "Global radius սանդղակ. Xs → number/6. CSS var(--rd-radius-xs)"
+          },
+          "Sm": {
+            "$type": "number",
+            "$value": "{Number.8}",
+            "$description": "Global radius սանդղակ. Sm → number/8. CSS var(--rd-radius-sm)"
+          },
+          "Md": {
+            "$type": "number",
+            "$value": "{Number.10}",
+            "$description": "Global radius սանդղակ. Md → number/10. CSS var(--rd-radius-md)"
+          },
+          "Lg": {
+            "$type": "number",
+            "$value": "{Number.12}",
+            "$description": "Global radius սանդղակ. Lg → number/12. CSS var(--rd-radius-lg)"
+          },
+          "Xl": {
+            "$type": "number",
+            "$value": "{Number.16}",
+            "$description": "Global radius սանդղակ. Xl → number/16. CSS var(--rd-radius-xl)"
+          },
+          "Pill": {
+            "$type": "number",
+            "$value": "{Number.999}",
+            "$description": "Global radius սանդղակ. Pill → number/999. CSS var(--rd-radius-pill)"
+          }
+        },
+        "Stroke": {
+          "Hairline": {
+            "$type": "number",
+            "$value": "{Number.1}",
+            "$description": "Global stroke width. Hairline → number/1. CSS var(--rd-stroke-hairline)"
+          },
+          "Control": {
+            "$type": "number",
+            "$value": "{Number.2}",
+            "$description": "Global stroke width. Control → number/2. CSS var(--rd-stroke-control)"
+          }
+        },
+        "Size": {
+          "Icon": {
+            "$type": "number",
+            "$value": "{Number.24}",
+            "$description": "Global չափ (icon grid, touch target). Icon → number/24. CSS var(--rd-size-icon)"
+          },
+          "Touch": {
+            "$type": "number",
+            "$value": "{Number.48}",
+            "$description": "Global չափ (icon grid, touch target). Touch → number/48. CSS var(--rd-size-touch)"
+          }
+        }
+      }
+    },
+    "Opacity": {
+      "Disabled": {
+        "$type": "number",
+        "$value": 0.4,
+        "$description": "Disabled = opacity, ոչ palette. ամբողջ կոմպոնենտի վրա (0.4). CSS var(--rd-opacity-disabled)"
+      }
+    },
+    "Font": {
+      "Display Multiplier": {
+        "Family": {
+          "$type": "text",
+          "$value": "{Family.Mono}",
+          "$description": "Text style Display Multiplier → family. → family/mono. CSS var(--rd-font-display-multiplier-family)"
+        },
+        "Size": {
+          "$type": "number",
+          "$value": "{Font Size.56}",
+          "$description": "Text style Display Multiplier → size. → size/56. CSS var(--rd-font-display-multiplier-size)"
+        },
+        "Weight": {
+          "$type": "number",
+          "$value": "{Weight.Bold}",
+          "$description": "Text style Display Multiplier → weight. → weight/bold. CSS var(--rd-font-display-multiplier-weight)"
+        },
+        "Tracking": {
+          "$type": "number",
+          "$value": "{Tracking.Tight}",
+          "$description": "Text style Display Multiplier → tracking. → tracking/tight. CSS var(--rd-font-display-multiplier-tracking)"
+        },
+        "Line Height": {
+          "$type": "number",
+          "$value": 56,
+          "$description": "Text style Display Multiplier → lh. px (size × ratio, Figma-ում lh-ը միայն px ա կապվում). CSS var(--rd-font-display-multiplier-lh)"
+        }
+      },
+      "Amount": {
+        "Family": {
+          "$type": "text",
+          "$value": "{Family.Mono}",
+          "$description": "Text style Amount → family. → family/mono. CSS var(--rd-font-amount-family)"
+        },
+        "Size": {
+          "$type": "number",
+          "$value": "{Font Size.20}",
+          "$description": "Text style Amount → size. → size/20. CSS var(--rd-font-amount-size)"
+        },
+        "Weight": {
+          "$type": "number",
+          "$value": "{Weight.Bold}",
+          "$description": "Text style Amount → weight. → weight/bold. CSS var(--rd-font-amount-weight)"
+        },
+        "Tracking": {
+          "$type": "number",
+          "$value": "{Tracking.Button}",
+          "$description": "Text style Amount → tracking. → tracking/button. CSS var(--rd-font-amount-tracking)"
+        },
+        "Line Height": {
+          "$type": "number",
+          "$value": 24,
+          "$description": "Text style Amount → lh. px (size × ratio, Figma-ում lh-ը միայն px ա կապվում). CSS var(--rd-font-amount-lh)"
+        }
+      },
+      "Button Large": {
+        "Family": {
+          "$type": "text",
+          "$value": "{Family.Mono}",
+          "$description": "Text style Button Large → family. → family/mono. CSS var(--rd-font-button-large-family)"
+        },
+        "Size": {
+          "$type": "number",
+          "$value": "{Font Size.16}",
+          "$description": "Text style Button Large → size. → size/16. CSS var(--rd-font-button-large-size)"
+        },
+        "Weight": {
+          "$type": "number",
+          "$value": "{Weight.Semibold}",
+          "$description": "Text style Button Large → weight. → weight/semibold. CSS var(--rd-font-button-large-weight)"
+        },
+        "Tracking": {
+          "$type": "number",
+          "$value": "{Tracking.Button}",
+          "$description": "Text style Button Large → tracking. → tracking/button. CSS var(--rd-font-button-large-tracking)"
+        },
+        "Line Height": {
+          "$type": "number",
+          "$value": 19,
+          "$description": "Text style Button Large → lh. px (size × ratio, Figma-ում lh-ը միայն px ա կապվում). CSS var(--rd-font-button-large-lh)"
+        }
+      },
+      "Button Base": {
+        "Family": {
+          "$type": "text",
+          "$value": "{Family.Mono}",
+          "$description": "Text style Button Base → family. → family/mono. CSS var(--rd-font-button-base-family)"
+        },
+        "Size": {
+          "$type": "number",
+          "$value": "{Font Size.14}",
+          "$description": "Text style Button Base → size. → size/14. CSS var(--rd-font-button-base-size)"
+        },
+        "Weight": {
+          "$type": "number",
+          "$value": "{Weight.Semibold}",
+          "$description": "Text style Button Base → weight. → weight/semibold. CSS var(--rd-font-button-base-weight)"
+        },
+        "Tracking": {
+          "$type": "number",
+          "$value": "{Tracking.Button}",
+          "$description": "Text style Button Base → tracking. → tracking/button. CSS var(--rd-font-button-base-tracking)"
+        },
+        "Line Height": {
+          "$type": "number",
+          "$value": 17,
+          "$description": "Text style Button Base → lh. px (size × ratio, Figma-ում lh-ը միայն px ա կապվում). CSS var(--rd-font-button-base-lh)"
+        }
+      },
+      "Pill": {
+        "Family": {
+          "$type": "text",
+          "$value": "{Family.Mono}",
+          "$description": "Text style Pill → family. → family/mono. CSS var(--rd-font-pill-family)"
+        },
+        "Size": {
+          "$type": "number",
+          "$value": "{Font Size.12}",
+          "$description": "Text style Pill → size. → size/12. CSS var(--rd-font-pill-size)"
+        },
+        "Weight": {
+          "$type": "number",
+          "$value": "{Weight.Bold}",
+          "$description": "Text style Pill → weight. → weight/bold. CSS var(--rd-font-pill-weight)"
+        },
+        "Tracking": {
+          "$type": "number",
+          "$value": "{Tracking.Base}",
+          "$description": "Text style Pill → tracking. → tracking/base. CSS var(--rd-font-pill-tracking)"
+        },
+        "Line Height": {
+          "$type": "number",
+          "$value": 14,
+          "$description": "Text style Pill → lh. px (size × ratio, Figma-ում lh-ը միայն px ա կապվում). CSS var(--rd-font-pill-lh)"
+        }
+      },
+      "Label Caps": {
+        "Family": {
+          "$type": "text",
+          "$value": "{Family.Mono}",
+          "$description": "Text style Label Caps → family. → family/mono. CSS var(--rd-font-label-caps-family)"
+        },
+        "Size": {
+          "$type": "number",
+          "$value": "{Font Size.12}",
+          "$description": "Text style Label Caps → size. → size/12. CSS var(--rd-font-label-caps-size)"
+        },
+        "Weight": {
+          "$type": "number",
+          "$value": "{Weight.Regular}",
+          "$description": "Text style Label Caps → weight. → weight/regular. CSS var(--rd-font-label-caps-weight)"
+        },
+        "Tracking": {
+          "$type": "number",
+          "$value": "{Tracking.Caps}",
+          "$description": "Text style Label Caps → tracking. → tracking/caps. CSS var(--rd-font-label-caps-tracking)"
+        },
+        "Line Height": {
+          "$type": "number",
+          "$value": 17,
+          "$description": "Text style Label Caps → lh. px (size × ratio, Figma-ում lh-ը միայն px ա կապվում). CSS var(--rd-font-label-caps-lh)"
+        }
+      }
+    }
+  },
+  "$themes": [],
+  "$metadata": {
+    "tokenSetOrder": [
+      "Primitives",
+      "Semantic"
+    ],
+    "generator": "tools/design/gen-tokens.mjs v2.0",
+    "counts": {
+      "Primitives": 105,
+      "Semantic": 135
+    }
+  }
+}
