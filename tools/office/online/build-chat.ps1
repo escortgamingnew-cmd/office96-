@@ -25,6 +25,8 @@ $rxAll = if (Test-Path $rxPath) { [IO.File]::ReadAllText($rxPath, [Text.Encoding
 # ---- արխիվի parse ----
 $archive = [ordered]@{}
 foreach ($ch in $map.Keys) {
+  # DM-երը անձնական են (D-012)՝ db-only. git-ի արխիվ չեն մտնում, էջում չեն baked լինում։
+  if ($ch -like 'dm-*') { $archive[$ch] = @(); 'dm (private, db-only): {0}' -f $ch; continue }
   $path = Join-Path $chatDir $map[$ch]
   $msgs = @()
   if (Test-Path $path) {

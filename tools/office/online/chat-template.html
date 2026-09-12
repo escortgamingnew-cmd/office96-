@@ -104,6 +104,11 @@
   .m:hover .rxadd, .rxrow:not(:empty) .rxadd { opacity:1; }
   @media (hover:none) { .rxadd { opacity:1; } }
   .rxadd:hover { color:var(--text); border-color:var(--muted2); }
+  .dmdel { align-self:flex-start; margin-left:8px; color:var(--muted2); font-size:13px;
+    padding:2px 6px; border-radius:6px; opacity:0; flex:none; }
+  .m:hover .dmdel { opacity:1; }
+  @media (hover:none) { .dmdel { opacity:.7; } }
+  .dmdel:hover { color:var(--red); background:var(--bg-side); }
   #picker { position:fixed; z-index:20; background:var(--bg-deep); border:1px solid var(--line2);
     border-radius:12px; padding:8px; display:none; gap:2px; box-shadow:0 8px 26px rgba(0,0,0,.5); }
   #picker.open { display:flex; }
@@ -407,14 +412,17 @@ function renderMsgs() {
     const img = safeImg(m.img);
     const tx = `<div class="tx ${isJumbo(m.text) ? "jumbo" : ""}">${decorate(m.text)}</div>` +
       (img ? `<img class="att" src="${img}" alt="" loading="lazy">` : "");
+    // DM-ում՝ ջնջելու կոճակ (db-ից եկած գրառումների վրա. անձնական տարածք, D-012)
+    const del = (cur.startsWith("dm-") && m._db)
+      ? `<button class="dmdel" data-del="${esc(m.id)}" title="Ջնջել">🗑</button>` : "";
     if (grouped) {
-      html += `<div class="m"><div class="avgap"></div><div class="body">${tx}${rxRowHtml(m)}</div></div>`;
+      html += `<div class="m"><div class="avgap"></div><div class="body">${tx}${rxRowHtml(m)}</div>${del}</div>`;
     } else {
       html += `<div class="m first"><img class="av" src="${avatarOf(m.author)}" data-a="${esc(m.author)}" alt="" loading="lazy">` +
         `<div class="body"><div class="mh"><span class="au ${esc(role)}">${esc(m.author)}</span>` +
         `<span class="ts">${dayOf(m.ts)} · ${fmtT(m.ts)}</span>` +
         (m.src === "web" ? `<span class="new">ՆՈՐ</span>` : "") +
-        `</div>${tx}${rxRowHtml(m)}</div></div>`;
+        `</div>${tx}${rxRowHtml(m)}</div>${del}</div>`;
     }
     prev = m;
   }
@@ -458,8 +466,18 @@ document.addEventListener("click", (ev) => {
     picker.classList.remove("open"); return;
   }
   if (chip) { toggleReact(chip.dataset.mid, chip.dataset.e); return; }
+  const del = ev.target.closest(".dmdel");
+  if (del) { dmDelete(del.dataset.del); ev.stopPropagation(); return; }
   picker.classList.remove("open");
 });
+
+/* DM գրառման ջնջում (D-012). անձնական տարածք — db doc-ը ջնջվում ա ընդմիշտ */
+async function dmDelete(id) {
+  if (!dbRef || !cur.startsWith("dm-")) return;
+  if (!confirm("Ջնջե՞լ այս նամակը։ Անշրջելի ա։")) return;
+  try { await dbRef.doc("channels/" + cur + "/messages/" + id).delete(); }
+  catch (e) { sendErr("Չջնջվեց (" + (e && e.code || "սխալ") + ")։"); }
+}
 
 function sendErr(msg) { const e = $("err"); e.textContent = msg; e.style.display = "block"; setTimeout(() => e.style.display = "none", 6000); }
 
@@ -787,7 +805,7 @@ renderSide(); renderHead(); renderMsgs(); renderUser(); renderStories();
     db.collection("channels/" + c.id + "/messages").orderBy("ts").limit(500).onSnapshot(snap => {
       live[c.id] = snap.docs.filter(d => d.exists).map(d => {
         const b = d.data() || {};
-        return { id: d.id, author: String(b.author || "անանուն"), ts: String(b.ts || ""), text: String(b.text || ""), img: safeImg(b.img), src: b.src === "synced" ? "archive" : "web" };
+        return { id: d.id, author: String(b.author || "անանուն"), ts: String(b.ts || ""), text: String(b.text || ""), img: safeImg(b.img), src: b.src === "synced" ? "archive" : "web", _db: true };
       });
       unread[c.id] = live[c.id].filter(m => m.src === "web").length;
       renderSide();
