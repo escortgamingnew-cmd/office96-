@@ -863,3 +863,113 @@ mode ունի, բայց 285-ից 7 token ա տարբերվում — մեր «mo
 
 Պատասխանիր ինչ կարաս, մնացածին քո տարբերակն առաջարկի. համաձայնությունը
 ֆիքսում եմ ու փուլ 3-ը սկսում (gen-tokens v2.0 + Run Dady UI-ի Atoms/Molecules)։
+
+---
+[2026-09-12 23:58] Տիգրան (developer)
+**Արեգ — T-0014 փուլ 2, պատասխաններս 7 հարցին։** architecture.md-ն կարդացի —
+կաղապարը ճիշտ ա, ընդունում եմ։ Նախ երկու փաստ, որոնց վրա պատասխանները
+կանգնած են. (ա) Pixi-ի կողմն այսօր UI token ՉԻ սպառում — tex.js-ի COL/COL_PROTO-ն
+աշխարհի գունապնակն ա (Figma-ի World collection-ը), ոչ UI-ը. ամբողջ UI-ը DOM/CSS ա
+(ui.js + index.html)։ (բ) index.html-ը ՄԻԱՅՆ 12 `--ui-*` var ա սպառում, `--eg-*`/
+`--rd-*` ոչ մի տեղ չկա, tokens.json-ը kit-ից բացի ոչ ոք չի կարդում (grep-ած) —
+T-0010-ը դեռ չեմ սկսել։ Լավ նորություն ա. legacy շերտը շատ բարակ ա։
+
+**1. CSS անվանակարգ — համաձայն, երկու ուղղում։**
+`--rd-<component>[-<variant|part>]-<slot>[-<axis>][-<state>]`, state ՄԻՇՏ վերջում —
+grep-ի համար ճիշտ ա. `--rd-button-bet-bg` prefix-ով բոլոր state-երը, `-pressed$`-ով
+բոլոր pressed-ները։ Հապավում՝ կարճը. `bg fg border glow h w pad-x pad-y gap radius`։
+`fg`, ոչ `content`. CSS-ում `color:` ա, դեվի գլխում fg ա. Figma-ում մնում ա Content։
+- Ուղղում 1. `top/bottom`-ը slot չեն, axis են. gradient-ը background ա →
+  `--rd-button-cashout-bg-top`, `--rd-button-cashout-bg-bottom-pressed`։ Այլապես
+  `bg` grep-ը cashout-ը չի բռնում ու slot բառարանը փքվում ա։
+- Ուղղում 2. `track/thumb/dot`-ը part են, variant-ի դիրքում. `--rd-segment-track-bg`,
+  `--rd-segment-track-pad`, `--rd-segment-dot-bg`։ Slot-ը միշտ վերջին «իմաստն» ա։
+Legacy հորիզոն. `--eg-space-*`/`--eg-radius-*` alias ՉԻ ՊԵՏՔ — ֆրոնտը երբեք չի
+սպառել, v2.0-ում ուղղակի ջնջի (0 կոտրում)։ `--ui-*` 12-ը ու հին `--rd-action-*`
+անունները մնում են մինչև T-0010-ի review անցնի, հետո մեկ commit-ով հանում ես.
+T-0010-ում ես ուղիղ canonical անուններ եմ գրելու, alias-ի վրա չեմ նստելու։
+Հերթականություն. քո v2.0-ն ԱՌԱՋ, T-0010-ը հետո — թե չէ index.html-ը երկու անգամ
+եմ գրում։
+
+**2. Սպառում — JS մոդուլ, ոչ getComputedStyle։**
+getComputedStyle-ը `rgb(46, 194, 126)` string ա տալիս, parse ա պետք, alpha-ն
+առանձին քաշել, ամեն կանչ style flush ա։ Boot-ին 30 var-ի համար կդիմանար, բայց դա
+«CSS-ը ճշմարտություն, JS-ը գուշակող» ա։ Ճիշտը՝ գեներատորը երկու սպառողին նույն
+աղբյուրից ա տալիս։ Ձևը՝ `prototype/pixi-feel/src/tokens.js` (Stake build-ում՝
+src/tokens.js), ESM, մեկ nested frozen object.
+```js
+export const RD = Object.freeze({
+  button: { bet: { bg: 0x2EC27E, bgPressed: 0x24A869, fg: 0x0A0E14, glow: { color: 0x2EC27E, alpha: .35 } },
+            radius: 12, h: { lg: 48, md: 40 }, padX: 22, padY: 14 },
+  field: { /* … */ }, opacity: { disabled: .4 },
+});
+```
+- գույն = `0xRRGGBB` number (Pixi-ի բնիկ ձևը); alpha-ով token = `{color, alpha}` —
+  Pixi-ում alpha-ն միշտ առանձին property ա։
+- չափեր unitless number, opacity 0–1, lh px number։
+- բանալիները CSS անվան հատվածներն են camelCase-ով (`bg-pressed` → `bgPressed`) —
+  մեկ կանոն, ձեռքով քարտեզ չկա։
+- `.d.ts` հիմա ՉԻ ՊԵՏՔ — պրոտոն plain JS ա, TS-ը stack-ում չկա (stack-ի հարց ա,
+  ոչ token-ի)։ JSDoc typedef-ը գեներատորը կարա տա, բավական ա։
+Ազնիվ նոթ. առաջին սպառողը ԴԵՌ ՉԿԱ (UI-ը DOM ա)։ Գեներացրու — էժան ա ու
+դետերմինիստիկ — բայց **Սևակ**, bundle script-երը (build-artifact*.ps1) Load-Module
+ֆիքս ցուցակ ունեն. tokens.js-ը մեկ տող ա պահանջելու, նախապես ասում եմ։
+DOM-ի կողմը. bundle-ը `<style>`-ն ա քաշում, `<link>` չի տեսնի → tokens.css-ը
+index.html-ի ՄԵՋ ա մտնելու։ Առաջարկ. գեներատորն ինքը splice անի
+`/* @tokens */ … /* @/tokens */` marker-ների արանքում — մեկ run, երկու ֆայլ սինք,
+ձեռքով copy չկա։ Դա T-0010-ի իմ մասն ա, քեզնից միայն marker-ի համաձայնությունն ա։
+
+**3. tokens.json / DTCG.** Flat tokens.json-ը ազատ փոխի, չեմ սպառում։ DTCG-ն
+ՀԱՎԵԼՅԱԼ export — առարկություն չունեմ, մեկ պայման. նույն run-ից ա ծնվում, ոչ ոք
+չի խմբագրում, գեներատորը count-check ա անում (flat semantic N = DTCG semantic N)։
+`number` vs `dimension`. ես DTCG չեմ սպառելու, px-ը CSS/JS-ում գեներատորն ա դնում —
+ինձ բավական ա։ Tokens Studio-ն `dimension`-ը ինչ ա ուտում՝ չգիտեմ, ստուգել ա
+պետք, քո դաշտն ա։
+
+**4. Number pool.** `--eg-number-12: 12px` — OK։ Primitive չեմ սպառելու (կանոն ա,
+T-0010-ում էլ չեմ խախտի)։ Միակ semantic→primitive թռիչքը `--ui-rad:
+var(--eg-radius-control)`-ն ա, v2.0-ում `--rd-button-radius` ա դառնում։ Opacity
+0–1 — այո։ Pill 999 — այո, 100-ը ոչ։ Մեկ խնդրանք. pool-ի թիվը գեներատորում ՄԻ
+ՏԵՂ ա հայտարարվում, semantic-ը `{number/22}` ա հղում, չգոյություն ունեցող թիվը
+error ա (ինչպես հիմա bad ref-ը)։
+
+**5. State-երը ֆրոնտում — իրական ցուցակը.**
+- `pressed` — կա, JS-ով (`#hold.active`, pointerdown/up. `:active`-ը hold-to-run-ի
+  համար հուսալի չի touch-action:none + preventDefault-ով)։ Chip/step/cashout-ը
+  հիմա `:active`-ով են։
+- `disabled` — դեռ չկա, լինելու ա (chip > balance, bet run-ի մեջ)։
+- `focus` — հիմա `outline:none` ա ամեն կոճակին. desktop-ում Space-ը hold ա,
+  keyboard user կա → `:focus-visible` պետք ա, token-ը գեներացրու (field-ինը կա,
+  button-ինն էլ)։
+- `selected` — chip-ը հիմա selected ՉԻ ցույց տալիս (փաստացի բագ ա), segment-ը
+  ֆրոնտում դեռ չկա։ Token՝ այո։
+- `hover` — մի գեներացրու։ Suffix-ը թույլատրված բազմությունում պահի, որ
+  ավելացնելը schema փոփոխություն չլինի։ Երբ desktop hover լինի՝ `@media
+  (hover:hover)` guard-ով։
+Մեխանիզմ. class = suffix 1:1. `.pressed`, `.selected`; disabled՝ native
+`:disabled` (button-ներ են); focus՝ `:focus-visible`։ `data-state`-ը ոչ —
+pressed+selected միաժամանակ ա լինում (ընտրված segment-ի վրա մատ)։ T-0010-ում
+`.active` → `.pressed` եմ վերանվանում, chip/step-ի `:active`-ը նույն pointer
+helper-ով `.pressed` եմ դարձնում — touch-ի :active ուշացումն էլ գնում ա,
+mouse/touch նույնն են։
+Կարևոր տարբերակում. `#betmorph.run/.lost`, `#cashout.won` — state ՉԵՆ, variant են
+(bet → ghost, cashout → won)։ Token-ում `-<variant>` դիրքում են, ոչ suffix։ Կոդում
+ՄԵԿ element ա մորֆում, դա feel-ի սիրտն ա — Figma-ում 3 set թե Kind variant՝ ինձ
+չի ազդում, հիմնադրի ընտրությունն ա։
+
+**6. lh.** Semantic-ում px-ը ՄԻԱԿն ա. font size-երը ֆիքս token են (fluid type չկա),
+DOM-ում `line-height:19px` ճիշտ ա, Pixi TextStyle.lineHeight-ն էլ px ա։ Ratio-ն
+primitive ա մնում (`--eg-lh-snug`) — գեներատորի բազմապատկիչն ա, ֆրոնտը չի սպառում։
+Երկուսը semantic-ում — ոչ։
+
+**7. Mode-եր.** Համաձայն. սպառող չկա, mode չկա։ `@media`-ով `:root` վերասահմանում —
+այո, DOM-ի համար։ Ապագայի նոթ. JS մոդուլը @media չի «լսում», mode լինի՝ matchMedia +
+երկու object — էն օրվա հարցն ա։ Ու World-ի 2 մոդը (Proto/Deep night) կոդում mode չի,
+`skyDark` slider ա (COL_PROTO→COL_NIGHT mix) — Figma-ի արտեֆակտ ա, կոդին
+չհետևեցնես։ Երբևէ World-ը գեներատոր մտնի՝ աղբյուրը tex.js-ն ա, ոչ Figma-ն։
+
+**Ամփոփ.** 1 ✓ (top/bottom = axis, part = variant-ի դիրք) · 2 JS մոդուլ nested
+frozen, 0xRRGGBB + {color,alpha}, .d.ts ոչ; tokens.css marker-ով splice · 3 DTCG
+հավելյալ + count-check · 4 ✓, space/radius alias ջնջի · 5 pressed/selected/focus/
+disabled, hover ոչ, class = suffix · 6 px միայն · 7 ✓։ Հերթականություն. v2.0 →
+T-0010 → legacy ջնջում։ Փուլ 3-ը կարաս սկսես։

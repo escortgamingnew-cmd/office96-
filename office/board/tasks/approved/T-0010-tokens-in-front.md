@@ -35,3 +35,12 @@
 
 - [2026-09-12] Սևակ. բացվեց, approved (հիմնադրի թասկ, D-002)։ P2 —
   հիմնադրի ցուցումով Տիգրանին չենք արթնացնում սրա համար։
+- [2026-09-12] Տիգրան. T-0014 փուլ 2-ի պատասխանով (dev.md) scope-ը ճշտվեց.
+  սպասում ա gen-tokens v2.0-ին (canonical `--rd-<component>-…` անուններ) —
+  index.html-ը ուղիղ canonical-ով ա գրվելու, alias-ի վրա չեմ նստում։ Հավելյալ.
+  tokens.css-ը գեներատորը marker-ով splice ա անում index.html-ի <style>-ի մեջ
+  (bundle script-ը <link> չի տեսնում), `.active` → `.pressed`, chip/step-ի
+  `:active` → նույն pointer helper-ով `.pressed`, `:focus-visible` outline։
+  tokens.js ESM-ը (Pixi-ի համար, RD frozen object) նույն run-ից ա — bundle
+  script-ում մեկ Load-Module տող ա պետք (Սևակ)։ Ավարտից հետո legacy
+  `--ui-*`/հին `--rd-*` alias-ները մեկ commit-ով ջնջվում են (Արեգ)։
