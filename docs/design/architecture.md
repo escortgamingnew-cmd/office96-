@@ -1,8 +1,10 @@
 # Design system արխիտեկտուրա — Fun Builder մոդելը ու Escort Gaming ստանդարտը
 
-**Կարգավիճակ.** T-0014 փուլ 1 (ուսումնասիրություն), Արեգ, 2026-09-12։ Փուլ 2-ը՝
-Տիգրանի հետ համաձայնեցում dev.md-ում, փուլ 3-ը՝ իրականացում (gen-tokens.mjs +
-Run Dady UI)։ Դոկը գրված ա, որ ՀԱՋՈՐԴ պրոյեկտը 0-ից նույն կառուցվածքով բացվի։
+**Կարգավիճակ.** T-0014 փուլ 3 ավարտված, Արեգ, 2026-09-12։ Բաժիններ 1–4-ը
+ուսումնասիրությունն են (փուլ 1), 5-ը՝ ստանդարտը ԻՆՉՊԵՍ ՈՐ իրականացված ա
+(gen-tokens.mjs v2.0 + Run Dady UI), 6-ը՝ migration-ի փաստացի ընթացքը, **7-ը՝ հաջորդ
+պրոյեկտի checklist-ը**։ Տիգրանի հետ համաձայնությունը՝ dev.md 2026-09-12 23:58։
+Գործնական ռեֆերենսը (ամեն token, Figma անուն, CSS/JS)՝ `docs/design/ui-tokens.md`։
 
 **Աղբյուրները.**
 - `docs/design/reference/fun-builder-tokens.json` — հիմնադրի Fun Builder
@@ -316,10 +318,11 @@ PERCENT ա ու ԿԱՊՎԱԾ ՉԻ (տես 3.2)։
 
 ---
 
-## 5. Escort Gaming ստանդարտ — թիրախային արխիտեկտուրա (առաջարկ)
+## 5. Escort Gaming ստանդարտ — արխիտեկտուրան, ինչպես որ իրականացված ա (v2.0)
 
-Հիմնադրի մոդելը + մեր գեներատորի կարգապահությունը։ Վավերացվում ա D-002-ով,
-կոդային մասը՝ Տիգրանի հետ (փուլ 2)։
+Հիմնադրի մոդելը + մեր գեներատորի կարգապահությունը։ Կոդային մասը Տիգրանի հետ
+համաձայնեցված ա (dev.md 09-12), դիզայնի վավերացումը՝ D-002-ով հիմնադրինը։
+Այս բաժինը թարմացված ա փուլ 3-ից հետո — էստեղ գրածը գեներատորի ընթացիկ վիճակն ա։
 
 ### 5.1 Շերտեր ու collection-ներ
 
@@ -331,15 +334,19 @@ Components  Atoms → Molecules → Screens
 ```
 
 Primitives-ը ստուդիայի ընդհանուրն ա (--eg-*), Semantic-ը խաղինը (--rd-*, հաջորդ
-խաղը՝ իր prefix-ով)։ Անփոփոխ։
+խաղը՝ իր prefix-ով)։ Figma-ում «Semantic»-ը ֆիզիկապես 3 collection ա (UI / Layout /
+Type) — չմիավորեցինք. Plugin API-ով variable-ը collection-ից collection չի տեղափոխվում,
+ID-ն կփոխվեր, binding-ները կկոտրվեին (6-րդ բաժնի ռիսկ գ)։ Հաջորդ ֆայլը 0-ից բացվելիս
+կարա մեկ Semantic collection լինի — kit-ի collection-ը `tokens.json → figma.collection`-ից ա։
 
 ### 5.2 Number pool
 
-`Number/<n>`. 0 1 2 4 6 8 10 12 14 16 20 22 24 28 32 40 48 56 999։ Հիմքը՝ Fun
-Builder-ի pool-ը + մեր կոդի իրական արժեքները (10, 22 button-x, 14 button-y, 999
-pill)։ `space/*`, `radius/*`, `size/<n>` primitives-ը ջնջվում են՝ CSS-ում
-`--eg-space-*`/`--eg-radius-*` alias-ով մնում (T-0010 ֆրոնտը դրանց վրա ա)։
-Font Size-ը մնում ա Type-ի մեջ (Fun Builder-ում էլ առանձին ա)։
+`number/<n>` → Figma `Number/<n>`. **0 1 2 4 6 8 10 12 14 16 20 22 24 32 40 48 999**
+(17)։ Հիմքը՝ Fun Builder-ի pool-ը + մեր կոդի իրական արժեքները (22 button-x, 14
+button-y, 999 pill)։ 28/56-ը հանվեցին — font size են, Type-ի մեջ են։ `space/*`,
+`radius/*`, `size/<n>` primitives-ը ջնջված են, `--eg-space-*`/`--eg-radius-*` alias
+ՉԻ մնացել (Տիգրան. ֆրոնտը երբեք չի սպառել, 0 կոտրում)։ Semantic-ը միայն
+`{number/<n>}` ա հղում, չգոյություն ունեցող թիվը error ա։
 
 ### 5.3 Կոմպոնենտային կաղապարը (ամեն կոմպոնենտ ՆՈՒՅՆ slot-երը)
 
@@ -354,42 +361,55 @@ Dimensions/Radius/<Component>/<Component> · Track · Inner
 Dimensions/Width/<Component>/… (միայն երբ պետք ա)
 ```
 
-State suffix բազմությունը (մոբայլ-առաջին կարգով). `-Pressed` (պարտադիր),
-`-Selected`, `-Focus`, `-Error`, `-Hover` (desktop-ի լրացում, ֆրոնտը կորոշի՝
-սպառում ա թե ոչ), Default-ը suffix չունի, Disabled-ը՝ Opacity/Disabled։
+State suffix բազմությունը (մոբայլ-առաջին կարգով). `-Pressed`, `-Selected`,
+`-Focus`, `-Error` գեներացվում են, `-Hover`-ը բառարանում ա, բայց **չի գեներացվում**
+(Տիգրան. մոբայլում չկա, երբ desktop hover լինի՝ `@media (hover:hover)` guard-ով,
+schema-ն չի փոխվում)։ Default-ը suffix չունի, Disabled-ը՝ Opacity/Disabled։
 Fun Builder-ի `-Active`-ը մեզ մոտ երկու իմաստ ա բաժանվում. `-Pressed` (մատը
-վրան ա) ու `-Selected` (ընտրված ա)։
+վրան ա) ու `-Selected` (ընտրված ա)։ Կոդում state = class 1:1 (`.pressed`,
+`.selected`, `:focus-visible`, native `:disabled`)։ Variant-ը (`#betmorph.run/.lost`,
+`#cashout.won`) state ՉԻ — 2-րդ դիրքում ա (bet/ghost/won), suffix չի։
 
-Run Dady-ի կոմպոնենտները կաղապարով.
+Երկու ուղղում Տիգրանից, որ կաղապարի մաս դարձան. (1) **top/bottom-ը axis են,
+ոչ slot** — gradient-ը background ա, `button/cashout/bg-top-pressed` (այլապես `bg`
+grep-ը cashout-ը չէր բռնի). (2) **track/thumb/dot/pill/label/helper-ը part են**,
+variant-ի դիրքում — `segment/track/pad`, `field/helper/fg-error`։ Slot-ը միշտ
+վերջին «իմաստն» ա։
+
+Run Dady-ի կոմպոնենտները կաղապարով (136 semantic, ամբողջ ցուցակը ui-tokens.md-ում).
 
 | Կոմպոնենտ | Colors/… | Dimensions/… |
 |---|---|---|
-| Button/Bet | Background, Background-Pressed, Content, Glow | Height/Button/Lg 48 · Md 40, Padding/Button/X 22 · Y 14, Radius/Button 12 |
-| Button/Cashout | Top, Bottom, Top-Pressed, Bottom-Pressed, Content, Glow | նույնը |
-| Button/Won | Top, Bottom | նույնը |
-| Button/Ghost | Background, Background-Pressed, Border, Content | նույնը |
-| Field | Background, Border, Border-Focus, Border-Error, Content, Placeholder | Height/Field 48, Padding/Field/X 16 · Y 12, Radius/Field 12 |
-| Chip | Top, Bottom, Content | Height/Chip 40, Padding/Chip/X 12, Radius/Chip 8 (inner) |
-| Segment | Track, Background-Selected, Content, Dot | Height/Segment 40, Padding/Segment/X 8 · Track 4, Gap/Segment/Track 4, Radius/Segment/Track 12 · Inner 8 |
-| Difficulty (heat) | Easy · Medium · Hard · Expert | — (Segment-ի Dot-ի արժեքներն են) |
-| Panel (HUD) | Background, Pill | Padding/Panel 16, Gap/Panel/Section 12 · Controls 8, Radius/Panel 16 |
-| Global | Text/{Primary, Secondary, Placeholder}, Icon/{Primary, Secondary}, Stroke/{Subtle, Focus, Error}, Shape/Accent, State/{Win, Loss, Caught, Crash} | Global/{xs 4, sm 8, md 12, lg 16, xl 24}, Radius/Global/{sm 6, md 10, lg 12, xl 16, Pill 999}, Width/{Hairline 1, Control 2}, Size/{Icon 24, Touch 48} |
+| Button/{Bet, Cashout, Won, Ghost} + Button/Border-Focus | Background[-Top/-Bottom][-Pressed], Content, Glow, Border | Height/Button/Lg 48 · Md 40, Padding/Button/X 22 · Y 14, Gap/Button 8, Radius/Button 12 |
+| Field (+ Label/Placeholder/Helper part) | Background, Content, Border[-Focus/-Error], Glow-Focus, Label/Content, Placeholder/Content, Helper/Content[-Error] | Height/Field 48, Padding/Field/X 16 · Y 12, Gap/Field 6, Radius/Field 12 |
+| Chip | Background-Top/-Bottom[-Pressed], Background-Selected, Border-Selected, Content | Height/Chip 40, Padding/Chip/X 12, Radius/Chip 8 |
+| Bet Row | Background-Top/-Bottom | Padding/Bet Row 4, Gap/Bet Row 8 |
+| Segment (+ Track/Dot part) | Background-Pressed/-Selected, Content[-Selected], Track/Background | Height/Segment 40, Padding/Segment/X 8 · Track 4, Gap/Segment 8 · Track 4, Radius/Segment 8 · Track 12, Size/Segment/Dot 8 |
+| Difficulty/{Easy, Medium, Hard, Expert} | Background (heat) | — |
+| Panel (+ Pill/Section/Controls/Balance part) | Background, Pill/Background | Padding/Panel 16, Radius/Panel 16, Gap/Panel/Section 12 · Controls 8 · Pill 6 · Balance 2 |
+| Global | Text/{Primary, Secondary, Placeholder}, Icon/{Primary, Secondary}, Stroke/{Subtle, Focus, Error}, Shape/Accent, State/{Win, Loss, Caught, Crash} | Space/{Xs 4, Sm 8, Md 12, Lg 16, Xl 24}, Radius/{Xs 6, Sm 8, Md 10, Lg 12, Xl 16, Pill 999}, Stroke/{Hairline 1, Control 2}, Size/{Icon 24, Touch 48} |
 
-Ամեն ընթացիկ `--rd-*` անուն ստանում ա նոր canonical անուն, հինը մնում ա CSS
-alias (T-0010-ը չի կոտրվում)։
+45 ընթացիկ `--rd-*` անուն ստացավ նոր canonical անուն, հինը CSS alias ա
+(`tokens.css` «legacy» բլոկ) մինչև T-0010-ի review-ն, հետո մեկ commit-ով ջնջվում ա։
 
 ### 5.4 Անվանակարգի կանոններ (գեներատորը պարտադրում ա)
 
 1. Figma անուն = `<Group>/<Component>[/<Variant>]/<Slot>[-<State>]`։ Բացատ միայն
    բազմաբառ անունների մեջ (`Bet Row`), suffix-ը գծիկով, երբեք բացատով։
-2. CSS անուն = `--<game>-<component>[-<variant>]-<slot>[-<state>]`, ամբողջը
-   lowercase-kebab, slot-երի հապավումով (փուլ 2-ում Տիգրանի հետ ֆիքսվող
-   բառարան. bg / fg / border / glow / top / bottom / h / pad-x / pad-y / gap /
-   radius / w)։ Figma-ից CSS-ը ՄԵՔԵՆԱՅՈՎ ա ստացվում, ոչ ձեռքով։
-3. Slot-ի հոմանիշ չկա. `Content`, ոչ `Text`/`Text-Main`/`On`։
-4. Default-ը suffix չունի. Disabled-ը գույն չունի։
-5. Token-ի ամեն արժեք primitive alias ա. գեներատորը raw-ը մերժում ա (կա)։
-6. Ամեն semantic ունի `$description` (ինչի համար ա, որտեղից ա արժեքը)։
+2. CSS անուն = `--<game>-<component>[-<variant|part>]-<slot>[-<axis>][-<state>]`,
+   lowercase-kebab, slot բառարանը (Տիգրանի հետ ֆիքսված). **bg fg border glow h w
+   size pad gap radius**, axis՝ top bottom x y, size՝ sm md lg։ `fg`, ոչ `content`
+   (CSS-ում `color:` ա, դեվի գլխում fg ա. Figma-ում Content)։ JS անուն = նույն
+   հատվածները camelCase (`RD.button.cashout.bgTopPressed`)։ Figma-ն, CSS-ն ու JS-ը
+   ՄԵԿ բանալուց ՄԵՔԵՆԱՅՈՎ են ծնվում, ձեռքով քարտեզ չկա։
+3. Slot-ի հոմանիշ չկա. `Content`, ոչ `Text`/`Text-Main`/`On`։ Բառարանից դուրս բառ =
+   գեներատորի error։
+4. Default-ը suffix չունի. Disabled-ը գույն չունի։ Hover-ը չի գեներացվում։
+5. Token-ի ամեն արժեք primitive alias ա. գեներատորը raw-ը մերժում ա. չափային slot-ը
+   միայն `{number/n}`, գունային slot-ը թիվ չի կարա լինի։
+6. Ամեն semantic ունի `$description` (կոմպոնենտի նոթ + slot + աղբյուր + CSS անուն) —
+   Figma variable-ի description-ում ու DTCG-ում։
+7. Ամեն կոմպոնենտ գոնե `bg` կամ `fg` ունի (կաղապարի պարտադիր մասը)։
 
 ### 5.5 Scope-երի քաղաքականություն
 
@@ -404,59 +424,87 @@ property-ի համար իմաստ ունի։
 
 ### 5.6 Figma էջեր (Run Dady UI ու ամեն հաջորդ ֆայլ)
 
-- **Foundations** — մնում ա (ramp-եր, type, doc)։
-- **Atoms** — Icons, Segment, Chip, Form Hint/Helper, Dot. State-ից անկախ կամ
-  մեկ set-ի ներսում փակ leaf-եր։
-- **Molecules** — Button/Bet, Button/Cashout, Button/Ghost (3 set, ոչ Kind
-  variant — set↔խումբ 1:1), Input, Bet Amount, Difficulty (track + Segment×4),
-  Bet Panel (կոմպոզիցիա)։ Ամեն մեկը Fun Builder-ի doc կաղապարով («Molecules
-  <Name>» header + variant grid + կոմպոզիցիաների instance)։
-- **Screens** — մնում ա։
+- **Foundations** — մնում ա (ramp-եր, type, doc frame-եր. «Design system — v2.0»
+  60:231-ը կաղապարի ամփոփումն ա ֆայլի մեջ)։
+- **Atoms** (18:2) — Icons, Button, Input, Chip, Segment (թասկի սահմանումով.
+  state-ից անկախ կամ մեկ set-ի ներսում փակ leaf-եր)։
+- **Molecules** (59:305) — Bet Amount, Difficulty (track + Segment×4), Bet Panel
+  (կոմպոզիցիա)։
+- Ամեն set իր **section**-ում ա («Atoms · Button», «Molecules · Bet Panel») —
+  Fun Builder-ի «Molecules <Name>» header-ի սկզբունքը Figma-ի բնիկ գործիքով, kit-ը
+  նոր set-ը section-ի մեջ ա դնում։
+- **Screens** — մնում ա, instance-ները Atoms/Molecules-ից են (0 missing main)։
 - Հիմնադրի 2:2-ը՝ անձեռնմխելի։
+- Button set-ը Kind variant-ով ա (18). 3 set-ի բաժանումը (set↔խումբ 1:1)
+  հիմնադրի որոշումն ա, product.md-ի հարցը բաց ա։ Token խմբերն արդեն առանձին են
+  (Colors/Button/{Bet, Cashout, Ghost}), բաժանումը միայն Figma-ի կողմն ա։
 
-Կաղապարը template ա. հաջորդ խաղի ֆայլը = նույն 4 էջը, նույն doc frame-ը,
-kit-ը գեներացնում ա։
+Կաղապարը template ա. հաջորդ խաղի ֆայլը = նույն 4 էջը, նույն section-ները,
+kit-ը գեներացնում ա (§7)։
 
 ---
 
-## 6. Migration պլան (փուլ 3)
+## 6. Migration — ինչ արվեց (փուլ 3, 2026-09-12)
 
-Կանոններ. anchor-ները ՍՈՒՐԲ են, `--rd-*`/`--ui-*` CSS անունները չեն կոտրվում
-(alias), Figma-ի variable-ները ՏԵՂՈՒՄ են վերանվանվում (ID նույնը → binding-ները
-ողջ), ամեն քայլ՝ regen → diff → commit։
+Կանոնները պահվեցին. anchor-ները 0 շարժ (17 hex), 103 հին `--ui-*`/`--rd-*` անուն
+նույն արժեքին ա լուծվում (ստուգված HEAD-ի tokens.css-ի դեմ), Figma-ի variable-ները
+ՏԵՂՈՒՄ վերանվանվեցին (ID նույնը), ամեն քայլ regen → diff → commit։
 
-1. **gen-tokens.mjs v2.0 — primitives.** `space/radius/size` → `number/<n>` pool.
-   CSS-ում `--eg-number-*` + հին `--eg-space-*`/`--eg-radius-*` alias-ներ։
-   Ստուգում. tokens.css-ի ֆրոնտ-սպառվող 12 var-ի արժեքը 0 շարժ։
-2. **v2.0 — semantic կաղապարով.** Semantic աղյուսակը վերագրվում ա
-   `<component>/<slot>[-<state>]` բանալիներով (5.3 աղյուսակը), figmaName-ը
-   կանոնով ա ծնվում (FIG ձեռքի քարտեզը կրճատվում ա մինչև բացառություններ)։
-   Հին բանալիները (`action/bet`, `surface/input`…) → `legacy` աղյուսակ, CSS
-   alias-ով։ Գեներատորը ստուգում ա. ամեն կոմպոնենտ կաղապարի պարտադիր slot-երն
-   ունի (Background/Content առնվազն), suffix-ը թույլատրված բազմությունից ա։
-3. **Export-ներ.** tokens.json-ը ստանում ա DTCG արտահանում (`tokens.dtcg.json`.
-   `$value/$type/$description`, alias `{Colors.Green.500}` ոճով, Tokens Studio
-   set-երով), ընթացիկ flat JSON-ը մնում ա kit-ի համար։ Ձևը՝ Տիգրանի պատասխանից
-   հետո (փուլ 2, հարց 3)։ Ֆրոնտի սպառման արտեֆակտը (CSS միայն, թե + JS/TS
-   մոդուլ Pixi-ի համար) — հարց 2։
-4. **Figma kit.** kit.src.js-ը վերանվանում ա variables-ը տեղում, scopes-ը դնում
-   5.5-ով, `$description`-ը՝ variable.description։ Կոլեկցիաները՝ Primitives /
-   Semantic (Layout+UI+Type միավորվում են մեկ Semantic-ի մեջ, Fun Builder-ի պես.
-   Figma-ում մեկ collection-ը group-ներով ավելի ընթեռնելի ա, քան 3 collection)։
-   World-ը մնում ա առանձին (2 մոդ)։
-5. **Run Dady UI էջեր.** Components → Atoms + Molecules, Button set-ը 3 set
-   (Bet/Cashout/Ghost), doc frame-երը կաղապարով։ Screens-ի instance-ները
-   swap-վում են (binding-ները չեն կոտրվում, քանի որ token ID-ները նույնն են)։
-6. **Դոկ.** ui-tokens.md-ն թարմանում ա, architecture.md-ի 5-րդ բաժինը դառնում ա
-   «template» — հաջորդ պրոյեկտի checklist։
+| Քայլ | Պլան | Փաստ |
+|---|---|---|
+| 1 primitives | space/radius/size → number pool, --eg-space/--eg-radius alias | number/<n> 17. alias ՉԿԱ (Տիգրան. ֆրոնտը չի սպառել), 109 → 105 primitive |
+| 2 semantic | կաղապարով բանալիներ, legacy աղյուսակ, գեներատորի ստուգումներ | 92 → 136 semantic, 45 legacy alias, parse()-ը slot/axis/state-ը պարտադրում ա, hover error ա, bg/fg պարտադիր, number-only չափեր |
+| 3 export-ներ | DTCG + ֆրոնտի արտեֆակտ | tokens.dtcg.json (հիմնադրի բարբառով՝ color/number/text, count-check 105+136), src/tokens.js (nested frozen, 0xRRGGBB, {color,alpha}, JSDoc), index.html @tokens splice (marker-ը T-0010-ում) |
+| 4 kit | in-place rename, scopes, description, Semantic միավորում | kit-ը TOKENS.figma-ից ա սնվում (collection/scopes/css/name/prev), mock-run-ը v1.2 անուններից ա սկսում ու ID-ի պահպանումն ա ստուգում. **միավորումը հանվեց** (ռիսկ գ) — 3 collection, անունները կաղապարով |
+| 5 Figma էջեր | Atoms + Molecules, Button 3 set, doc | Layout 40 rename + 21 նոր, UI 36 rename + 18 նոր, Type 30 description, 298 rebind 6 set-ում (+ Screens balance gap), Components → Atoms, Molecules նոր էջ, 8 section, «Design system — v2.0» doc (60:231). **Button 3 set — ՉԻ արվել**, հիմնադրի որոշումն ա (product.md) |
+| 6 դոկ | ui-tokens.md, template բաժին | ui-tokens.md v2.0, §7 checklist ստորև |
 
-**Ռիսկեր.** (ա) Button set-ը 3-ի բաժանելը Screens-ի instance-ները ձեռքով
-swap ա պահանջում (18 variant → 3×6). ալտերնատիվ՝ Kind-ը պահել variant-ով, բայց
-token խմբերը առանձին (set↔խումբ 1:n)։ Հիմնադրի ընտրությունն ա, երկուսն էլ
-աշխատում են։ (բ) CSS անունների կրկնակի շերտ (canonical + legacy alias)
-tokens.css-ը մեծացնում ա. Տիգրանի հետ պայմանավորվել legacy-ի ջնջման հորիզոնը։
-(գ) Figma-ում variable-ը collection-ից collection Plugin API-ով ՉԻ տեղափոխվում —
-Layout/UI/Type → Semantic միավորումը նոր variable + rebind ա, ID-ն փոխվում ա։
-Կա՛մ միավորումը հանում ենք պլանից (3 collection-ը մնում ա, անունները
-կաղապարով), կա՛մ kit-ը rebind-ը ինքն ա անում ամբողջ ֆայլով (T-0012-ի փորձ. mock-run
-+ Լուսինեի Figma read-only աուդիտ)։ Իմ առաջարկը՝ չմիավորել. ռիսկը արժեքից մեծ ա։
+Աուդիտ (MCP, read-only). 256 variable (64/16/61/62/53), v1.2 անուն 0, ALL_SCOPES 0,
+Atoms 937 / Molecules 913 / Screens 702 binding, primitive-ի binding 0, hardcoded
+fill 0, Screens-ի instance-ների missing main 0։ Set-երում Global-ից մնացել են
+միայն stroke width-երը (Global/Stroke — դիտավորյալ) ու Bet Panel-ի ազատ տեքստը
+(Global/Text)։
+
+Բաց ռիսկեր. (ա) Button set-ի բաժանումը — հիմնադրի որոշում, token խմբերն արդեն
+առանձին են, Figma-ի կողմն ա միայն. (բ) legacy շերտի ջնջման հորիզոնը ֆիքսված ա՝
+T-0010-ի review-ից հետո, մեկ commit։
+
+---
+
+## 7. Հաջորդ պրոյեկտի կաղապար — checklist (0-ից նույն կառուցվածքով)
+
+Ենթադրություն. նոր խաղ = նոր `<prefix>` (Run Dady-ինը `rd`), նույն primitives-ը
+(--eg-*), նոր semantic քարտեզ, նոր Figma ֆայլ։
+
+1. **Գեներատոր.** `tools/design/gen-tokens.mjs`-ը copy չես անում — `semantic`
+   օբյեկտն ու `ANCHOR`-ը խաղինն են, մնացածը ընդհանուր։ Նոր խաղի anchor-ները
+   կոդից ես վերցնում (ճշգրիտ hex, երբեք կլորացված), ramp()-ը մնացածը լցնում ա։
+   Նոր գույնի ընտանիք = ANCHOR-ի մեկ տող։ Number pool-ին թիվ ավելացնելը մեկ տեղ ա։
+2. **Semantic քարտեզ.** Ամեն ինտերակտիվ կոմպոնենտի համար լրացրու կաղապարը (§5.3).
+   `bg`/`fg` պարտադիր, հետո border/glow, հետո h/pad/gap/radius — ամեն մեկը
+   `{number/n}`։ State-երը միայն էնտեղ, որտեղ ֆրոնտն իրոք ունի (հարցրու դեվին
+   ցուցակը. Run Dady-ինը pressed/selected/focus/error)։ Variant-ը 2-րդ դիրք, part-ը
+   2-րդ դիրք, slot-ը վերջում։ Global-ը միայն կոմպոնենտից դուրս սպառողի համար։
+3. **Վազեցրու.** `node tools/design/gen-tokens.mjs` — error-ները կաղապարի խախտումն
+   են (բառարանից դուրս slot, raw արժեք, pool-ում չեղած թիվ, hover)։ Հետո
+   `node tools/design/figma-kit/test/mock-run.mjs`։ Ստուգի regen-ը դետերմինիստիկ ա
+   (երկու անգամ վազեցնելը diff չի տալիս)։
+4. **Ֆրոնտ.** tokens.css-ը index.html-ի `@tokens` marker-ների արանքն ա գնում,
+   src/tokens.js-ը Pixi-ին։ Ֆրոնտը primitive չի սպառում, state = class = suffix։
+5. **Figma ֆայլ.** 4 էջ՝ Foundations / Atoms / Molecules / Screens։ Variables-ը kit-ի
+   «1. Variables audit + sync»-ով (կամ MCP-ով նույն TOKENS.figma տվյալներից).
+   primitives hidden scopes [], semantic scopes ըստ slot-ի, description, code syntax։
+   Text style-երը «2»-ով։ Ամեն set իր section-ում («Atoms · <Name>»), set ↔ token
+   խումբ 1:1 (variant-ը state/size ա փոխում, ոչ token խմբի արմատը — Button-ի
+   Kind-ի հարցը հենց սա ա)։ Ոչ մի hardcoded fill/stroke/padding/radius, 4 անկյունը
+   ու 4 stroke-ը առանձին կապված։
+6. **Աուդիտ (QA-ի համար).** variable count = tokens.json-ի count, v1.x անուն 0,
+   ALL_SCOPES 0, binding primitive-ի 0, hardcoded 0, instance-ների missing main 0,
+   anchor-ները diff 0։ Read-only MCP script-երը T-0014-ի Log-ում են։
+7. **Դոկ.** ui-tokens.md-ի կաղապարով՝ արտեֆակտների աղյուսակ, գրամատիկա, primitives,
+   semantic կոմպոնենտներով, ֆրոնտի սպառում, Figma էջեր։ Architecture-ը ընդհանուր ա,
+   չես կրկնում։
+
+Ինչը ԴԵՌ ձեռքով ա (kit-ի backlog). Chip/Segment/Difficulty/Bet Amount/Bet Panel
+կոմպոնենտային փուլերը, doc frame-երի կաղապարը։ Հաջորդ պրոյեկտում սրանք kit-ի փուլ
+դառնան՝ ֆայլը ամբողջությամբ գեներացվող ա։

@@ -126,3 +126,53 @@ Fun Builder ֆայլում ոչ մի մուտացիա. Run Dady UI-ին էս ses
 զուգահեռ session-ների պատճառով իմ commit-ի փոխարեն Սևակի `87f740a`-ի մեջ են ընկել
 (approved→doing rename-ը՝ Հասմիկի `0511dc3`-ի)։ Բովանդակությունը իմն ա, ստորագրությունը՝
 ոչ — ուղղում եմ էս տողով, պատմությունը չեմ վերագրում։ (Արեգ)
+
+### 2026-09-13 — Արեգ. փուլ 3 ավարտված → review/
+
+Տիգրանի պատասխանը (dev.md 09-12 23:58) ընդունված ամբողջությամբ. slot բառարան
+`bg fg border glow h w size pad gap radius` (`size`-ը ես ավելացրի՝ քառակուսի չափերի
+համար. icon/dot — մեկ թիվ, ոչ w+h), top/bottom = axis, track/dot/pill/label/helper = part,
+JS մոդուլ nested frozen, DTCG հավելյալ + count-check, `--eg-space/--eg-radius` ջնջված,
+hover չի գեներացվում, lh միայն px, mode չկա։
+
+**3.1 gen-tokens.mjs v2.0** (`f5af385`). Number pool `number/<n>` 17 արժեք (0…48, 999;
+28/56 հանված՝ font size են)։ Semantic 92 → 136, բանալու գրամատիկա
+`<component>[/<part>]/<slot>[-<axis>][-<state>]` — `parse()`-ը error ա գցում բառարանից
+դուրս slot-ի, raw արժեքի, pool-ում չեղած թվի, գունային slot-ի թվի, hover-ի ու
+bg/fg չունեցող կոմպոնենտի վրա։ Figma անուն / CSS / JS՝ մեկ բանալուց, ձեռքի FIG
+քարտեզը վերացավ (PREV_FIG-ը միայն միգրացիայի համար ա)։ 45 legacy `--rd-*` alias +
+12 `--ui-*`։ Ստուգում. 103 հին --ui/--rd անուն HEAD-ի tokens.css-ի դեմ → 0 արժեքային
+շարժ, dropped միայն --eg-space/--eg-radius. regen ×2 md5 նույնը։ Նոր արտեֆակտներ՝
+`docs/design/tokens.dtcg.json` (105 + 136, հիմնադրի color/number/text բարբառ,
+$description ամեն semantic-ի), `prototype/pixi-feel/src/tokens.js` (RD, 0xRRGGBB,
+{color, alpha}, JSDoc typedef), index.html splice `@tokens` marker-ով (marker չկա՝ բաց,
+Տիգրանը T-0010-ում ա դնում)։ Kit-ը TOKENS.figma-ից ա սնվում, mock-run-ը v1.2 Figma
+անուններից ա սկսում ու in-place rename-ի ID-ն ա ստուգում — OK։
+
+**3.2 Run Dady UI** (`e1fed71`, MCP, 13 use_figma). Layout՝ 40 rename (Spacing→Number,
+Padding/Gap/Size/Stroke→Dimensions/*, Radius primitives→Global/Radius alias) + 21 նոր.
+UI՝ 36 rename + 18 նոր (Field/*, Chip pressed/selected, Segment content, Button
+Border-Focus). Type՝ 30 description։ Rebind՝ Button 90, Input 34, Chip 24, Segment 88,
+Difficulty 16, Bet Amount 46 (instance subtree-ները չեմ դիպել՝ ժառանգում են) + Screens
+balance gap (Number/2 primitive binding → նոր `panel/balance/gap`)։ Էջեր՝ Components →
+**Atoms** (18:2), նոր **Molecules** (59:305), 8 section (Atoms · Icons/Button/Input/Chip/
+Segment, Molecules · Bet Amount/Difficulty/Bet Panel), Foundations-ում «Design system —
+v2.0 (T-0014)» doc 60:231 (x=3624)։ Աուդիտ. 256 variable (64/16/61/62/53), v1.2 անուն 0,
+ALL_SCOPES 0, Atoms 937 / Molecules 913 / Screens 702 binding, primitive binding 0,
+hardcoded fill 0, missing main 0։ Collection-ները ՉԵՆ միավորվել (ռիսկ գ). 2:2-ին ձեռք
+չեմ տվել. Button set-ը Kind variant-ով ա։ Ledger՝ scratchpad/figma-ds-state.json։
+
+**3.3 Դոկ.** ui-tokens.md v2.0 (արտեֆակտների աղյուսակ, գրամատիկա, կոմպոնենտային
+աղյուսակներ, ֆրոնտի սպառում, Figma էջեր), architecture.md §5 փաստացի վիճակով, §6
+migration-ի փաստ + աուդիտ, **§7 հաջորդ պրոյեկտի checklist**, kit README (backlog)։
+
+**Հիմնադրի որոշումներին մնաց.** (1) Button set՝ 3 set, թե Kind variant (token խմբերն
+արդեն առանձին են, միայն Figma-ի կողմն ա). (2) Tokens Studio-ի հաստատումը (DTCG-ն
+իրա ֆայլի բարբառով ա, `dimension`/`fontFamily` չեմ անցել՝ որ Figma sync-ը ուտի).
+(3) T-0013-ից բաց՝ Bet-ի մուգ տեքստ, lh px, difficulty անուններ, desktop 390։
+**Տիգրանին.** src/tokens.js-ի ձևը վերջնական ա, index.html-ի marker-ը ու bundle-ի
+Load-Module տողը T-0010-ում. legacy-ի ջնջումը review-ից հետո։
+
+QA-ի համար (Լուսինե). regen ×2 diff 0, mock-run OK, `git show HEAD~2:docs/design/tokens.css`
+դեմ 103 անուն 0 շարժ (script-ը Log-ի վերևում ա նկարագրված), Figma աուդիտի թվերը վերևում,
+read-only ստուգում՝ variable count 256, `Colors/Action/*`/`Spacing/*` անուն չկա։

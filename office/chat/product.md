@@ -316,3 +316,34 @@ state-ը suffix, disabled-ը opacity, set ↔ token խումբ 1:1, Atoms/Molecu
 Փուլ 3-ը Տիգրանի պատասխանից հետո ա։ Անկեղծ դիտարկումներս էլ դոկի 3.2-ում են —
 բոլորը ձեռքով պահվող համակարգի բնական հետքեր են, ու հենց դրանք ա գեներատորը
 վերացնում։
+
+---
+[2026-09-13 00:50] Արեգ (designer)
+**Արամ — T-0014 փուլ 3-ը review-ում ա. քո Fun Builder արխիտեկտուրան հիմա Run Dady-ի
+ստանդարտն ա՝ գեներատորից մինչև Figma։** Որտեղ նայել (Run Dady UI).
+- **Variables պանել.** Semantic-ը կոմպոնենտ-scoped ա քո կաղապարով.
+  `Colors/Button/Bet/Background`, `Colors/Button/Cashout/Background-Top-Pressed`,
+  `Colors/Field/Border-Focus`, `Colors/Segment/Track/Background`,
+  `Dimensions/Padding/Button/X`, `Dimensions/Radius/Field/Field`, Global-ը՝
+  `Colors/Global/{Text, Icon, Stroke, Shape, State}`, `Dimensions/Global/{Space, Radius,
+  Stroke, Size}`։ Չափերը ՄԵԿ `Number/<n>` pool-ից են (hidden), ամեն semantic
+  description ունի։ 256 variable, բոլորը ՏԵՂՈՒՄ վերանվանված — քո 2:2-ի binding-ները ողջ են,
+  ձեռք չեմ տվել։
+- **Atoms էջ** — https://www.figma.com/design/JTDf8M2yHwzitpAAPzXnca/Run-Dady-UI?node-id=18-2
+  (Icons, Button, Input, Chip, Segment — ամեն մեկը իր section-ում)։
+- **Molecules էջ** — https://www.figma.com/design/JTDf8M2yHwzitpAAPzXnca/Run-Dady-UI?node-id=59-305
+  (Bet Amount, Difficulty, Bet Panel)։
+- **Foundations «Design system — v2.0»** doc —
+  https://www.figma.com/design/JTDf8M2yHwzitpAAPzXnca/Run-Dady-UI?node-id=60-231
+  (կաղապարը մեկ էջով. շերտեր, slot-եր, state-եր, CSS/JS անուններ, էջեր)։
+- Կոդի կողմը. `tools/design/gen-tokens.mjs` v2.0 → tokens.css + src/tokens.js (Pixi) +
+  **tokens.dtcg.json** քո tokens.json-ի ձևաչափով (Tokens Studio-ի համար)։ Անչորները 0 շարժ։
+  Դոկը՝ `docs/design/ui-tokens.md` + `architecture.md` §7 «հաջորդ պրոյեկտի checklist»։
+
+**Քեզնից երկու որոշում** (նույնները, բաց են).
+1. **Button set-ը** — 3 set (Bet / Cashout / Ghost, քո «մեկ set ↔ մեկ token խումբ»), թե
+   Kind variant-ը մնա։ Token խմբերն արդեն առանձին են (`Colors/Button/Bet|Cashout|Ghost`),
+   միայն Figma-ի կողմն ա — ասա, մեկ session-ում անում եմ։
+2. **Tokens Studio** — binding-ները դրանով ես արել Fun Builder-ում։ DTCG export-ը քո ֆայլի
+   բարբառով եմ գրել (`color/number/text`), որ sync-ը ուտի. եթե ուրիշ գործիք ա՝ ասա։
+Ու T-0013-ից բացերը՝ Bet-ի մուգ տեքստ, lh px, difficulty-ի անուններ/քանակ, desktop 390։

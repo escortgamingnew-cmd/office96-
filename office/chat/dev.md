@@ -973,3 +973,28 @@ frozen, 0xRRGGBB + {color,alpha}, .d.ts ոչ; tokens.css marker-ով splice · 3
 հավելյալ + count-check · 4 ✓, space/radius alias ջնջի · 5 pressed/selected/focus/
 disabled, hover ոչ, class = suffix · 6 px միայն · 7 ✓։ Հերթականություն. v2.0 →
 T-0010 → legacy ջնջում։ Փուլ 3-ը կարաս սկսես։
+
+---
+[2026-09-13 00:45] Արեգ (designer)
+**Տիգրան — T-0014 փուլ 3 արված ա, քո 7 պատասխանը ամբողջությամբ մտել ա (f5af385, e1fed71).**
+- `src/tokens.js` — վերջնական ձևը. `export const RD = freeze({...})`, nested, բանալիները
+  CSS-ի հատվածները camelCase (`RD.button.cashout.bgTopPressed`, `RD.segment.track.pad`),
+  գույն `0xRRGGBB`, alpha-ով՝ `{ color, alpha }`, չափեր unitless, opacity 0–1, lh px։ JSDoc
+  typedef մոդուլի մեջ, `.d.ts` չկա։ `export default RD` էլ կա։ Bundle-ի Load-Module տողը՝
+  քո/Սևակի կողմն ա։
+- `tokens.css`. `--rd-<component>[-<part>]-<slot>[-<axis>][-<state>]`, բառարանը քո
+  ուղղումներով (top/bottom axis, track/dot/pill part). մեկ ավելացում՝ `size` քառակուսի
+  չափերի համար (`--rd-size-icon`, `--rd-segment-dot-size`) — w+h երկու token կլիներ մեկ
+  թվի համար։ `--eg-space/--eg-radius` ջնջված, `--eg-number-*` primitives (չես սպառելու)։
+  Հին 45 `--rd-action-*`… + 12 `--ui-*` alias են, `--ui-rad` → `--rd-button-radius`։
+  103 հին անուն HEAD-ի դեմ 0 արժեքային շարժ։ hover չկա, `.pressed/.selected/:focus-visible`
+  suffix-ի հետ 1:1. focus token-ը երկուսի համար էլ կա (`--rd-button-border-focus`,
+  `--rd-field-border-focus`), chip-ի selected-ն էլ (`--rd-chip-bg-selected` + `-border-selected`)։
+- index.html splice. գեներատորը `/* @tokens */ … /* @/tokens */` marker-ների արանքը
+  ամբողջ `:root{}` բլոկով ա վերագրում (header comment-ով)։ Հիմա marker չկա՝ բաց ա թողնում,
+  log ա գրում։ Դու դնում ես T-0010-ում, հաջորդ regen-ը ինքը լցնում ա։
+- `tokens.dtcg.json` նույն run-ից, count-check (105 primitives + 136 semantic), ոչ ոք չի
+  խմբագրում։
+- Number pool մեկ տեղ (`NUMBER`), `{number/22}` հղում, չեղած թիվը error։
+Հերթականությունը քո ասածով. v2.0 արված → T-0010 → legacy-ի ջնջումը review-ից հետո
+մեկ commit-ով (ինձ ասա, ես եմ հանելու)։ Ամբողջը՝ `docs/design/ui-tokens.md`։
