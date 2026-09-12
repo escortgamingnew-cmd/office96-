@@ -50,6 +50,7 @@ function scopesFor(name, semantic) {
   if (name.startsWith("icon/")) return ["SHAPE_FILL", "STROKE_COLOR", "TEXT_FILL"];
   if (/^border\/|ghost-border$/.test(name)) return ["STROKE_COLOR"];
   if (name.startsWith("state/")) return ["TEXT_FILL", "STROKE_COLOR"];
+  if (name.startsWith("difficulty/")) return ["SHAPE_FILL", "STROKE_COLOR", "TEXT_FILL", "EFFECT_COLOR"]; /* segment-ի նշիչ + glow */
   if (name === "brand/accent") return ["FRAME_FILL", "SHAPE_FILL", "TEXT_FILL"];
   if (/^(action|surface)\//.test(name)) return ["FRAME_FILL", "SHAPE_FILL"];
   if (/^(pad|gap)\//.test(name)) return ["GAP", "WIDTH_HEIGHT"];
@@ -61,7 +62,11 @@ function scopesFor(name, semantic) {
 const cssVar = (name, semantic) => `var(--${semantic ? "rd" : "eg"}-${name.replace(/\//g, "-").toLowerCase()})`;
 
 /* ---------- ՓՈՒԼ 1. variables audit + sync ---------- */
-const V = {}; /* "Collection:name" → Variable */
+/* v1.2. Figma-ում variable-ի անունը purpose-ով ա (TOKENS.figmaNames[key], օր. Colors/Global/Text/Primary),
+ * token-ի բանալին (text/primary) = CSS անունն ա։ Lookup-ը նախ Figma անունով ա, հետո հին բանալիով
+ * (միգրացիա. գտավ հին անունով → վերանվանում ա ՏԵՂՈՒՄ, ID-ն նույնը, binding-ները մնում են)։ */
+const V = {}; /* "Collection:figmaName" → Variable */
+const fig = (key) => (TOKENS.figmaNames && TOKENS.figmaNames[key]) || key;
 async function loadVars() {
   const cols = await figma.variables.getLocalVariableCollectionsAsync();
   const vars = await figma.variables.getLocalVariablesAsync();
@@ -71,9 +76,10 @@ async function loadVars() {
   }
   return cols;
 }
-const getVar = (col, name) => {
-  const v = V[`${col}:${name}`];
-  if (!v) throw new Error(`variable չկա՝ ${col}/${name} — նախ վազեցրու «1. Variables audit + sync»`);
+const lookup = (col, key) => V[`${col}:${fig(key)}`] || V[`${col}:${key}`];
+const getVar = (col, key) => {
+  const v = lookup(col, key);
+  if (!v) throw new Error(`variable չկա՝ ${col}/${fig(key)} — նախ վազեցրու «1. Variables audit + sync»`);
   return v;
 };
 /* semantic ref "{green/500}" → primitive Variable */
@@ -89,12 +95,15 @@ async function phaseVariables() {
     if (!c) { c = figma.variables.createVariableCollection(name); c.renameMode(c.modes[0].modeId, modeName); cols.push(c); log(`+ collection ${name}`); }
     return c;
   };
-  const stat = { created: 0, updated: 0 };
-  const ensureVar = (colName, name, type) => {
+  const stat = { created: 0, updated: 0, renamed: 0 };
+  const ensureVar = (colName, key, type) => {
     const c = ensureCol(colName, colName === "UI" ? "Night" : "Value");
-    let v = V[`${colName}:${name}`];
-    if (!v) { v = figma.variables.createVariable(name, c, type); V[`${colName}:${name}`] = v; stat.created++; log(`+ ${colName}/${name}`); }
+    const name = fig(key);
+    let v = lookup(colName, key);
+    if (!v) { v = figma.variables.createVariable(name, c, type); stat.created++; log(`+ ${colName}/${name}`); }
+    else if (v.name !== name) { v.name = name; stat.renamed++; }
     else stat.updated++;
+    V[`${colName}:${name}`] = v;
     return [v, c.modes[0].modeId];
   };
   const typeOf = (v) => (isColor(v) ? "COLOR" : typeof v === "number" ? "FLOAT" : "STRING");
@@ -119,7 +128,7 @@ async function phaseVariables() {
     v.hiddenFromPublishing = false;
     v.setVariableCodeSyntax("WEB", cssVar(name, true));
   }
-  log(`variables: ${stat.created} նոր, ${stat.updated} թարմացված`);
+  log(`variables: ${stat.created} նոր, ${stat.renamed} վերանվանված, ${stat.updated} թարմացված`);
   cols = await loadVars();
 }
 
